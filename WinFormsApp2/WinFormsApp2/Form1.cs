@@ -40,10 +40,9 @@ namespace WinFormsApp2
         {
             try
             {
-                string expression = richTextBox1.Text.Replace(',', '.');
 
                 DataTable dt = new DataTable();
-                var result = dt.Compute(expression, string.Empty);
+                var result = dt.Compute(richTextBox1.Text, string.Empty);
 
                 label1.Text = richTextBox1.Text + "=";
                 richTextBox1.Text = result.ToString();
@@ -53,7 +52,6 @@ namespace WinFormsApp2
                 MessageBox.Show("Invalid expression");
             }
         }
-
 
         private void AddNumbers(long number)
         {
