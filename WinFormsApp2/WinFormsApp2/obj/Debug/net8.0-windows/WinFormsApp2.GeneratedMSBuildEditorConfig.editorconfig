@@ -14,6 +14,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = WinFormsApp2
-build_property.ProjectDir = C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\WinFormsApp2\WinFormsApp2\
+build_property.ProjectDir = C:\Users\Samuel\Source\Repos\SamoVR\SamosCircus2\WinFormsApp2\WinFormsApp2\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
