@@ -238,11 +238,11 @@
             // label1
             // 
             label1.AutoSize = true;
+            label1.ForeColor = SystemColors.ControlDarkDark;
             label1.Location = new Point(29, 139);
             label1.Name = "label1";
-            label1.Size = new Size(56, 25);
+            label1.Size = new Size(0, 25);
             label1.TabIndex = 18;
-            label1.Text = "0+0=";
             // 
             // Form1
             // 

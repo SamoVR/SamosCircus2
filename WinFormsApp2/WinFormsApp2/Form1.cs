@@ -44,7 +44,7 @@ namespace WinFormsApp2
                 DataTable dt = new DataTable();
                 var result = dt.Compute(richTextBox1.Text, string.Empty);
 
-
+                label1.Text = richTextBox1.Text + "=";
                 richTextBox1.Text = result.ToString();
             }
             catch (Exception ex)
@@ -76,6 +76,7 @@ namespace WinFormsApp2
             {
                 richTextBox1.Text = "0";
             }
+            label1.Text = " ";
         }
 
         private void button9_Click(object sender, EventArgs e)
