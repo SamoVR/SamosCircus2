@@ -105,13 +105,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Samuel\Documents\Visual Studio 2022\libraries\glfw-3.4.bin.WIN64\include;C:\Users\Samuel\Documents\Visual Studio 2022\libraries\glm;C:\Users\Samuel\Documents\Visual Studio 2022\libraries\imgui;C:\Users\Samuel\Documents\Visual Studio 2022\libraries\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Samuel\Documents\Visual Studio 2022\libraries\glfw-3.4.bin.WIN64\include;C:\Users\Samuel\Documents\Visual Studio 2022\libraries\glm;C:\Users\Samuel\Documents\Visual Studio 2022\libraries\imgui;C:\Users\Samuel\Documents\Visual Studio 2022\libraries\imgui\backends;C:\Users\Samuel\Documents\Visual Studio 2022\libraries\imgui\examples\libs\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\Samuel\Documents\Visual Studio 2022\libraries\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

@@ -7,10 +7,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-
 #include <iostream>
 
 const char* vertexShaderSource = R"(
@@ -45,13 +41,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void setupImGui(GLFWwindow* window) {
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 130");
-}
-
 int main() {
     if (!glfwInit()) return -1;
 
@@ -70,8 +59,7 @@ int main() {
         return -1;
     }
 
-    setupImGui(window);
-
+    glClearColor(0.2, 0.25, 0.25, 0.0);
     glEnable(GL_DEPTH_TEST);
 
     float vertices[] = {
@@ -172,24 +160,9 @@ int main() {
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        ImGui::Begin("Cube Controller");
-        ImGui::SliderFloat("Rotation Speed", &rotationSpeed, 0.1f, 5.0f);
-        ImGui::End();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
