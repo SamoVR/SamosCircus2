@@ -1,5 +1,5 @@
 // Samo_VR
-// Rotating cube with ImGui controls
+// Rotating cube with ImGui controls 
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
