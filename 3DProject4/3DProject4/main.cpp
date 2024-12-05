@@ -169,7 +169,7 @@ int main() {
     ImVec4 color4 = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);  // Yellow
     ImVec4 color5 = ImVec4(1.0f, 0.0f, 1.0f, 1.0f);  // Magenta
     ImVec4 color6 = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);  // Cyan
-    
+
     float vertices[] = {
         // Positions               // Colors (from ImVec4)
         -0.5f, -0.5f, -0.5f,  color1.x, color1.y, color1.z,
@@ -184,7 +184,7 @@ int main() {
 
         -0.5f, -0.5f, -0.5f, color3.x, color3.y, color3.z,
         -0.5f, -0.5f, 0.5f, color3.x, color3.y, color3.z,
-        - 0.5f, 0.5f, 0.5f, color3.x, color3.y, color3.z,
+        -0.5f, 0.5f, 0.5f, color3.x, color3.y, color3.z,
         -0.5f, 0.5f, -0.5f, color3.x, color3.y, color3.z,
 
         0.5f, -0.5f, -0.5f, color4.x, color4.y, color4.z,
@@ -274,9 +274,9 @@ int main() {
         ImGui::SliderFloat("Rotation Speed", &rotationSpeed, 0.0f, 2500.0f);
         ImGui::SliderFloat("Distance", &distance, 5.0f, 170.0f);
         ImGui::SliderFloat3("Rotation Direction", glm::value_ptr(rotationDirection), -5.0f, 5.0f);
-        
+
         ImGui::Separator();
-        
+
         ImGui::Text("Background Controls");
         ImGui::ColorEdit3("Clear Color", (float*)&clear_color);
 
