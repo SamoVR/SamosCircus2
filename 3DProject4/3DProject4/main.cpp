@@ -20,45 +20,110 @@
 
 #include <stb_image.h>
 
+#include <string>
 #include <iostream>
 
+// Shaders
+
 const char* vertexShaderSource = R"(
-#version 330 core
-layout(location = 0) in vec3 aPos;
-layout(location = 1) in vec3 aColor;
+    #version 330 core
 
-out vec3 vertexColor;
+    layout(location = 0) in vec3 aPos;         // Vertex position
+    layout(location = 1) in vec3 aColor;       // Vertex color
+    layout(location = 2) in float isFloor;     // isFloor flag
+    layout(location = 3) in vec2 aTexCoord;    // Texture coordinates
 
-uniform mat4 mvp;
+    out vec3 vertexColor;  // Pass vertex color to the fragment shader
+    out vec2 TexCoord;
+    out float isFloorFlag;
 
-void main()
-{
-    gl_Position = mvp * vec4(aPos, 1.0);
-    vertexColor = aColor;
-}
+    uniform mat4 mvp;
+
+    void main()
+    {
+        gl_Position = mvp * vec4(aPos, 1.0);
+        vertexColor = aColor;  // Pass the color to the fragment shader
+        TexCoord = aTexCoord;
+        isFloorFlag = isFloor;
+    }
 )";
+
 
 const char* fragmentShaderSource = R"(
-#version 330 core
-in vec3 vertexColor;
+    #version 330 core
 
-out vec4 FragColor;
+    in vec3 vertexColor;  // Interpolated vertex color
+    in vec2 TexCoord;
+    in float isFloorFlag;
 
-void main()
-{
-    FragColor = vec4(vertexColor, 1.0);
-}
+    out vec4 FragColor;
+
+    uniform sampler2D floorTexture;
+
+    void main()
+    {
+        vec4 texColor = texture(floorTexture, TexCoord);
+
+        // Use a conditional check to blend colors only for non-floor surfaces
+        if (isFloorFlag < 0.5) {
+            FragColor = vec4(vertexColor, 1.0);  // Combine vertex color for non-floor surfaces
+        } else {
+            FragColor = texColor;  // Use only the texture color for the floor
+        }
+    }
 )";
+
 
 // Camera parameters
 glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 5.0f);  // Camera position
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);     // Camera front vector
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);         // Camera up vector
 
+// Global variables
+
+// Special Variables
+ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+glm::vec3 defaultRotationDirection = glm::vec3(0.5f, 1.0f, 0.0f);
+glm::vec3 rotationDirection = defaultRotationDirection;
+
+// Variables
+//float defaultRotationSpeed = 50.0f;
+float rotationSpeed = 50.0f;
+
+float minFov = 40.0f;
+float maxFov = 170.0f;
+float defaultFov = 70.0f;
+float fov = defaultFov; // camera fov
+
+float rotationAngle = 0.0f;
+
+float minDistance = 1.0f;
+float maxDistance = 75.0f;
+float defaultDistance = 5.0f;
+float distance = defaultDistance; // camera distance
+
 float lastX = 400.0f;
 float lastY = 300.0f;
 float yaw = -90.0f, pitch = 0.0f;
+
 bool isDragging = false;
+
+int keySetSpeed = GLFW_KEY_P;       // Default key for "Set Speed to 0"
+int keyResetRotation = GLFW_KEY_E; // Default key for "Reset Rotation Directions"
+int keyResetFOV = GLFW_KEY_F;      // Default key for "Reset FOV"
+int keyResetDistance = GLFW_KEY_G; // Default key for "Reset Distance"
+
+int rebindActiveKey = -1;
+
+// Functions
+
+std::string ToUpper(const std::string& input) {
+    std::string result = input;
+    for (char& c : result) {
+        c = toupper(c);  // Convert each character to uppercase
+    }
+    return result;
+}
 
 unsigned int loadTexture(const char* path) {
     unsigned int textureID;
@@ -83,6 +148,41 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+void keyboard_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (action == GLFW_PRESS) {
+        if (key == keySetSpeed) {
+            rotationSpeed = 0.0f;
+            std::cout << "Speed reset to 0" << std::endl;
+        }
+        if (key == keyResetRotation) {
+            rotationDirection = defaultRotationDirection;
+            std::cout << "Rotation reset" << std::endl;
+        }
+        if (key == keyResetFOV) {
+            fov = defaultFov;  // Default FOV reset
+            std::cout << "FOV reset" << std::endl;
+        }
+        if (key == keyResetDistance) {
+            distance = defaultDistance;  // Set distance back to a default value
+            std::cout << "Distance reset" << std::endl;
+        }
+    }
+}
+
+
+void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    // Scroll up (yoffset > 0) decreases distance
+    // Scroll down (yoffset < 0) increases distance
+    float scrollSpeed = 2.0f;  // Adjust scroll speed as needed
+    distance -= yoffset * scrollSpeed;
+
+    if (distance < minDistance) distance = minDistance;  // Clamp to prevent too close
+    if (distance > maxDistance) distance = maxDistance;  // Clamp to prevent too far
+
+    //std::cout << "Current distance: " << distance << std::endl;
+}
+
+
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_RIGHT) {
         if (action == GLFW_PRESS) {
@@ -101,7 +201,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 
-void mouse_move_callback(GLFWwindow* window, double xpos, double ypos) {
+void mouse_position_callback(GLFWwindow* window, double xpos, double ypos) {
     if (isDragging) {
         float xoffset = xpos - lastX;
         float yoffset = lastY - ypos;
@@ -120,7 +220,7 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos) {
     }
 }
 
-
+// Main Function
 
 int main() {
     if (!glfwInit()) return -1;
@@ -153,10 +253,11 @@ int main() {
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
 
-
+    glfwSetKeyCallback(window, keyboard_key_callback);
+    glfwSetScrollCallback(window, mouse_scroll_callback);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
-    glfwSetCursorPosCallback(window, mouse_move_callback);
+    glfwSetCursorPosCallback(window, mouse_position_callback);
 
 
     IMGUI_CHECKVERSION();
@@ -240,50 +341,70 @@ int main() {
     };
 
     float floorVertices[] = {
-        // Positions          // Texture Coords
-        -10.0f, 0.0f, -10.0f,  0.0f, 0.0f,
-        10.0f,  0.0f, -10.0f,  1.0f, 0.0f,
-        10.0f,  0.0f, 10.0f,   1.0f, 1.0f,
-        -10.0f, 0.0f, 10.0f,   0.0f, 1.0f
+        // Positions         // Texture Coords  // isFloor
+        -10.0f, 0.0f, -10.0f,  0.0f, 0.0f, 1.0f,  // Vertex 0
+         10.0f, 0.0f, -10.0f,  1.0f, 0.0f, 1.0f,  // Vertex 1
+         10.0f, 0.0f,  10.0f,  1.0f, 1.0f, 1.0f,  // Vertex 2
+        -10.0f, 0.0f,  10.0f,  0.0f, 1.0f, 1.0f   // Vertex 3
     };
     unsigned int floorIndices[] = { 0, 1, 2, 2, 3, 0 };
 
-    unsigned int floorVAO, floorVBO, floorEBO;
+    unsigned int floorVAO, floorVBO, floorEBO; //FLOOR
     glGenVertexArrays(1, &floorVAO);
     glGenBuffers(1, &floorVBO);
     glGenBuffers(1, &floorEBO);
 
     glBindVertexArray(floorVAO);
+
+    // Bind VBO and fill it with data
     glBindBuffer(GL_ARRAY_BUFFER, floorVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertices), floorVertices, GL_STATIC_DRAW);
 
+    // Bind EBO and fill it with indices
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floorEBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(floorIndices), floorIndices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    // Set up Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
+    // Set up Texture Coordinates attribute (location = 3)
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(3);
 
-    unsigned int VBO, VAO, EBO;
+    // Set up isFloor attribute
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    //// VAO END
+
+    unsigned int VBO, VAO, EBO; //CUBE
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
+    // Bind Vertex Array Object
     glBindVertexArray(VAO);
 
+    // Bind and set Vertex Buffer Object
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // Bind and set Element Buffer Object
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+    // Define position attribute (location = 0)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    // Define color attribute (location = 1)
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
+
+    //// VAO END
 
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -301,18 +422,10 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    //TEXTURE VARIABLES
-    unsigned int floorTexture = loadTexture("textures/texture_01");
+    // Texture Variables
+    unsigned int floorTexture = loadTexture("textures/texture_08.png");
 
-    //SPECIAL VARIABLES
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    glm::vec3 rotationDirection = glm::vec3(0.5f, 1.0f, 0.0f);
-
-    //VARIABLES
-    float rotationSpeed = 50.0f;
-    float distance = 45.0f; // cube distance
-    float radius = 10.0f;
-    float rotationAngle = 0.0f;
+    // Variables
     float lastFrameTime = glfwGetTime();
 
     while (!glfwWindowShouldClose(window)) { //MAIN LOOP
@@ -322,33 +435,85 @@ int main() {
 
         glfwPollEvents();
 
-
+        // ImGui Initialize
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // ImGui window
-        ImGui::Begin("Controls");
+        // ImGui Controls Window
+        ImGui::Begin("Dashboard");
 
-        ImGui::Text("Cube Controls");
-        ImGui::SliderFloat("Rotation Speed", &rotationSpeed, 0.0f, 2500.0f);
-        ImGui::SliderFloat("Distance", &distance, 5.0f, 170.0f);
-        ImGui::SliderFloat3("Rotation Direction", glm::value_ptr(rotationDirection), -5.0f, 5.0f);
+        if (ImGui::CollapsingHeader("Controls")) {
 
-        ImGui::Separator();
+            ImGui::Text("Cube Controls");
+            ImGui::SliderFloat("Rotation Speed", &rotationSpeed, 0.0f, 2500.0f);
+            ImGui::SliderFloat3("Rotation Direction", glm::value_ptr(rotationDirection), -5.0f, 5.0f);
 
-        ImGui::Text("Background Controls");
-        ImGui::ColorEdit3("Clear Color", (float*)&clear_color);
+            ImGui::Separator();
 
-        ImGui::Separator();
+            ImGui::Text("Camera Controls");
+            ImGui::SliderFloat("Distance", &distance, minDistance, maxDistance);
+            ImGui::SliderFloat("FOV", &fov, minFov, maxFov);
 
-        ImGui::Text("Cube Colors");
-        ImGui::ColorEdit3("Face 1 Color", (float*)&color1);
-        ImGui::ColorEdit3("Face 2 Color", (float*)&color2);
-        ImGui::ColorEdit3("Face 3 Color", (float*)&color3);
-        ImGui::ColorEdit3("Face 4 Color", (float*)&color4);
-        ImGui::ColorEdit3("Face 5 Color", (float*)&color5);
-        ImGui::ColorEdit3("Face 6 Color", (float*)&color6);
+            ImGui::Separator();
+
+            ImGui::Text("Background Controls");
+            ImGui::ColorEdit3("Clear Color", (float*)&clear_color);
+
+            ImGui::Separator();
+
+            ImGui::Text("Cube Colors");
+            ImGui::ColorEdit3("Face 1 Color", (float*)&color1);
+            ImGui::ColorEdit3("Face 2 Color", (float*)&color2);
+            ImGui::ColorEdit3("Face 3 Color", (float*)&color3);
+            ImGui::ColorEdit3("Face 4 Color", (float*)&color4);
+            ImGui::ColorEdit3("Face 5 Color", (float*)&color5);
+            ImGui::ColorEdit3("Face 6 Color", (float*)&color6);
+
+        }
+
+        if (ImGui::CollapsingHeader("Keybinds")) {
+
+            // Title
+            ImGui::Text("Cube Keybinds");
+            ImGui::Separator();
+
+            // Function to create a rebindable keybind button
+            auto renderRebindButton = [&](const char* label, int& key, int keyId) {
+                ImGui::Text(label);
+                ImGui::SameLine();
+
+                // Get the key name and convert to uppercase
+                const char* keyName = glfwGetKeyName(key, 0);
+                std::string buttonLabel = (rebindActiveKey == keyId)
+                    ? "Press a key..."
+                    : ToUpper(keyName).c_str();
+
+                // Show the button and handle rebinding
+                if (ImGui::Button(buttonLabel.c_str())) {
+                    rebindActiveKey = keyId; // Set this key for rebinding
+                }
+
+                // Handle rebinding when this button is active
+                if (rebindActiveKey == keyId) {
+                    // Iterate through possible keys and detect key press
+                    for (int i = GLFW_KEY_SPACE; i <= GLFW_KEY_LAST; ++i) {
+                        if (glfwGetKey(window, i) == GLFW_PRESS) {
+                            key = i;             // Assign the new key
+                            rebindActiveKey = -1; // Exit rebinding mode
+                        }
+                    }
+                }
+                };
+
+            // Render the keybind buttons
+            renderRebindButton("Set Speed to 0", keySetSpeed, 1);
+            renderRebindButton("Reset Rotation Directions", keyResetRotation, 2);
+            renderRebindButton("Reset FOV", keyResetFOV, 3);
+            renderRebindButton("Reset Distance", keyResetDistance, 4);
+
+            ImGui::Separator();
+        }
 
         ImGui::End();
 
@@ -393,56 +558,66 @@ int main() {
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // Updating buffer
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+        // Update the vertex buffer if necessary
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // Update buffer with new vertices
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // Clear the screen
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w); // Set clear color
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color and depth buffers
 
+        // Get framebuffer dimensions and calculate aspect ratio (make resolution calculate off the screen automatically)
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
-        float aspect = (float)width / height;
+        float aspect = static_cast<float>(width) / static_cast<float>(height);
 
+        // Update rotation angle
         rotationAngle += rotationSpeed * deltaTime;
 
-        glm::mat4 view = glm::mat4(1.0f);
-        float x = radius * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        float y = radius * sin(glm::radians(pitch));
-        float z = radius * sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        // Camera view transformation
+        float camX = distance * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        float camY = distance * sin(glm::radians(pitch));
+        float camZ = distance * sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        glm::mat4 view = glm::lookAt(
+            glm::vec3(camX, camY, camZ),    // Camera position
+            glm::vec3(0.0f, 0.0f, 0.0f),   // Look-at point
+            glm::vec3(0.0f, 1.0f, 0.0f)    // Up vector
+        );
 
-        view = glm::lookAt(glm::vec3(x, y, z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 projection = glm::perspective(glm::radians(fov), aspect, 0.1f, 100.0f); // Projection transformation
+        glm::mat4 modelCube = glm::rotate(glm::mat4(1.0f), glm::radians(rotationAngle), glm::vec3(rotationDirection)); //Cube transform
+        glm::mat4 mvpCube = projection * view * modelCube;
 
-        // Apply transformations
-        glm::mat4 modelCube = glm::rotate(glm::mat4(1.0f), glm::radians(rotationAngle), glm::vec3(rotationDirection));
-        glm::mat4 modelFloor = glm::mat4(1.0f);
-
-        //glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-        glm::mat4 projection = glm::perspective(glm::radians(distance), aspect, 0.1f, 100.0f);
-
-        glm::mat4 mvp = projection * view * modelCube;
-
-        // Use the shader program
+        // Use shader program and set the MVP matrix for the cube
         glUseProgram(shaderProgram);
-
-        // Send the MVP matrix to the shader
         unsigned int mvpLoc = glGetUniformLocation(shaderProgram, "mvp");
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvpCube));
 
-        // Bind the VAO and draw the cube
+        // Bind the cube's VAO and draw it
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-        // Bind and draw the floor
+        // Transform for the floor
+        glm::mat4 modelFloor = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -5.0f, 0.0f));
         glm::mat4 mvpFloor = projection * view * modelFloor;
-        unsigned int mvpLocFloor = glGetUniformLocation(shaderProgram, "mvp");
-        glUniformMatrix4fv(mvpLocFloor, 1, GL_FALSE, glm::value_ptr(mvpFloor));
 
+        // Set the MVP matrix for the floor
+        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvpFloor));
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, floorTexture);
+        glUniform1i(glGetUniformLocation(shaderProgram, "floorTexture"), 0);
+
+        // Bind and draw the floor
         glBindVertexArray(floorVAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
-        // Render ImGui on top of OpenGL content
+        // Render ImGui UI
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        // Swap buffers
         glfwSwapBuffers(window);
 
     }
