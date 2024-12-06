@@ -1,5 +1,4 @@
 // Samo_VR
-// Rotating cube with ImGui controls 
 // Rotating cube with expanded 3D space control
 
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -65,13 +64,19 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     if (button == GLFW_MOUSE_BUTTON_RIGHT) {
         if (action == GLFW_PRESS) {
             isDragging = true;
-            void glfwGetCursorPos(GLFWwindow * window, double* xpos, double* ypos);
+
+            // Initialize lastX and lastY to the current cursor position
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+            lastX = static_cast<float>(xpos);
+            lastY = static_cast<float>(ypos);
         }
         else if (action == GLFW_RELEASE) {
             isDragging = false;
         }
     }
 }
+
 
 void mouse_move_callback(GLFWwindow* window, double xpos, double ypos) {
     if (isDragging) {
@@ -135,6 +140,7 @@ int main() {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     ImGui::StyleColorsDark();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -149,9 +155,7 @@ int main() {
     const int base_width = 1920;
     const int base_height = 1080;
 
-
     float dpi_scale = (float)screen_width / base_width;
-
 
     io.FontGlobalScale = dpi_scale;
 
@@ -171,11 +175,36 @@ int main() {
     ImVec4 color6 = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);  // Cyan
 
     float vertices[] = {
+        // Positions               // Colors (from ImVec4)
+        -0.5f, -0.5f, -0.5f,  color1.x, color1.y, color1.z,
+        0.5f, -0.5f, -0.5f, color1.x, color1.y, color1.z,
+        0.5f, 0.5f, -0.5f, color1.x, color1.y, color1.z,
+        -0.5f, 0.5f, -0.5f, color1.x, color1.y, color1.z,
 
+        -0.5f, -0.5f, 0.5f, color2.x, color2.y, color2.z,
+        0.5f, -0.5f, 0.5f, color2.x, color2.y, color2.z,
+        0.5f, 0.5f, 0.5f, color2.x, color2.y, color2.z,
+        -0.5f, 0.5f, 0.5f, color2.x, color2.y, color2.z,
 
+        -0.5f, -0.5f, -0.5f, color3.x, color3.y, color3.z,
+        -0.5f, -0.5f, 0.5f, color3.x, color3.y, color3.z,
+        -0.5f, 0.5f, 0.5f, color3.x, color3.y, color3.z,
+        -0.5f, 0.5f, -0.5f, color3.x, color3.y, color3.z,
 
+        0.5f, -0.5f, -0.5f, color4.x, color4.y, color4.z,
+        0.5f, -0.5f, 0.5f, color4.x, color4.y, color4.z,
+        0.5f, 0.5f, 0.5f, color4.x, color4.y, color4.z,
+        0.5f, 0.5f, -0.5f, color4.x, color4.y, color4.z,
 
+        -0.5f, -0.5f, -0.5f, color5.x, color5.y, color5.z,
+        0.5f, -0.5f, -0.5f, color5.x, color5.y, color5.z,
+        0.5f, -0.5f, 0.5f, color5.x, color5.y, color5.z,
+        -0.5f, -0.5f, 0.5f, color5.x, color5.y, color5.z,
 
+        -0.5f, 0.5f, -0.5f, color6.x, color6.y, color6.z,
+        0.5f, 0.5f, -0.5f, color6.x, color6.y, color6.z,
+        0.5f, 0.5f, 0.5f, color6.x, color6.y, color6.z,
+        -0.5f, 0.5f, 0.5f, color6.x, color6.y, color6.z
     };
 
     unsigned int indices[] = {
@@ -223,6 +252,12 @@ int main() {
     glDeleteShader(fragmentShader);
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    float rotationSpeed = 50.0f;
+    glm::vec3 rotationDirection = glm::vec3(0.5f, 1.0f, 0.0f);
+    float distance = 45.0f; // cube distance
+    float radius = 10.0f;
+    float rotationAngle = 0.0f;
+    float lastFrameTime = glfwGetTime();
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrameTime = glfwGetTime();
@@ -231,12 +266,22 @@ int main() {
 
         glfwPollEvents();
 
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
         // ImGui window
         ImGui::Begin("Controls");
+
+        ImGui::Text("Cube Controls");
+        ImGui::SliderFloat("Rotation Speed", &rotationSpeed, 0.0f, 2500.0f);
+        ImGui::SliderFloat("Distance", &distance, 5.0f, 170.0f);
+        ImGui::SliderFloat3("Rotation Direction", glm::value_ptr(rotationDirection), -5.0f, 5.0f);
+
+        ImGui::Separator();
+
+        ImGui::Text("Background Controls");
         ImGui::ColorEdit3("Clear Color", (float*)&clear_color);
 
         ImGui::Separator();
@@ -300,6 +345,20 @@ int main() {
         glfwGetFramebufferSize(window, &width, &height);
         float aspect = (float)width / height;
 
+        rotationAngle += rotationSpeed * deltaTime;
+
+        glm::mat4 view = glm::mat4(1.0f);
+        float x = radius * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        float y = radius * sin(glm::radians(pitch));
+        float z = radius * sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+        view = glm::lookAt(glm::vec3(x, y, z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        // Apply transformations
+        glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(rotationAngle), glm::vec3(rotationDirection));
+
+        //glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+        glm::mat4 projection = glm::perspective(glm::radians(distance), aspect, 0.1f, 100.0f);
         glm::mat4 mvp = projection * view * model;
 
         glUseProgram(shaderProgram);
