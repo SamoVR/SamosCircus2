@@ -1,8 +1,12 @@
 // Samo_VR
 // Rotating cube with expanded 3D space control
 
+//GLFW
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define GLFW_EXPOSE_NATIVE_WGL
+
+//STB
+#define STB_IMAGE_IMPLEMENTATION
 
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
@@ -13,6 +17,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include <stb_image.h>
 
 #include <iostream>
 
@@ -54,7 +60,24 @@ float lastY = 300.0f;
 float yaw = -90.0f, pitch = 0.0f;
 bool isDragging = false;
 
+unsigned int loadTexture(const char* path) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
 
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
+    if (data) {
+        GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(data);
+    }
+    else {
+        std::cerr << "Failed to load texture: " << path << std::endl;
+    }
+    return textureID;
+}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -216,6 +239,33 @@ int main() {
         20, 21, 22, 22, 23, 20
     };
 
+    float floorVertices[] = {
+        // Positions          // Texture Coords
+        -10.0f, 0.0f, -10.0f,  0.0f, 0.0f,
+        10.0f,  0.0f, -10.0f,  1.0f, 0.0f,
+        10.0f,  0.0f, 10.0f,   1.0f, 1.0f,
+        -10.0f, 0.0f, 10.0f,   0.0f, 1.0f
+    };
+    unsigned int floorIndices[] = { 0, 1, 2, 2, 3, 0 };
+
+    unsigned int floorVAO, floorVBO, floorEBO;
+    glGenVertexArrays(1, &floorVAO);
+    glGenBuffers(1, &floorVBO);
+    glGenBuffers(1, &floorEBO);
+
+    glBindVertexArray(floorVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, floorVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertices), floorVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floorEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(floorIndices), floorIndices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -251,15 +301,21 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    //TEXTURE VARIABLES
+    unsigned int floorTexture = loadTexture("textures/texture_01");
+
+    //SPECIAL VARIABLES
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    float rotationSpeed = 50.0f;
     glm::vec3 rotationDirection = glm::vec3(0.5f, 1.0f, 0.0f);
+
+    //VARIABLES
+    float rotationSpeed = 50.0f;
     float distance = 45.0f; // cube distance
     float radius = 10.0f;
     float rotationAngle = 0.0f;
     float lastFrameTime = glfwGetTime();
 
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window)) { //MAIN LOOP
         float currentFrameTime = glfwGetTime();
         float deltaTime = currentFrameTime - lastFrameTime;
         lastFrameTime = currentFrameTime;
@@ -355,24 +411,40 @@ int main() {
         view = glm::lookAt(glm::vec3(x, y, z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
         // Apply transformations
-        glm::mat4 model = glm::rotate(glm::mat4(1.0f), glm::radians(rotationAngle), glm::vec3(rotationDirection));
+        glm::mat4 modelCube = glm::rotate(glm::mat4(1.0f), glm::radians(rotationAngle), glm::vec3(rotationDirection));
+        glm::mat4 modelFloor = glm::mat4(1.0f);
 
         //glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
         glm::mat4 projection = glm::perspective(glm::radians(distance), aspect, 0.1f, 100.0f);
-        glm::mat4 mvp = projection * view * model;
 
+        glm::mat4 mvp = projection * view * modelCube;
+
+        // Use the shader program
         glUseProgram(shaderProgram);
-        int mvpLoc = glGetUniformLocation(shaderProgram, "mvp");
+
+        // Send the MVP matrix to the shader
+        unsigned int mvpLoc = glGetUniformLocation(shaderProgram, "mvp");
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 
+        // Bind the VAO and draw the cube
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-        // Render ImGui
+        // Bind and draw the floor
+        glm::mat4 mvpFloor = projection * view * modelFloor;
+        unsigned int mvpLocFloor = glGetUniformLocation(shaderProgram, "mvp");
+        glUniformMatrix4fv(mvpLocFloor, 1, GL_FALSE, glm::value_ptr(mvpFloor));
+
+        glBindVertexArray(floorVAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        // Render ImGui on top of OpenGL content
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+        // Swap buffers
         glfwSwapBuffers(window);
+
     }
 
 
