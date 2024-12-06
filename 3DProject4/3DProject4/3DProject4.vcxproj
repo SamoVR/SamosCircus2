@@ -105,7 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Samuel\Documents\Visual Studio 2022\libraries\glfw-3.4.bin.WIN64;C:\Users\Samuel\Documents\Visual Studio 2022\libraries\glm;imgui;C:\Users\Samuel\Documents\Visual Studio 2022\libraries\glfw-3.4.bin.WIN64\lib-vc2022;glfw\include;C:\Users\Samuel\Documents\Visual Studio 2022\libraries\glew-2.1.0\include;C:\Users\Samuel\Documents\Visual Studio 2022\libraries\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>glm;imgui;glfw\include;glew\include;stb;textures;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

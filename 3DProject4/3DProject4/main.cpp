@@ -1,5 +1,6 @@
 // Samo_VR
 // Rotating cube with expanded 3D space control
+//TODO: make file "textures" be included in output app
 
 //GLFW
 #define GLFW_EXPOSE_NATIVE_WIN32
