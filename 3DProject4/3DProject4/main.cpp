@@ -6,6 +6,9 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define GLFW_EXPOSE_NATIVE_WGL
 
+//GLM
+#define GLM_ENABLE_EXPERIMENTAL
+
 //STB
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -18,6 +21,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include <stb_image.h>
 
@@ -74,13 +78,14 @@ const char* fragmentShaderSource = R"(
     }
 )";
 
+// Global variables
 
 // Camera parameters
 glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 5.0f);  // Camera position
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);     // Camera front vector
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);         // Camera up vector
-
-// Global variables
+float cameraMovementSpeed = 0.05f;
+bool cameraMovementEnabled = false;
 
 // Special Variables
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -109,11 +114,22 @@ float yaw = -90.0f, pitch = 0.0f;
 
 bool isDragging = false;
 
+//cube manipulation
 int keySetSpeed = GLFW_KEY_P;       // Default key for "Set Speed to 0"
+
+//cam manipulation
 int keyResetRotation = GLFW_KEY_E; // Default key for "Reset Rotation Directions"
 int keyResetFOV = GLFW_KEY_F;      // Default key for "Reset FOV"
 int keyResetDistance = GLFW_KEY_G; // Default key for "Reset Distance"
+int keyResetCameraPosition = GLFW_KEY_B;
 
+//cam movement
+int keyMoveCamLeft = GLFW_KEY_A;
+int keyMoveCamRight = GLFW_KEY_D;
+int keyMoveCamUp = GLFW_KEY_W;
+int keyMoveCamDown = GLFW_KEY_S;
+
+//global keybind
 int rebindActiveKey = -1;
 
 // Functions
@@ -151,6 +167,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
 void keyboard_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS) {
+
+        // OTHER KEYBINDS
+
         if (key == keySetSpeed) {
             rotationSpeed = 0.0f;
             std::cout << "Speed reset to 0" << std::endl;
@@ -189,7 +208,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         if (action == GLFW_PRESS) {
             isDragging = true;
 
-            // Initialize lastX and lastY to the current cursor position
+            // Get the current cursor position
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
             lastX = static_cast<float>(xpos);
@@ -202,10 +221,12 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 
+
 void mouse_position_callback(GLFWwindow* window, double xpos, double ypos) {
     if (isDragging) {
         float xoffset = xpos - lastX;
-        float yoffset = lastY - ypos;
+        float yoffset = lastY - ypos;  // Y-axis is flipped
+
         lastX = xpos;
         lastY = ypos;
 
@@ -218,8 +239,16 @@ void mouse_position_callback(GLFWwindow* window, double xpos, double ypos) {
 
         if (pitch > 89.0f) pitch = 89.0f;
         if (pitch < -89.0f) pitch = -89.0f;
+
+        // Recalculate cameraFront
+        glm::vec3 front;
+        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.y = sin(glm::radians(pitch));
+        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraFront = glm::normalize(front);
     }
 }
+
 
 // Main Function
 
@@ -424,10 +453,20 @@ int main() {
     glDeleteShader(fragmentShader);
 
     // Texture Variables
-    unsigned int floorTexture = loadTexture("textures/texture_08.png");
+    unsigned int floorTexture = loadTexture("assets/textures/texture_08.png");
 
     // Variables
     float lastFrameTime = glfwGetTime();
+
+    io.Fonts->AddFontDefault(); //ProggyClean
+
+    ImFont* headingFont = io.Fonts->AddFontFromFileTTF("assets/fonts/ProggyVector-Regular.ttf", 18.0f);
+    if (headingFont == nullptr)
+    {
+        std::cerr << "Failed to load heading font." << std::endl;
+    }
+
+    ImGui_ImplOpenGL3_CreateFontsTexture();
 
     while (!glfwWindowShouldClose(window)) { //MAIN LOOP
         float currentFrameTime = glfwGetTime();
@@ -446,24 +485,38 @@ int main() {
 
         if (ImGui::CollapsingHeader("Controls")) {
 
+            ImGui::PushFont(headingFont);
             ImGui::Text("Cube Controls");
+            ImGui::PopFont();
+
             ImGui::SliderFloat("Rotation Speed", &rotationSpeed, 0.0f, 2500.0f);
             ImGui::SliderFloat3("Rotation Direction", glm::value_ptr(rotationDirection), -5.0f, 5.0f);
 
             ImGui::Separator();
 
+            ImGui::PushFont(headingFont);
             ImGui::Text("Camera Controls");
+            ImGui::PopFont();
+
             ImGui::SliderFloat("Distance", &distance, minDistance, maxDistance);
             ImGui::SliderFloat("FOV", &fov, minFov, maxFov);
+            ImGui::Checkbox("Free Camera Enabled", &cameraMovementEnabled);
+            ImGui::SliderFloat("Camera Speed", &cameraMovementSpeed, 0.001f, 1.0f);
 
             ImGui::Separator();
 
+            ImGui::PushFont(headingFont);
             ImGui::Text("Background Controls");
+            ImGui::PopFont();
+
             ImGui::ColorEdit3("Clear Color", (float*)&clear_color);
 
             ImGui::Separator();
 
-            ImGui::Text("Cube Colors");
+            ImGui::PushFont(headingFont);
+            ImGui::Text("Cube's Face Colors");
+            ImGui::PopFont();
+
             ImGui::ColorEdit3("Face 1 Color", (float*)&color1);
             ImGui::ColorEdit3("Face 2 Color", (float*)&color2);
             ImGui::ColorEdit3("Face 3 Color", (float*)&color3);
@@ -474,10 +527,6 @@ int main() {
         }
 
         if (ImGui::CollapsingHeader("Keybinds")) {
-
-            // Title
-            ImGui::Text("Cube Keybinds");
-            ImGui::Separator();
 
             // Function to create a rebindable keybind button
             auto renderRebindButton = [&](const char* label, int& key, int keyId) {
@@ -507,13 +556,39 @@ int main() {
                 }
                 };
 
+
             // Render the keybind buttons
-            renderRebindButton("Set Speed to 0", keySetSpeed, 1);
-            renderRebindButton("Reset Rotation Directions", keyResetRotation, 2);
-            renderRebindButton("Reset FOV", keyResetFOV, 3);
-            renderRebindButton("Reset Distance", keyResetDistance, 4);
+            ImGui::PushFont(headingFont);
+            ImGui::Text("Cube Manipulation Keybinds");
+            ImGui::PopFont();
 
             ImGui::Separator();
+
+            renderRebindButton("Set Speed to 0:", keySetSpeed, 1);
+
+
+            ImGui::PushFont(headingFont);
+            ImGui::Text("Camera Manipulation Keybinds");
+            ImGui::PopFont();
+
+            ImGui::Separator();
+
+            renderRebindButton("Reset Rotation Directions:", keyResetRotation, 2);
+            renderRebindButton("Reset FOV:", keyResetFOV, 3);
+            renderRebindButton("Reset Distance:", keyResetDistance, 4);
+            renderRebindButton("Reset Position:", keyResetCameraPosition, 5);
+
+            ImGui::PushFont(headingFont);
+            ImGui::Text("Camera Movement Keybinds");
+            ImGui::PopFont();
+            
+            ImGui::Separator();
+
+            renderRebindButton("Camera Move Left:", keyMoveCamLeft, 6);
+            renderRebindButton("Camera Move Right:", keyMoveCamRight, 7);
+            renderRebindButton("Camera Move Up:", keyMoveCamUp, 8);
+            renderRebindButton("Camera Move Down:", keyMoveCamDown, 9);
+
         }
 
         ImGui::End();
@@ -565,10 +640,10 @@ int main() {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         // Clear the screen
-        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w); // Set clear color
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color and depth buffers
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Get framebuffer dimensions and calculate aspect ratio (make resolution calculate off the screen automatically)
+        // Get framebuffer dimensions and calculate aspect ratio
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         float aspect = static_cast<float>(width) / static_cast<float>(height);
@@ -577,17 +652,41 @@ int main() {
         rotationAngle += rotationSpeed * deltaTime;
 
         // Camera view transformation
-        float camX = distance * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        float camY = distance * sin(glm::radians(pitch));
-        float camZ = distance * sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        glm::mat4 view = glm::lookAt(
-            glm::vec3(camX, camY, camZ),    // Camera position
-            glm::vec3(0.0f, 0.0f, 0.0f),   // Look-at point
-            glm::vec3(0.0f, 1.0f, 0.0f)    // Up vector
-        );
+        glm::mat4 view;
 
-        glm::mat4 projection = glm::perspective(glm::radians(fov), aspect, 0.1f, 100.0f); // Projection transformation
-        glm::mat4 modelCube = glm::rotate(glm::mat4(1.0f), glm::radians(rotationAngle), glm::vec3(rotationDirection)); //Cube transform
+        if (cameraMovementEnabled) {
+            cameraMovementSpeed * deltaTime;
+
+            // Camera WASD movement
+            if (glfwGetKey(window, keyMoveCamUp) == GLFW_PRESS)
+                cameraPosition += cameraMovementSpeed * cameraFront;
+            if (glfwGetKey(window, keyMoveCamDown) == GLFW_PRESS)
+                cameraPosition -= cameraMovementSpeed * cameraFront;
+            if (glfwGetKey(window, keyMoveCamLeft) == GLFW_PRESS)
+                cameraPosition -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraMovementSpeed;
+            if (glfwGetKey(window, keyMoveCamRight) == GLFW_PRESS)
+                cameraPosition += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraMovementSpeed;
+
+            // Construct the view matrix with camera movement
+            view = glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
+        }
+        else {
+            float camX = distance * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+            float camY = distance * sin(glm::radians(pitch));
+            float camZ = distance * sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+            view = glm::lookAt(
+                glm::vec3(camX, camY, camZ),
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(0.0f, 1.0f, 0.0f)
+            );
+        }
+
+        // Projection transformation
+        glm::mat4 projection = glm::perspective(glm::radians(fov), aspect, 0.1f, 100.0f);
+
+        // Cube transformation
+        glm::mat4 modelCube = glm::rotate(glm::mat4(1.0f), glm::radians(rotationAngle), glm::vec3(rotationDirection));
         glm::mat4 mvpCube = projection * view * modelCube;
 
         // Use shader program and set the MVP matrix for the cube
@@ -622,7 +721,6 @@ int main() {
         glfwSwapBuffers(window);
 
     }
-
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
