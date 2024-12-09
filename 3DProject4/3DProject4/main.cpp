@@ -114,6 +114,8 @@ float yaw = -90.0f, pitch = 0.0f;
 
 bool isDragging = false;
 
+bool floorEnabled = true;
+
 //cube manipulation
 int keySetSpeed = GLFW_KEY_P;       // Default key for "Set Speed to 0"
 
@@ -500,7 +502,7 @@ int main() {
 
             ImGui::SliderFloat("Distance", &distance, minDistance, maxDistance);
             ImGui::SliderFloat("FOV", &fov, minFov, maxFov);
-            ImGui::Checkbox("Free Camera Enabled", &cameraMovementEnabled);
+            ImGui::Checkbox("Enable Free Camera", &cameraMovementEnabled);
             ImGui::SliderFloat("Camera Speed", &cameraMovementSpeed, 0.001f, 1.0f);
 
             ImGui::Separator();
@@ -510,6 +512,7 @@ int main() {
             ImGui::PopFont();
 
             ImGui::ColorEdit3("Clear Color", (float*)&clear_color);
+            ImGui::Checkbox("Enable Floor", &floorEnabled);
 
             ImGui::Separator();
 
@@ -576,7 +579,7 @@ int main() {
             renderRebindButton("Reset Rotation Directions:", keyResetRotation, 2);
             renderRebindButton("Reset FOV:", keyResetFOV, 3);
             renderRebindButton("Reset Distance:", keyResetDistance, 4);
-            renderRebindButton("Reset Position:", keyResetCameraPosition, 5);
+            //renderRebindButton("Reset Position:", keyResetCameraPosition, 5);
 
             ImGui::PushFont(headingFont);
             ImGui::Text("Camera Movement Keybinds");
@@ -710,9 +713,12 @@ int main() {
         glUniform1i(glGetUniformLocation(shaderProgram, "floorTexture"), 0);
 
         // Bind and draw the floor
-        glBindVertexArray(floorVAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        if (floorEnabled)
+        {
+            glBindVertexArray(floorVAO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
+        //glBindVertexArray(0);
 
         // Render ImGui UI
         ImGui::Render();
