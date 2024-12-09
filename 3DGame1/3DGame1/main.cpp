@@ -26,7 +26,6 @@ void main() {
 }
 )";
 
-
 // Fragment Shader source
 const char* fragmentShaderSource = R"(
 #version 330 core
@@ -39,15 +38,12 @@ void main() {
 }
 )";
 
-
 // Room vertices (simple cube room)
-// Room vertices with color attributes (x, y, z, r, g, b)
 float roomVertices[] = {
     // Floor (2 triangles)
     -5.0f, -1.0f, -5.0f, 0.7f, 0.7f, 0.7f,  // Grey
      5.0f, -1.0f, -5.0f, 0.7f, 0.7f, 0.7f,
      5.0f, -1.0f,  5.0f, 0.7f, 0.7f, 0.7f,
-
     -5.0f, -1.0f, -5.0f, 0.7f, 0.7f, 0.7f,
      5.0f, -1.0f,  5.0f, 0.7f, 0.7f, 0.7f,
     -5.0f, -1.0f,  5.0f, 0.7f, 0.7f, 0.7f,
@@ -56,7 +52,6 @@ float roomVertices[] = {
     -5.0f, -1.0f, -5.0f, 0.0f, 0.0f, 1.0f,  // Blue
      5.0f, -1.0f, -5.0f, 0.0f, 0.0f, 1.0f,
      5.0f,  5.0f, -5.0f, 0.0f, 0.0f, 1.0f,
-
     -5.0f, -1.0f, -5.0f, 0.0f, 0.0f, 1.0f,
      5.0f,  5.0f, -5.0f, 0.0f, 0.0f, 1.0f,
     -5.0f,  5.0f, -5.0f, 0.0f, 0.0f, 1.0f,
@@ -65,20 +60,56 @@ float roomVertices[] = {
     -5.0f, -1.0f,  5.0f, 1.0f, 0.0f, 0.0f,  // Red
      5.0f, -1.0f,  5.0f, 1.0f, 0.0f, 0.0f,
      5.0f,  5.0f,  5.0f, 1.0f, 0.0f, 0.0f,
-
     -5.0f, -1.0f,  5.0f, 1.0f, 0.0f, 0.0f,
      5.0f,  5.0f,  5.0f, 1.0f, 0.0f, 0.0f,
     -5.0f,  5.0f,  5.0f, 1.0f, 0.0f, 0.0f,
 };
 
+const int width = 800, height = 600;
 
+glm::vec3 cameraPos(0.0f, 2.0f, 8.0f);   // Initial camera position
+glm::vec3 cameraFront(0.0f, 0.0f, -1.0f); // Direction camera is looking
+glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);     // Up direction
+
+float yaw = -90.0f;  // Horizontal rotation
+float pitch = 0.0f;  // Vertical rotation
+float fov = 45.0f;   // Field of view
+float sensitivity = 0.1f;  // Mouse sensitivity
+bool firstMouse = true;
+float lastX = width / 2.0f, lastY = height / 2.0f;
 
 // Character position
 glm::vec3 characterPos(0.0f, 0.0f, 0.0f);
-const float characterSpeed = 2.5f;
+float characterSpeed = 12.5f;
 
-// Collision boundaries
-const float boundary = 4.5f;
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // Reversed since y-coordinates go from bottom to top
+    lastX = xpos;
+    lastY = ypos;
+
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch = glm::clamp(pitch + yoffset, -89.0f, 89.0f);
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
+}
 
 // Initialize the GLFW window
 GLFWwindow* initWindow(int width, int height, const char* title) {
@@ -103,6 +134,10 @@ GLFWwindow* initWindow(int width, int height, const char* title) {
         std::cerr << "Failed to initialize GLEW\n";
         return nullptr;
     }
+
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED); // Disable cursor for FPS control
     return window;
 }
 
@@ -129,21 +164,21 @@ GLuint compileShader(const char* vertexSrc, const char* fragmentSrc) {
 
 // Process input for movement
 void processInput(GLFWwindow* window, float deltaTime) {
-    glm::vec3 movement(0.0f);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) movement.z -= characterSpeed * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) movement.z += characterSpeed * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) movement.x -= characterSpeed * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) movement.x += characterSpeed * deltaTime;
+    float velocity = characterSpeed * deltaTime;
 
-    // Update character position with boundary constraints
-    characterPos += movement;
-    characterPos.x = glm::clamp(characterPos.x, -boundary, boundary);
-    characterPos.z = glm::clamp(characterPos.z, -boundary, boundary);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraFront * velocity;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraFront * velocity;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * velocity;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * velocity;
 }
+
 
 // Main function
 int main() {
-    const int width = 800, height = 600;
     GLFWwindow* window = initWindow(width, height, "Basic Game with ImGui");
     if (!window) return -1;
 
@@ -191,12 +226,18 @@ int main() {
         glfwPollEvents();
         processInput(window, deltaTime);
 
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+        projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100.0f);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Render room
         glUseProgram(shaderProgram);
-        model = glm::translate(glm::mat4(1.0f), characterPos);
-        view = glm::lookAt(glm::vec3(0.0f, 2.0f, 8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / height, 0.1f, 100.0f);
+        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        glm::mat4 model = glm::mat4(1.0f);
 
         GLuint modelLoc = glGetUniformLocation(shaderProgram, "model");
         GLuint viewLoc = glGetUniformLocation(shaderProgram, "view");
@@ -216,8 +257,11 @@ int main() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Debug Info");
-        ImGui::Text("Character Position: (%.2f, %.2f, %.2f)", characterPos.x, characterPos.y, characterPos.z);
+        ImGui::Begin("Debug");
+        
+        ImGui::Text("Character Position: (%.2f, %.2f, %.2f)", cameraPos.x, cameraPos.y, cameraPos.z);
+        ImGui::SliderFloat("Character Speed", &characterSpeed,1.0f,20.0f);
+
         ImGui::End();
 
         ImGui::Render();
