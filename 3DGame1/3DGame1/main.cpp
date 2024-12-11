@@ -80,7 +80,7 @@ float lastX = width / 2.0f, lastY = height / 2.0f;
 
 // Character position
 glm::vec3 characterPos(0.0f, 0.0f, 0.0f);
-float characterSpeed = 12.5f;
+float characterSpeed = 10.0f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -106,7 +106,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
     glm::vec3 front;
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
+    front.y = 0;//sin(glm::radians(pitch));
     front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(front);
 }
@@ -137,7 +137,7 @@ GLFWwindow* initWindow(int width, int height, const char* title) {
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED); // Disable cursor for FPS control
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // Disable cursor for FPS control
     return window;
 }
 
@@ -174,6 +174,11 @@ void processInput(GLFWwindow* window, float deltaTime) {
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * velocity;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * velocity;
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
+    if (glfwGetKey(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_CAPTURED)
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
 }
 
 
@@ -185,6 +190,11 @@ int main() {
     // Setup ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImGui::StyleColorsDark();
+
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
@@ -230,6 +240,7 @@ int main() {
         glfwGetFramebufferSize(window, &width, &height);
         projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100.0f);
 
+        glClearColor(0.2, 0.2, 0.3,0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Render room
