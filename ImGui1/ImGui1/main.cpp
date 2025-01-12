@@ -315,7 +315,7 @@ int main() {
         // Math Section
         if (ImGui::CollapsingHeader("Math")) {
 
-            ImGui::Separator();
+            ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 2.0f);
 
             ImGui::PushFont(headingFont);
             ImGui::Text("Histogram");
@@ -362,7 +362,9 @@ int main() {
             // Visualize histograms with ImPlot
             DrawHistogramsWithLine(histograms, array_count, 0.0f, static_cast<float>(array_count), ImVec2(600, 200));
 
-            ImGui::Separator();
+            ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 2.0f);
+
+
 
         }
 
