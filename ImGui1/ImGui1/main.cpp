@@ -16,6 +16,9 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
 
+#include <implot.h>
+#include <implot_internal.h>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -28,6 +31,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <random>
 
 // Shaders
 
@@ -81,8 +85,8 @@ const char* fragmentShaderSource = R"(
 
 // Global Variables
 
-ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
+ImVec4 background_color = ImVec4(0.45f, 0.55f, 0.6f, 1.0f);
+bool show_histogram_window = false; // Control visibility of histogram editor
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -90,58 +94,120 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
 // ImGui Functions
 
-void DrawHistogramsWithLine(
+/*void DrawHistogramsWithLine(
     const std::vector<std::vector<float>>& histograms,
-    const char* labels[],
-    int group_count,
+    int array_count,  // Number of arrays to visualize
     float min_value,
     float max_value,
-    ImVec2 size)
-{
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    ImVec2 pos = ImGui::GetCursorScreenPos();
-    ImVec2 canvas_size = (size.x == 0) ? ImVec2(ImGui::GetContentRegionAvail().x, size.y) : size;
+    ImVec2 size
+) {
+    size.x = std::max(size.x, 1.0f);
+    size.y = std::max(size.y, 1.0f);
 
-    float group_width = canvas_size.x / group_count;
-    int bar_count = histograms[0].size();
-    float bar_width = group_width / histograms.size();
+    // Combine all histograms into one for visualization
+    std::vector<float> combined_histogram(array_count, 0.0f);
 
-    // Loop through groups
-    for (int g = 0; g < group_count; ++g) {
-        // Draw histograms for each group
-        for (int i = 0; i < histograms.size(); ++i) {
-            float value = histograms[i][g];
-            float bar_height = ((value - min_value) / (max_value - min_value)) * canvas_size.y;
+    // Add the data from each array
+    for (const auto& array : histograms) {
+        if (array.size() != array_count) {
+            std::cerr << "Error: Array size mismatch!" << std::endl;
+            continue;
+        }
 
-            ImVec2 bar_min = ImVec2(pos.x + g * group_width + i * bar_width, pos.y + canvas_size.y - bar_height);
-            ImVec2 bar_max = ImVec2(bar_min.x + bar_width - 1, pos.y + canvas_size.y);
-
-            draw_list->AddRectFilled(bar_min, bar_max, IM_COL32(100 + i * 10, 150 + i * 10, 250, 255));
+        for (int i = 0; i < array_count; ++i) {
+            combined_histogram[i] += array[i]; // Add values to the histogram
+            
         }
     }
 
-    // Draw labels below each group
-    for (int g = 0; g < group_count; ++g) {
-        ImVec2 label_pos = ImVec2(pos.x + g * group_width + group_width * 0.5f, pos.y + canvas_size.y + 4);
-        draw_list->AddText(label_pos, IM_COL32(255, 255, 255, 255), labels[g]);
+    // Draw combined histogram bars
+    ImGui::PlotHistogram(
+        "Combined Histogram",
+        combined_histogram.data(),
+        array_count,
+        0,
+        nullptr,
+        min_value,
+        max_value,
+        size
+    );
+
+    // Visualize additional lines over histogram bars (data lines)
+    std::vector<float> data_lines(array_count);
+    for (int i = 0; i < array_count; ++i) {
+        data_lines[i] = combined_histogram[i]; // Get the histogram value
     }
+    ImGui::PlotLines(
+        "Data Lines",
+        data_lines.data(),
+        array_count,
+        0,
+        nullptr,
+        min_value,
+        max_value,
+        size
+    );
+}*/
 
-    // Overlay line graph
-    for (int g = 1; g < group_count; ++g) {
-        for (int i = 0; i < histograms.size(); ++i) {
-            float y1 = pos.y + canvas_size.y - ((histograms[i][g - 1] - min_value) / (max_value - min_value)) * canvas_size.y;
-            float y2 = pos.y + canvas_size.y - ((histograms[i][g] - min_value) / (max_value - min_value)) * canvas_size.y;
+// Histogram - ImPlot version
+void DrawHistogramsWithLine(
+    const std::vector<std::vector<float>>& histograms,
+    int array_count,  // Number of bins in the histogram
+    float min_value,  // Minimum x-axis value
+    float max_value,  // Maximum x-axis value
+    ImVec2 size       // Size of the plot
+) {
+    size.x = std::max(size.x, 1.0f);
+    size.y = std::max(size.y, 1.0f);
 
-            float x1 = pos.x + (g - 1) * group_width + group_width * 0.5f;
-            float x2 = pos.x + g * group_width + group_width * 0.5f;
+    // Combine all histograms into one for visualization
+    std::vector<float> combined_histogram(array_count, 0.0f);
 
-            draw_list->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), IM_COL32(255, 0, 0, 255), 2.0f);
+    // Accumulate data from all histograms
+    for (const auto& array : histograms) {
+        if (array.size() != array_count) {
+            std::cerr << "Error: Array size mismatch!" << std::endl;
+            continue;
+        }
+
+        for (int i = 0; i < array_count; ++i) {
+            combined_histogram[i] += array[i];
         }
     }
 
-    // Draw border
-    draw_list->AddRect(pos, ImVec2(pos.x + canvas_size.x, pos.y + canvas_size.y), IM_COL32(255, 255, 255, 255));
-    ImGui::Dummy(ImVec2(canvas_size.x, canvas_size.y + 20)); // Reserve space
+    // Calculate the y-axis maximum for proper scaling
+    float y_max = *std::max_element(combined_histogram.begin(), combined_histogram.end());
+
+    // Begin ImPlot context
+    if (ImPlot::BeginPlot("Histogram Plot", size)) {
+        // Set up axes and their limits
+        ImPlot::SetupAxes("Bins", "Frequency", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
+        ImPlot::SetupAxisLimits(ImAxis_X1, min_value, max_value, ImPlotCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0f, y_max + 1.0f, ImPlotCond_Always);
+
+        // Calculate bar width and offset
+        float bar_width = (max_value - min_value) / array_count;
+        float bar_offset = bar_width / 2.0f;
+
+        // Plot combined histogram as bars
+        ImPlot::PlotBars("Histogram", combined_histogram.data(), array_count, bar_width, bar_offset);
+
+        // Overlay line graph based on histogram data
+        ImPlot::PlotLine("Data Line", combined_histogram.data(), array_count);
+
+        // End ImPlot context
+        ImPlot::EndPlot();
+    }
+}
+
+float GetRandomFloat(float min_val = 0.0f, float max_val = 1.0f) {
+    // Create a random number generator
+    std::random_device rd;  // Seed
+    std::mt19937 gen(rd()); // Mersenne Twister engine
+    std::uniform_real_distribution<float> dist(min_val, max_val); // Range [min_val, max_val]
+
+    // Return a random float
+    return dist(gen);
 }
 
 int main() {
@@ -165,7 +231,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "ImGui Tests", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1200, 800, "ImGui Tests", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -210,7 +276,9 @@ int main() {
 
     io.Fonts->AddFontDefault(); //ProggyClean
 
-    ImFont* headingFont = io.Fonts->AddFontFromFileTTF("assets/fonts/ProggyVector-Regular.ttf", 18.0f);
+    ImFont* headingFont = io.Fonts->AddFontFromFileTTF("assets/fonts/ProggyVector-Regular.ttf", 20.0f);
+    ImFont* heading2Font = io.Fonts->AddFontFromFileTTF("assets/fonts/ProggyVector-Regular.ttf", 16.0f);
+
     if (headingFont == nullptr)
     {
         std::cerr << "Failed to load heading font." << std::endl;
@@ -219,42 +287,91 @@ int main() {
     ImGui_ImplOpenGL3_CreateFontsTexture();
 
     // Prepare histogram data
-    const int group_count = 16; // Number of groups
-    const int array_count = 3;  // Number of arrays
-    std::vector<std::vector<float>> histograms(array_count, std::vector<float>(group_count, 0.0f));
-    const char* labels[group_count];
-    for (int i = 0; i < group_count; ++i) labels[i] = std::to_string(i).c_str();
+    int array_count = 8;  // Default number of histogram bins
+    std::vector<std::vector<float>> histograms(1, std::vector<float>(array_count, 0.0f));
+    bool show_histogram_window = false;
 
-    // Fill histogram data
-    for (int i = 0; i < array_count; ++i) {
-        for (int j = 0; j < group_count; ++j) {
-            histograms[i][j] = sinf(j * 0.3f + i) * 0.5f + 0.5f; // Example values
-        }
-    }
+    /*for (auto& val : histograms[0]) {
+        val = GetRandomFloat(0.0f, 1.0f); // Assign random value
+    }*/
 
-    while (!glfwWindowShouldClose(window)) { //MAIN LOOP
+    // Initialize ImPlot context at the start of your program
+    ImPlot::CreateContext();
 
+    while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        // ImGui Initialize
+        // Set OpenGL background color based on user selection
+        glClearColor(background_color.x, background_color.y, background_color.z, background_color.w);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // ImGui Controls Window
+        // Main Dashboard Window
         ImGui::Begin("Dashboard");
 
-        if (ImGui::CollapsingHeader("Math"))
-        {
-            DrawHistogramsWithLine(histograms, labels, group_count, 0.0f, 1.0f, ImVec2(600, 200));
+        // Math Section
+        if (ImGui::CollapsingHeader("Math")) {
+
+            ImGui::Separator();
+
+            ImGui::PushFont(headingFont);
+            ImGui::Text("Histogram");
+            ImGui::PopFont();
+
+            ImGui::Separator();
+
+            // Slider for array count (dynamic bin resizing)
+            static int new_array_count = array_count;
+            ImGui::SliderInt("Array Count", &new_array_count, 1, 32);
+
+            if (new_array_count != array_count) {
+                array_count = new_array_count;
+                histograms.resize(1);
+                histograms[0].resize(array_count, 0.0f);
+            }
+
+            if (ImGui::Button("Edit Histogram Values")) {
+                show_histogram_window = !show_histogram_window;  // Toggle window visibility
+            }
+
+            ImGui::Separator();
+
+            ImGui::PushFont(heading2Font);
+            ImGui::Text("Quick Actions");
+            ImGui::PopFont();
+
+            if (ImGui::Button("Randomize Histogram Values")) {
+                for (auto& val : histograms[0]) {
+                    val = GetRandomFloat(0.0f, 1.0f); // Assign random value
+                }
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Set All Histogram Values to 0")) {
+                for (auto& val : histograms[0]) {
+                    val = 0.0f;
+                }
+            }
+
+            ImGui::Separator();
+
+            // Visualize histograms with ImPlot
+            DrawHistogramsWithLine(histograms, array_count, 0.0f, static_cast<float>(array_count), ImVec2(600, 200));
+
+            ImGui::Separator();
 
         }
 
-        if (ImGui::CollapsingHeader("Background Controls")) 
-        {
+        // Background Controls Section
+        if (ImGui::CollapsingHeader("Background Controls")) {
+
             ImGui::Separator();
 
-            ImGui::ColorEdit3("Background Color", (float*)&clear_color);
+            ImGui::ColorEdit3("Background Color", (float*)&background_color);
 
             ImGui::Separator();
 
@@ -262,30 +379,33 @@ int main() {
 
         ImGui::End();
 
-        // Clear the screen
-        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // Histogram Editor Window
+        if (show_histogram_window) {
+            ImGui::Begin("Histogram Values", &show_histogram_window);
 
-        // Get framebuffer dimensions and calculate aspect ratio
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-        float aspect = static_cast<float>(width) / static_cast<float>(height);
+            for (int j = 0; j < array_count; ++j) {
+                ImGui::SliderFloat(("Value " + std::to_string(j)).c_str(),
+                    &histograms[0][j], 0.0f, 1.0f);
+            }
 
-        // Render ImGui UI
+            ImGui::End();
+        }
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
-
     }
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+    ImPlot::DestroyContext();
 
     glfwDestroyWindow(window);
     glfwTerminate();
+
 
     return 0;
 }
