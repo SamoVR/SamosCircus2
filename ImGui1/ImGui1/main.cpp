@@ -200,6 +200,48 @@ void DrawHistogramsWithLine(
     }
 }
 
+// Helper functions for matrix operations
+void SetToIdentity(float* matrix, int size) {
+    for (int i = 0; i < size * size; ++i) {
+        matrix[i] = (i % (size + 1) == 0) ? 1.0f : 0.0f; // Diagonal elements = 1, others = 0
+    }
+}
+
+float CalculateDeterminant2x2(const float* matrix) {
+    return matrix[0] * matrix[3] - matrix[1] * matrix[2];
+}
+
+// Draw Matrix Input
+void DrawMatrixInput(float* matrix, int size, const char* label) {
+    if (size < 2 || size > 4) {
+        ImGui::Text("Matrix size must be between 2x2 and 4x4");
+        return;
+    }
+
+    ImGui::Text("%s (%dx%d):", label, size, size);
+
+    ImGui::Columns(size, nullptr, false); // Create grid layout
+    for (int row = 0; row < size; ++row) {
+        for (int col = 0; col < size; ++col) {
+            ImGui::PushID(row * size + col); // Unique ID for each input box
+            ImGui::InputFloat("", &matrix[row * size + col], 0.1f, 1.0f, "%.2f");
+            ImGui::PopID();
+            ImGui::NextColumn(); // Move to next cell
+        }
+    }
+    ImGui::Columns(1); // Reset columns layout
+
+    // Add quick actions
+    if (ImGui::Button("Reset to Identity")) {
+        SetToIdentity(matrix, size);
+    }
+    ImGui::SameLine();
+    if (size == 2) { // Example: Calculate determinant for 2x2 matrices
+        float det = CalculateDeterminant2x2(matrix);
+        ImGui::Text("Determinant: %.2f", det);
+    }
+}
+
 float GetRandomFloat(float min_val = 0.0f, float max_val = 1.0f) {
     // Create a random number generator
     std::random_device rd;  // Seed
@@ -291,6 +333,10 @@ int main() {
     std::vector<std::vector<float>> histograms(1, std::vector<float>(array_count, 0.0f));
     bool show_histogram_window = false;
 
+    //Value Manipulation
+    float floatValue = 0;
+    int intValue = 0;
+
     /*for (auto& val : histograms[0]) {
         val = GetRandomFloat(0.0f, 1.0f); // Assign random value
     }*/
@@ -364,6 +410,110 @@ int main() {
 
             ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 2.0f);
 
+            ImGui::PushFont(headingFont);
+            ImGui::Text("Value Manipulation");
+            ImGui::PopFont();
+
+            ImGui::Separator();
+
+            ImGui::SliderFloat("Float Slider", &floatValue, 0, 5);
+            ImGui::SliderInt("Int Slider", &intValue, 0, 5);
+
+            ImGui::DragFloat("Drag Float", &floatValue, 0.1, 0, 5);
+            ImGui::DragInt("Drag Int", &intValue, 0.1, 0, 5);
+
+            ImGui::InputFloat("Float Input", &floatValue);
+            ImGui::InputInt("Int Input", &intValue);
+
+            ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 2.0f);
+
+            ImGui::PushFont(headingFont);
+            ImGui::Text("Sine Wave");
+            ImGui::PopFont();
+
+            static float x_values[100], y_values[100];
+            for (int i = 0; i < 100; ++i) {
+                x_values[i] = i * 0.1f;
+                y_values[i] = sin(x_values[i]);
+            }
+            if (ImPlot::BeginPlot("Sine Wave")) {
+                ImPlot::PlotLine("sin(x)", x_values, y_values, 100);
+                ImPlot::EndPlot();
+            }
+
+            ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 2.0f);
+
+            ImGui::PushFont(headingFont);
+            ImGui::Text("Scatter Plot");
+            ImGui::PopFont();
+
+            static float xs[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            static float ys[10] = { 1, 4, 9, 16, 25, 36, 49, 64, 81, 100 };
+            if (ImPlot::BeginPlot("Scatter Plot")) {
+                ImPlot::PlotScatter("Points", xs, ys, 10);
+                ImPlot::EndPlot();
+            }
+
+            ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 2.0f);
+
+            ImGui::PushFont(headingFont);
+            ImGui::Text("Heat Map");
+            ImGui::PopFont();
+
+            static float values[5][5] = {
+                {0.1f, 0.2f, 0.3f, 0.4f, 0.5f},
+                {0.2f, 0.3f, 0.4f, 0.5f, 0.6f},
+                {0.3f, 0.4f, 0.5f, 0.6f, 0.7f},
+                {0.4f, 0.5f, 0.6f, 0.7f, 0.8f},
+                {0.5f, 0.6f, 0.7f, 0.8f, 0.9f},
+            };
+            if (ImPlot::BeginPlot("Heatmap")) {
+                ImPlot::PlotHeatmap("Heat", &values[0][0], 5, 5);
+                ImPlot::EndPlot();
+            }
+
+            ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 2.0f);
+
+            ImGui::PushFont(headingFont);
+            ImGui::Text("Pie Chart");
+            ImGui::PopFont();
+
+            float data[] = { 30.0f, 20.0f, 50.0f };
+            const char* labels[] = { "A", "B", "C" };
+            if (ImPlot::BeginPlot("Pie Chart")) {
+                ImPlot::PlotPieChart(labels, data, 3, 0.5f, 0.5f, 0.3f);
+                ImPlot::EndPlot();
+            }
+
+            ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 2.0f);
+
+            ImGui::PushFont(headingFont);
+            ImGui::Text("Matrix");
+            ImGui::PopFont();
+
+            static float matrix_3x3[9] = {
+                1.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 1.0f,
+            };
+
+            DrawMatrixInput(matrix_3x3, 3, "3x3 Matrix");
+
+            ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 2.0f);
+
+            ImGui::PushFont(headingFont);
+            ImGui::Text("Polynomial Solver");
+            ImGui::PopFont();
+
+            // Polynomial solver example: ax^2 + bx + c
+            static float coefficients[3] = { 1.0f, -3.0f, 2.0f }; // Coefficients a, b, c
+            static float x_value = 1.0f; // Value for evaluation
+
+            ImGui::InputFloat3("Coefficients (a, b, c)", coefficients);
+            ImGui::SliderFloat("Evaluate at x", &x_value, -10.0f, 10.0f);
+
+            float result = coefficients[0] * x_value * x_value + coefficients[1] * x_value + coefficients[2];
+            ImGui::Text("f(x) = %.2f", result);
 
 
         }
