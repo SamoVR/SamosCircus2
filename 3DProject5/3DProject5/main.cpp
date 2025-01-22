@@ -24,6 +24,12 @@ int RAYS_NUMBER = 100; // Dynamic ray count
 
 // Background color
 glm::vec3 background_color(0.1f, 0.1f, 0.1f); // Default dark gray
+glm::vec3 ray_color(1.0f, 0.83f, 0.23f);
+
+// Angle control variables
+bool angle_mode = false; // Enable/Disable angle-based raycasting
+float angle_range = 90.0f; // Angle range in degrees
+float rotation_angle = 0.0f; // Rotation angle in degrees
 
 // Circle Class
 class Circle {
@@ -71,9 +77,20 @@ public:
 
     void generateRays() {
         rays.clear();
+
         float angle_step = glm::two_pi<float>() / RAYS_NUMBER;
+        float start_angle = 0.0f;
+        float end_angle = glm::two_pi<float>();
+
+        if (angle_mode) {
+            float half_range = glm::radians(angle_range / 2.0f);
+            start_angle = glm::radians(rotation_angle) - half_range;
+            end_angle = glm::radians(rotation_angle) + half_range;
+            angle_step = (end_angle - start_angle) / RAYS_NUMBER;
+        }
+
         for (int i = 0; i < RAYS_NUMBER; ++i) {
-            float angle = i * angle_step;
+            float angle = start_angle + i * angle_step;
             rays.emplace_back(source.position, angle);
         }
     }
@@ -144,7 +161,7 @@ private:
 
         // Draw ray
         glBegin(GL_LINES);
-        glColor3f(1.0f, 0.83f, 0.23f); // Yellow color
+        glColor3f(ray_color.x,ray_color.y,ray_color.z); // Yellow color
         glVertex2f(ray.start.x, ray.start.y);
         glVertex2f(end_x, end_y);
         glEnd();
@@ -221,13 +238,6 @@ int main() {
 
     io.Fonts->AddFontDefault(); //ProggyClean
 
-    ImFont* headingFont = io.Fonts->AddFontFromFileTTF("assets/fonts/ProggyVector-Regular.ttf", 18.0f);
-    if (headingFont == nullptr)
-    {
-        std::cerr << "Failed to load heading font." << std::endl;
-    }
-
-
     // Main Loop
     while (!glfwWindowShouldClose(window)) {
         // Set background color
@@ -258,6 +268,7 @@ int main() {
         }
 
         rayCaster.draw();
+        rayCaster.generateRays();
 
         // ImGui
         ImGui_ImplOpenGL3_NewFrame();
@@ -265,18 +276,21 @@ int main() {
         ImGui::NewFrame();
 
         ImGui::Begin("Dashboard");
-        ImGui::PushFont(headingFont);
         ImGui::Text("Controls");
-        ImGui::PopFont();
         ImGui::Separator();
+
         
         ImGui::SliderFloat("Obstacle Speed Y", &obstacle_speed_y, -10.0f, 10.0f);
         ImGui::SliderFloat("Obstacle Speed X", &obstacle_speed_x, -10.0f, 10.0f);
         ImGui::SliderFloat("Source Radius", &rayCaster.source.radius, 5.0f, 100.0f);
         ImGui::SliderFloat("Obstacle Radius", &rayCaster.obstacle.radius, 5.0f, 100.0f);
-        if (ImGui::SliderInt("Ray Count", &RAYS_NUMBER, 10, 1000)) {
-            rayCaster.generateRays();
+        ImGui::SliderInt("Ray Count", &RAYS_NUMBER, 10, 1000);
+        ImGui::Checkbox("Angle Mode", &angle_mode);
+        if (angle_mode) {
+            ImGui::SliderFloat("Angle Range", &angle_range, 10.0f, 360.0f);
+            ImGui::SliderFloat("Rotation Angle", &rotation_angle, 0.0f, 360.0f);
         }
+        ImGui::ColorEdit3("Ray Color", glm::value_ptr(ray_color));
         ImGui::ColorEdit3("Background Color", glm::value_ptr(background_color));
         ImGui::End();
 
