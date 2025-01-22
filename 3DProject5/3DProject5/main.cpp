@@ -22,6 +22,9 @@ int WIDTH = 900;
 int HEIGHT = 600;
 int RAYS_NUMBER = 100; // Dynamic ray count
 
+// Background color
+glm::vec3 background_color(0.1f, 0.1f, 0.1f); // Default dark gray
+
 // Circle Class
 class Circle {
 public:
@@ -48,9 +51,10 @@ public:
 class Ray {
 public:
     glm::vec2 start;
-    float angle;
+    glm::vec2 direction;
 
-    Ray(const glm::vec2& start, float angle) : start(start), angle(angle) {}
+    Ray(const glm::vec2& start, float angle)
+        : start(start), direction(cos(angle), sin(angle)) {}
 };
 
 // RayCaster Class
@@ -67,8 +71,9 @@ public:
 
     void generateRays() {
         rays.clear();
+        float angle_step = glm::two_pi<float>() / RAYS_NUMBER;
         for (int i = 0; i < RAYS_NUMBER; ++i) {
-            float angle = ((float)i / RAYS_NUMBER) * glm::two_pi<float>();
+            float angle = i * angle_step;
             rays.emplace_back(source.position, angle);
         }
     }
@@ -84,37 +89,69 @@ public:
 
 private:
     void drawRay(const Ray& ray) {
-        float x = ray.start.x;
-        float y = ray.start.y;
-        float step = 1.0f;
-        bool end_of_screen = false;
-        bool hit_object = false;
+        // Ray direction
+        float dx = ray.direction.x;
+        float dy = ray.direction.y;
 
+        // Calculate intersections with screen edges
+        float t_min = std::numeric_limits<float>::max();
+
+        // Top and bottom edges
+        if (dy != 0) {
+            float t_top = -ray.start.y / dy;
+            float t_bottom = (HEIGHT - ray.start.y) / dy;
+            t_min = std::min(t_min, std::max(t_top, t_bottom));
+        }
+
+        // Left and right edges
+        if (dx != 0) {
+            float t_left = -ray.start.x / dx;
+            float t_right = (WIDTH - ray.start.x) / dx;
+            t_min = std::min(t_min, std::max(t_left, t_right));
+        }
+
+        // If no intersection, skip this ray
+        if (t_min < 0) return;
+
+        // Compute endpoint on the screen boundary
+        float end_x = ray.start.x + t_min * dx;
+        float end_y = ray.start.y + t_min * dy;
+
+        // Check collision with obstacle
+        float obstacle_t = std::numeric_limits<float>::max();
+        glm::vec2 obstacle_to_ray = ray.start - obstacle.position;
+
+        float a = dx * dx + dy * dy;
+        float b = 2.0f * (obstacle_to_ray.x * dx + obstacle_to_ray.y * dy);
+        float c = glm::dot(obstacle_to_ray, obstacle_to_ray) - obstacle.radius * obstacle.radius;
+
+        // Solve quadratic for intersection
+        float discriminant = b * b - 4 * a * c;
+        if (discriminant >= 0) {
+            float sqrt_disc = sqrt(discriminant);
+            float t1 = (-b - sqrt_disc) / (2.0f * a);
+            float t2 = (-b + sqrt_disc) / (2.0f * a);
+
+            if (t1 >= 0) obstacle_t = std::min(obstacle_t, t1);
+            if (t2 >= 0) obstacle_t = std::min(obstacle_t, t2);
+        }
+
+        // Determine final endpoint (obstacle or screen)
+        if (obstacle_t < t_min) {
+            end_x = ray.start.x + obstacle_t * dx;
+            end_y = ray.start.y + obstacle_t * dy;
+        }
+
+        // Draw ray
         glBegin(GL_LINES);
         glColor3f(1.0f, 0.83f, 0.23f); // Yellow color
-        glVertex2f(x, y);
-
-        while (!end_of_screen && !hit_object) {
-            x += step * cos(ray.angle);
-            y += step * sin(ray.angle);
-
-            // Check bounds
-            if (x < 0 || x > WIDTH || y < 0 || y > HEIGHT) {
-                end_of_screen = true;
-            }
-
-            // Check collision with obstacle
-            glm::vec2 point(x, y);
-            float dist_squared = glm::dot(point - obstacle.position, point - obstacle.position);
-            if (dist_squared <= obstacle.radius * obstacle.radius) {
-                hit_object = true;
-            }
-        }
-        glVertex2f(x, y);
+        glVertex2f(ray.start.x, ray.start.y);
+        glVertex2f(end_x, end_y);
         glEnd();
     }
 };
 
+// Callback for window resizing
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     float aspect_x = (float)width / WIDTH;
     float aspect_y = (float)height / HEIGHT;
@@ -177,11 +214,24 @@ int main() {
     // ImGui Setup
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
+    io.Fonts->AddFontDefault(); //ProggyClean
+
+    ImFont* headingFont = io.Fonts->AddFontFromFileTTF("assets/fonts/ProggyVector-Regular.ttf", 18.0f);
+    if (headingFont == nullptr)
+    {
+        std::cerr << "Failed to load heading font." << std::endl;
+    }
+
+
     // Main Loop
     while (!glfwWindowShouldClose(window)) {
+        // Set background color
+        glClearColor(background_color.r, background_color.g, background_color.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Update obstacle position
@@ -199,39 +249,40 @@ int main() {
             obstacle_speed_x = -obstacle_speed_x;
         }
 
-        // Poll for mouse input
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        // Poll for mouse input if not interacting with ImGui
+        if (!ImGui::GetIO().WantCaptureMouse && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
             rayCaster.source.position = glm::vec2((float)xpos, (float)ypos);
             rayCaster.generateRays();
         }
 
-        // Draw RayCaster
         rayCaster.draw();
 
-        // Start ImGui frame
+        // ImGui
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // ImGui UI
-        ImGui::Begin("Controls");
-        ImGui::Text("Adjust Settings:");
+        ImGui::Begin("Dashboard");
+        ImGui::PushFont(headingFont);
+        ImGui::Text("Controls");
+        ImGui::PopFont();
+        ImGui::Separator();
+        
         ImGui::SliderFloat("Obstacle Speed Y", &obstacle_speed_y, -10.0f, 10.0f);
         ImGui::SliderFloat("Obstacle Speed X", &obstacle_speed_x, -10.0f, 10.0f);
         ImGui::SliderFloat("Source Radius", &rayCaster.source.radius, 5.0f, 100.0f);
         ImGui::SliderFloat("Obstacle Radius", &rayCaster.obstacle.radius, 5.0f, 100.0f);
-        if (ImGui::SliderInt("Ray Count", &RAYS_NUMBER, 10, 500)) {
+        if (ImGui::SliderInt("Ray Count", &RAYS_NUMBER, 10, 1000)) {
             rayCaster.generateRays();
         }
+        ImGui::ColorEdit3("Background Color", glm::value_ptr(background_color));
         ImGui::End();
 
-        // Render ImGui
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        // Swap buffers and poll events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
