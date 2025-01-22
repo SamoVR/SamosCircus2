@@ -18,9 +18,9 @@
 #include <cmath>
 
 // Constants
-constexpr int WIDTH = 900;
-constexpr int HEIGHT = 600;
-constexpr int RAYS_NUMBER = 100;
+int WIDTH = 900;
+int HEIGHT = 600;
+int RAYS_NUMBER = 100; // Dynamic ray count
 
 // Circle Class
 class Circle {
@@ -115,6 +115,24 @@ private:
     }
 };
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    float aspect_x = (float)width / WIDTH;
+    float aspect_y = (float)height / HEIGHT;
+
+    WIDTH = width;
+    HEIGHT = height;
+
+    // Adjust viewport
+    glViewport(0, 0, width, height);
+
+    // Adjust orthographic projection
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, WIDTH, HEIGHT, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
 // Main Function
 int main() {
     // Initialize GLFW
@@ -131,6 +149,8 @@ int main() {
         return -1;
     }
     glfwMakeContextCurrent(window);
+
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // Initialize GLEW
     if (glewInit() != GLEW_OK) {
@@ -150,7 +170,9 @@ int main() {
 
     // Create RayCaster Object
     RayCaster rayCaster(WIDTH / 2.0f, HEIGHT / 2.0f, 50.0f, WIDTH / 2.0f, HEIGHT / 4.0f, 30.0f);
+
     float obstacle_speed_y = 2.0f;
+    float obstacle_speed_x = 1.0f;
 
     // ImGui Setup
     IMGUI_CHECKVERSION();
@@ -164,9 +186,17 @@ int main() {
 
         // Update obstacle position
         rayCaster.obstacle.position.y += obstacle_speed_y;
+        rayCaster.obstacle.position.x += obstacle_speed_x;
+
+        // Ensure obstacle bounces within bounds
         if (rayCaster.obstacle.position.y - rayCaster.obstacle.radius < 0 ||
             rayCaster.obstacle.position.y + rayCaster.obstacle.radius > HEIGHT) {
             obstacle_speed_y = -obstacle_speed_y;
+        }
+
+        if (rayCaster.obstacle.position.x - rayCaster.obstacle.radius < 0 ||
+            rayCaster.obstacle.position.x + rayCaster.obstacle.radius > WIDTH) {
+            obstacle_speed_x = -obstacle_speed_x;
         }
 
         // Poll for mouse input
@@ -187,8 +217,14 @@ int main() {
 
         // ImGui UI
         ImGui::Begin("Controls");
-        ImGui::Text("Adjust Obstacle Speed:");
-        ImGui::SliderFloat("Speed", &obstacle_speed_y, -10.0f, 10.0f);
+        ImGui::Text("Adjust Settings:");
+        ImGui::SliderFloat("Obstacle Speed Y", &obstacle_speed_y, -10.0f, 10.0f);
+        ImGui::SliderFloat("Obstacle Speed X", &obstacle_speed_x, -10.0f, 10.0f);
+        ImGui::SliderFloat("Source Radius", &rayCaster.source.radius, 5.0f, 100.0f);
+        ImGui::SliderFloat("Obstacle Radius", &rayCaster.obstacle.radius, 5.0f, 100.0f);
+        if (ImGui::SliderInt("Ray Count", &RAYS_NUMBER, 10, 500)) {
+            rayCaster.generateRays();
+        }
         ImGui::End();
 
         // Render ImGui
