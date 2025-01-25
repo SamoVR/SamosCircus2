@@ -67,13 +67,14 @@ float roomVertices[] = {
 
 const int width = 800, height = 600;
 
-glm::vec3 cameraPos(0.0f, 2.0f, 8.0f);   // Initial camera position
+glm::vec3 cameraPos(0.0f, 2.0f, 0.0f);   // Initial camera position
 glm::vec3 cameraFront(0.0f, 0.0f, -1.0f); // Direction camera is looking
+glm::vec3 characterFront(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);     // Up direction
 
-float yaw = -90.0f;  // Horizontal rotation
+float yaw = -50.0f;  // Horizontal rotation
 float pitch = 0.0f;  // Vertical rotation
-float fov = 45.0f;   // Field of view
+float fov = 60.0f;   // Field of view
 float sensitivity = 0.1f;  // Mouse sensitivity
 bool firstMouse = true;
 float lastX = width / 2.0f, lastY = height / 2.0f;
@@ -106,9 +107,16 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
     glm::vec3 front;
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = 0;//sin(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
     front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(front);
+
+    glm::vec3 front2;
+    front2.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front2.y = 0.0f;
+    front2.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+    characterFront = glm::normalize(front2);
 }
 
 // Initialize the GLFW window
@@ -167,9 +175,9 @@ void processInput(GLFWwindow* window, float deltaTime) {
     float velocity = characterSpeed * deltaTime;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraFront * velocity;
+        cameraPos += characterFront * velocity;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraFront * velocity;
+        cameraPos -= characterFront * velocity;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * velocity;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
@@ -268,10 +276,26 @@ int main() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Debug");
+        ImGui::Begin("Debug Controls");
         
-        ImGui::Text("Character Position: (%.2f, %.2f, %.2f)", cameraPos.x, cameraPos.y, cameraPos.z);
         ImGui::SliderFloat("Character Speed", &characterSpeed,1.0f,20.0f);
+        ImGui::SliderFloat("FOV", &fov, 1.0f, 90.0f);
+
+        ImGui::End();
+
+        ImGui::Begin("Debug Info");
+
+        ImGui::Text("Camera");
+        ImGui::Separator();
+        ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", cameraPos.x, cameraPos.y, cameraPos.z);
+        ImGui::Text("Camera Front: (%.2f, %.2f, %.2f)", cameraFront.x, cameraFront.y, cameraFront.z);
+
+        ImGui::Text("Yaw: %f",yaw);
+        ImGui::Text("Pitch: %f", pitch);
+        ImGui::Text("FOV: %f", fov);
+        ImGui::Text("Sensitivity: %f", sensitivity);
+        ImGui::Text("firstMouse: %f", firstMouse);
+        ImGui::Text("lastX: %f | lastY: %f", lastX,lastY);
 
         ImGui::End();
 
