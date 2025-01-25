@@ -72,7 +72,7 @@ glm::vec3 cameraFront(0.0f, 0.0f, -1.0f); // Direction camera is looking
 glm::vec3 characterFront(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);     // Up direction
 
-float yaw = -50.0f;  // Horizontal rotation
+float yaw = -90.0f;  // Horizontal rotation
 float pitch = 0.0f;  // Vertical rotation
 float fov = 60.0f;   // Field of view
 float sensitivity = 0.1f;  // Mouse sensitivity
@@ -226,12 +226,6 @@ int main() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-
-    // Projection and camera setup
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100.0f);
-    glm::mat4 view;
-    glm::mat4 model;
-
     glEnable(GL_DEPTH_TEST);
 
     float lastFrame = 0.0f;
@@ -246,7 +240,6 @@ int main() {
 
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
-        projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100.0f);
 
         glClearColor(0.2, 0.2, 0.3,0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
