@@ -63,6 +63,23 @@ float roomVertices[] = {
     -5.0f, -1.0f,  5.0f, 1.0f, 0.0f, 0.0f,
      5.0f,  5.0f,  5.0f, 1.0f, 0.0f, 0.0f,
     -5.0f,  5.0f,  5.0f, 1.0f, 0.0f, 0.0f,
+
+    // Left Wall (2 triangles)
+    -5.0f, -1.0f, -5.0f, 0.0f, 1.0f, 0.0f,  // Green
+    -5.0f, -1.0f,  5.0f, 0.0f, 1.0f, 0.0f,
+    -5.0f,  5.0f,  5.0f, 0.0f, 1.0f, 0.0f,
+    -5.0f, -1.0f, -5.0f, 0.0f, 1.0f, 0.0f,
+    -5.0f,  5.0f,  5.0f, 0.0f, 1.0f, 0.0f,
+    -5.0f,  5.0f, -5.0f, 0.0f, 1.0f, 0.0f,
+
+    // Right Wall (2 triangles)
+    10.0f, -1.0f, -5.0f, 1.0f, 0.0f, 1.0f,  // Pink
+    10.0f, -1.0f,  5.0f, 1.0f, 0.0f, 1.0f,
+    10.0f,  5.0f,  5.0f, 1.0f, 0.0f, 1.0f,
+    10.0f, -1.0f, -5.0f, 1.0f, 0.0f, 1.0f,
+    10.0f,  5.0f,  5.0f, 1.0f, 0.0f, 1.0f,
+    10.0f,  5.0f, -5.0f, 1.0f, 0.0f, 1.0f,
+
 };
 
 const int width = 800, height = 600;
@@ -192,7 +209,7 @@ void processInput(GLFWwindow* window, float deltaTime) {
 
 // Main function
 int main() {
-    GLFWwindow* window = initWindow(width, height, "Basic Game with ImGui");
+    GLFWwindow* window = initWindow(width, height, "3DGame1");
     if (!window) return -1;
 
     // Setup ImGui
@@ -260,7 +277,7 @@ int main() {
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 18); // 6 triangles, 18 vertices
+        glDrawArrays(GL_TRIANGLES, 0, 30); // 6 triangles, 18 vertices
 
 
 
