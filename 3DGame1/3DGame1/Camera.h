@@ -1,33 +1,65 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/constants.hpp>
+
+// Enum for camera movement
+enum class CameraMovement {
+    FORWARD,
+    BACKWARD,
+    LEFT,
+    RIGHT
+};
 
 class Camera {
 public:
-    glm::vec3 Position;
-    glm::vec3 Front;
-    glm::vec3 Up;
-    glm::vec3 Right;
-    glm::vec3 WorldUp;
+    // Constructor
+    Camera(glm::vec3 position, glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
+        float yaw = -90.0f, float pitch = 0.0f);
 
-    float Yaw;
-    float Pitch;
-    float MovementSpeed;
-    float MouseSensitivity;
-    float Fov;
+    // Getters
+    glm::mat4 getProjection(float width,float height) const;
+    glm::mat4 getViewMatrix() const;
+    float getFOV() const;
+    float getMovementSpeed() const;
 
-    Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch);
+    // Process inputs
+    void processKeyboard(CameraMovement direction, float deltaTime);
+    void processMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
 
-    glm::mat4 GetViewMatrix();
-    void ProcessKeyboard(const std::string& direction, float deltaTime);
-    void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
-    void ProcessMouseScroll(float yoffset);
+    // Static mouse callback for GLFW
+    static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+
+    // Set initial mouse position
+    void setInitialMousePosition(float x, float y);
 
 private:
+    // Camera attributes
+    glm::vec3 position;
+    glm::vec3 front;
+    glm::vec3 characterFront;
+    glm::vec3 up;
+    glm::vec3 right;
+    glm::vec3 worldUp;
+
+    // Euler angles
+    float yaw;
+    float pitch;
+
+    // Camera options
+    float movementSpeed;
+    float mouseSensitivity;
+    float fov;
+
+    // Last mouse position
+    float lastX, lastY;
+    bool firstMouse;
+
+    // Recalculate the camera vectors
     void updateCameraVectors();
 };
 
-#endif
+#endif // CAMERA_H
