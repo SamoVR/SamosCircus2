@@ -5,17 +5,22 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
     <Filter Include="imgui">
       <UniqueIdentifier>{e2151ec7-2f07-4b8d-bf91-749d6dea64db}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core">
-      <UniqueIdentifier>{3ad6fcdb-14e6-4fad-812a-9fe18fbb2c30}</UniqueIdentifier>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{de7eaa86-5ec7-46e0-a325-171b3d90657e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="graphics">
-      <UniqueIdentifier>{3c2cd280-3854-4ce8-bb16-acb4f5e8dce6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="input">
-      <UniqueIdentifier>{89dc1ee9-d82e-46f3-8579-ff73cf25c7f1}</UniqueIdentifier>
+    <Filter Include="temp">
+      <UniqueIdentifier>{d5813a4c-e116-42bb-a5ff-1961d950c481}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

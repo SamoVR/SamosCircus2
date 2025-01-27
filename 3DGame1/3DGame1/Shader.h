@@ -20,4 +20,8 @@ public:
     void setMat4(const std::string& name, const float* value) const;
 };
 
+class Shader
+{
+};
+
 #endif
