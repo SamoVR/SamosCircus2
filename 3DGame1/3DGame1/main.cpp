@@ -91,7 +91,7 @@ glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);     // Up direction
 
 float yaw = -90.0f;  // Horizontal rotation
 float pitch = 0.0f;  // Vertical rotation
-float fov = 60.0f;   // Field of view
+float fov = 70.0f;   // Field of view
 float sensitivity = 0.1f;  // Mouse sensitivity
 bool firstMouse = true;
 float lastX = width / 2.0f, lastY = height / 2.0f;
