@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "Camera.h"
 #include "InputManager.h"
+#include "UIManager.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -115,14 +116,16 @@ GLuint compileShader(const char* vertexSrc, const char* fragmentSrc) {
 // Main function
 int main() {
     glm::vec3 cameraPos(0.0f, 2.0f, 3.0f);
-    Camera camera(cameraPos);
 
+    Camera camera(cameraPos);
+    InputManager inputManager;
+    UIManager uiManager;
 
     GLFWwindow* window = initWindow(width, height, "3DGame1",camera);
     if (!window) return -1;
 
     // Setup ImGui
-    /*IMGUI_CHECKVERSION();
+    IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
@@ -130,7 +133,7 @@ int main() {
     ImGui::StyleColorsDark();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 330");*/
+    ImGui_ImplOpenGL3_Init("#version 330");
 
     GLuint shaderProgram = compileShader(vertexShaderSource, fragmentShaderSource);
 
@@ -162,16 +165,9 @@ int main() {
         lastFrame = currentFrame;
 
         glfwPollEvents();
-        //
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera.processKeyboard(CameraMovement::FORWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera.processKeyboard(CameraMovement::BACKWARD, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera.processKeyboard(CameraMovement::LEFT, deltaTime);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera.processKeyboard(CameraMovement::RIGHT, deltaTime);
-        //
+
+        inputManager.handleMovement(window,camera,deltaTime);
+
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
 
@@ -197,16 +193,8 @@ int main() {
         glDrawArrays(GL_TRIANGLES, 0, 30); // 6 triangles, 18 vertices
 
         // Render ImGui
-        /*ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        ImGui::Begin("Debug Controls");
-
-        ImGui::End();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());*/
+        uiManager.SetupImgui();
+        
 
         glfwSwapBuffers(window);
     }
@@ -216,9 +204,9 @@ int main() {
     glDeleteBuffers(1, &VBO);
     glDeleteProgram(shaderProgram);
 
-    /*ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();*/
+    ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
     glfwTerminate();
