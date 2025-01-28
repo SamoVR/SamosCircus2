@@ -26,6 +26,9 @@ public:
     float getFOV() const;
     float getMovementSpeed() const;
 
+    // Setters
+    void setMovementSpeed(float speed);
+
     // Process inputs
     void processKeyboard(CameraMovement direction, float deltaTime);
     void processMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);

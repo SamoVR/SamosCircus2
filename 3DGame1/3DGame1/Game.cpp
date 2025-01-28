@@ -45,7 +45,7 @@ void Game::run() {
 }
 
 void Game::init() {
-    uiManager.Init(window); // Initialize ImGui
+    uiManager.Init(window,&camera); // Initialize ImGui
 
     // Compile and set shaders
     shaderProgram = renderer.compileShader("vertex.glsl", "fragment.glsl");

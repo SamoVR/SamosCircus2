@@ -1,15 +1,21 @@
 #include "UIManager.h"
+#include "Camera.h"
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <iostream>
 
-void UIManager::Init(GLFWwindow* window) {
+void UIManager::Init(GLFWwindow* window, Camera* camera) {
     if (isInitialized) {
         std::cerr << "ImGui is already initialized!" << std::endl;
         return;
     }
+
+    this->camera = camera;
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -34,8 +40,16 @@ void UIManager::SetupImgui() {
     ImGui::NewFrame();
 
     ImGui::Begin("Debug Controls");
-    // Add debug widgets or controls here
-    ImGui::Text("Example Text");
+    //ImGui::PushFont(headingFont);
+    ImGui::Text("Player Controls");
+    ImGui::Separator();
+
+    float movementSpeed = camera->getMovementSpeed();
+    if (ImGui::SliderFloat("Movement Speed", &movementSpeed, 0.0f, 50.0f))
+    {
+        camera->setMovementSpeed(movementSpeed);
+    }
+    
     ImGui::End();
 
     ImGui::Render();

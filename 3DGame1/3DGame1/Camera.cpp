@@ -7,8 +7,6 @@
 #include <iostream>
 
 void Camera::updateCameraVectors() {
-    // Update the front, right, and up vectors using your camera logic
-    // Example logic:
     glm::vec3 front;
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     front.y = sin(glm::radians(pitch));
@@ -36,15 +34,6 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     movementSpeed(2.5f), mouseSensitivity(0.1f), fov(60.0f),
     lastX(400), lastY(300), firstMouse(true) {
     updateCameraVectors();
-}
-
-// Returns the view matrix using LookAt matrix
-glm::mat4 Camera::getViewMatrix() const {
-    return glm::lookAt(position, position + front, up);
-}
-
-glm::mat4 Camera::getProjection(float width,float height) const {
-    return glm::perspective(glm::radians(fov), (float)width / height, 0.1f, 100.0f);
 }
 
 // Processes input received from keyboard
@@ -102,4 +91,29 @@ void Camera::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 void Camera::setInitialMousePosition(float x, float y) {
     lastX = x;
     lastY = y;
+}
+
+/* Getters */
+
+// Returns the view matrix using LookAt matrix
+glm::mat4 Camera::getViewMatrix() const {
+    return glm::lookAt(position, position + front, up);
+}
+
+glm::mat4 Camera::getProjection(float width, float height) const {
+    return glm::perspective(glm::radians(fov), (float)width / height, 0.1f, 100.0f);
+}
+
+float Camera::getFOV() const {
+    return fov;
+}
+
+float Camera::getMovementSpeed() const {
+    return movementSpeed;
+}
+
+/* Setters */
+
+void Camera::setMovementSpeed(float newSpeed) {
+    movementSpeed = newSpeed;
 }
