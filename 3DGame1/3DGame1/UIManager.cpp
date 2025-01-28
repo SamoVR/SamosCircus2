@@ -20,11 +20,36 @@ void UIManager::Init(GLFWwindow* window, Camera* camera) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable keyboard controls
     ImGui::StyleColorsDark();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
+
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+    int screen_width = mode->width;
+    int screen_height = mode->height;
+
+    const int base_width = 1920;
+    const int base_height = 1080;
+
+    float dpi_scale = (float)screen_width / base_width;
+
+    io.FontGlobalScale = dpi_scale;
+    
+    ////
+    
+    io.Fonts->AddFontDefault();
+
+    this->headingFont = io.Fonts->AddFontFromFileTTF("assets/fonts/ProggyVector-Regular.ttf", 18.0f);
+    if (headingFont == nullptr)
+    {
+        std::cerr << "Failed to load heading font." << std::endl;
+    }
+
+    ImGui_ImplOpenGL3_CreateFontsTexture();
 
     isInitialized = true;
 }
@@ -40,8 +65,9 @@ void UIManager::SetupImgui() {
     ImGui::NewFrame();
 
     ImGui::Begin("Debug Controls");
-    //ImGui::PushFont(headingFont);
+    ImGui::PushFont(headingFont);
     ImGui::Text("Player Controls");
+    ImGui::PopFont();
     ImGui::Separator();
 
     float movementSpeed = camera->getMovementSpeed();

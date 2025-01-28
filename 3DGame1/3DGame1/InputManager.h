@@ -9,11 +9,11 @@
 class InputManager {
 
 public:
-	void handleMovement(GLFWwindow* window, Camera& camera, float deltaTime);
-
+	void handleKeyboard(GLFWwindow* window, Camera& camera, float deltaTime);
+	void handleMouse(GLFWwindow* window);
 
 private:
-
+	bool cursorLocked = true;
 
 
 };

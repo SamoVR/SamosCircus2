@@ -31,7 +31,7 @@ void Camera::updateCameraVectors() {
 // Constructor with initial values
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     : position(position), worldUp(up), yaw(yaw), pitch(pitch),
-    movementSpeed(2.5f), mouseSensitivity(0.1f), fov(60.0f),
+    movementSpeed(5.0f), mouseSensitivity(0.1f), fov(60.0f),
     lastX(400), lastY(300), firstMouse(true) {
     updateCameraVectors();
 }

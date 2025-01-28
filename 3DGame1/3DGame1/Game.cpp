@@ -7,7 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-const int width = 800, height = 600;
+const int width = 1200, height = 800;
 
 Game::Game()
     : camera(glm::vec3(0.0f, 2.0f, 3.0f)), lastFrame(0.0f)
@@ -58,7 +58,9 @@ void Game::init() {
 }
 
 void Game::update(float deltaTime) {
-    inputManager.handleMovement(window, camera, deltaTime);
+    inputManager.handleKeyboard(window, camera, deltaTime);
+
+    inputManager.handleMouse(window);
 }
 
 void Game::render() {

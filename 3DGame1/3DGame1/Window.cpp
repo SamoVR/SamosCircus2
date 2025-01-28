@@ -32,7 +32,7 @@ GLFWwindow* initWindow(int width, int height, const char* title, Camera& camera)
     // Set callbacks
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, Camera::mouse_callback);
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // Disable cursor for FPS control
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // Disable cursor for FPS control
 
     // Pass camera to the window
     glfwSetWindowUserPointer(window, &camera);
