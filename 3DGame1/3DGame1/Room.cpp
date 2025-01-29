@@ -48,6 +48,14 @@ float roomVertices[] = {
     10.0f,  5.0f,  5.0f, 1.0f, 0.0f, 1.0f,
     10.0f,  5.0f, -5.0f, 1.0f, 0.0f, 1.0f,
 
+    // Floor2 (2 triangles)
+    -10.0f, -1.0f, -30.0f, 0.0f, 0.7f, 0.0f,  // Dark Green
+     10.0f, -1.0f, -30.0f, 0.0f, 0.7f, 0.0f,
+     10.0f, -1.0f, -10.0f, 0.0f, 0.7f, 0.0f,
+    -10.0f, -1.0f, -30.0f, 0.0f, 0.7f, 0.0f,
+     10.0f, -1.0f, -10.0f, 0.0f, 0.7f, 0.0f,
+    -10.0f, -1.0f, -10.0f, 0.0f, 0.7f, 0.0f,
+
 };
 
 Room::Room() : VAO(0), VBO(0) {}
@@ -79,6 +87,6 @@ void Room::init() {
 
 void Room::render() {
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 30); // Update with actual vertex count
+    glDrawArrays(GL_TRIANGLES, 0, 36); // Update with actual vertex count
     glBindVertexArray(0);
 }

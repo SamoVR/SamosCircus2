@@ -19,6 +19,9 @@ void InputManager::handleKeyboard(GLFWwindow* window, Camera& camera, float delt
         camera.processKeyboard(CameraMovement::LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.processKeyboard(CameraMovement::RIGHT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        std::cout << "jump test";
+
 
     //////////////////
 
