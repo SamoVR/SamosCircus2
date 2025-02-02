@@ -7,6 +7,7 @@
 #include "UIManager.h"
 #include "Room.h"
 #include "Window.h"
+#include "World.h"
 
 class Game {
 public:
@@ -27,6 +28,7 @@ private:
     Renderer renderer;
     UIManager uiManager;
     Room room;
+    World world;
 
     GLFWwindow* window;
     GLuint shaderProgram;

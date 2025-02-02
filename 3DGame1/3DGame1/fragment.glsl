@@ -1,8 +1,10 @@
 #version 330 core
-in vec3 ourColor;
+in vec2 TexCoord;  // Receive texture coordinates from vertex shader
 
 out vec4 FragColor;
 
+uniform sampler2D texture1;  // The texture sampler
+
 void main() {
-    FragColor = vec4(ourColor, 1.0); // Use the interpolated color
+    FragColor = texture(texture1, TexCoord); // Sample texture at TexCoord
 }

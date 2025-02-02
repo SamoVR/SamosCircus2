@@ -51,8 +51,13 @@ void Game::init() {
     shaderProgram = renderer.compileShader("vertex.glsl", "fragment.glsl");
     renderer.setShaderProgram(shaderProgram);
 
-    // Initialize room or other game objects
-    room.init();
+    //World generation
+    glEnable(GL_CULL_FACE); // Cull back faces
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW); // Counter-clockwise vertex order
+    renderer.setupCube();
+    world.generateChunks(3);
+    //room.init();
 
     glEnable(GL_DEPTH_TEST);
 }
@@ -82,8 +87,8 @@ void Game::render() {
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    // Render the room
-    room.render();
+    //room.render();
+    renderer.renderChunks(world);
 
     // Render ImGui
     uiManager.SetupImgui();

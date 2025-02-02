@@ -6,8 +6,11 @@
 #include <sstream>
 #include <iostream>
 #include <string>
+#include <vector>
 
-Renderer::Renderer() : shaderProgram(0) {}
+Renderer::Renderer() : shaderProgram(0), cubeVAO(0), cubeVBO(0) {
+
+}
 
 Renderer::~Renderer() {
     if (shaderProgram) {
@@ -101,4 +104,117 @@ void Renderer::setUniformMat4(const std::string& name, const glm::mat4& mat) {
 void Renderer::clear(float r, float g, float b, float a) {
     glClearColor(r, g, b, a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::setupCube() {
+    float vertices[] = {
+        // Positions         // Texture Coords
+        // Front face
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        // Back face
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        // Left face
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        // Right face
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+         // Bottom face
+         -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+          0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+          0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+          0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+         // Top face
+         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+          0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+          0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+          0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
+
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+        std::cout << "OpenGL Error before glGenVertexArrays: " << error << std::endl;
+    }
+
+    glGenVertexArrays(1, &cubeVAO);
+    if (cubeVAO == 0) {
+        std::cerr << "Error generating Vertex Array Object" << std::endl;
+    }
+
+    glGenBuffers(1, &cubeVBO);
+    if (cubeVBO == 0) {
+        std::cerr << "Error generating Vertex Buffer Object" << std::endl;
+    }
+
+    glBindVertexArray(cubeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Texture coordinate attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
+}
+
+void Renderer::renderChunks(World& world) {
+    glUseProgram(shaderProgram);
+
+    for (auto& chunkPair : world.chunks) {
+        Chunk* chunk = chunkPair.second;
+        if (!chunk) continue;
+
+        int chunkX = chunkPair.first.first;
+        int chunkZ = chunkPair.first.second;
+
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int y = 0; y < CHUNK_SIZE; y++) {
+                for (int z = 0; z < CHUNK_SIZE; z++) {
+                    if (chunk->blocks[x][y][z].type == BlockType::GRASS) {
+                        Block block(BlockType::GRASS);
+                        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(
+                            static_cast<float>(chunkX * CHUNK_SIZE + x),
+                            static_cast<float>(y),
+                            static_cast<float>(chunkZ * CHUNK_SIZE + z)
+                        ));
+
+                        block.render(model,shaderProgram);
+                    }
+                }
+            }
+        }
+    }
+
+    glBindVertexArray(0);
 }
