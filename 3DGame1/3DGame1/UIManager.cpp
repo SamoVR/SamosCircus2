@@ -9,13 +9,18 @@
 #include <imgui_impl_opengl3.h>
 #include <iostream>
 
+#include "stb_image.h"
+
 void UIManager::Init(GLFWwindow* window, Camera* camera) {
     if (isInitialized) {
-        std::cerr << "ImGui is already initialized!" << std::endl;
+        std::cerr << "UI is already initialized!" << std::endl;
         return;
     }
 
     this->camera = camera;
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -51,10 +56,12 @@ void UIManager::Init(GLFWwindow* window, Camera* camera) {
 
     ImGui_ImplOpenGL3_CreateFontsTexture();
 
+    SetupCoreUI();
+
     isInitialized = true;
 }
 
-void UIManager::SetupImgui() {
+void UIManager::UpdateUI() {
     if (!isInitialized) {
         std::cerr << "ImGui is not initialized! Call Init() first." << std::endl;
         return;
@@ -81,15 +88,60 @@ void UIManager::SetupImgui() {
     ImGui::Separator();
 
     float movementSpeed = camera->getMovementSpeed();
-    if (ImGui::SliderFloat("Movement Speed", &movementSpeed, 0.0f, 50.0f))
-    {
+    if (ImGui::SliderFloat("Movement Speed", &movementSpeed, 0.0f, 50.0f)) {
         camera->setMovementSpeed(movementSpeed);
     }
-    
+
+    ImGui::End();
+
+    ////////// Crosshair //////////
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    float centerX = io.DisplaySize.x * 0.5f;
+    float centerY = io.DisplaySize.y * 0.5f;
+
+    ImGui::SetNextWindowPos(ImVec2(centerX, centerY), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+
+    ImGui::Begin("Crosshair", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground);
+
+    if (crosshairTexture) {
+        float iconSize = 32.0f; // Adjust based on texture atlas size
+        ImVec2 uv0 = ImVec2(0.0f, 0.0f);
+        ImVec2 uv1 = ImVec2(1.0f / 16.0f, 1.0f / 16.0f); // Assuming a 16x16 atlas
+
+        ImGui::Image((ImTextureID)(intptr_t)crosshairTexture, ImVec2(iconSize, iconSize), uv0, uv1);
+    }
+
     ImGui::End();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+
+void UIManager::SetupCoreUI() {
+
+    int channels;
+
+    unsigned char* data = stbi_load("assets/textures/icons.png", &crosshairWidth, &crosshairHeight, &channels, 4);
+    if (data) {
+        glGenTextures(1, &crosshairTexture);
+        glBindTexture(GL_TEXTURE_2D, crosshairTexture);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, crosshairWidth, crosshairHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        stbi_image_free(data);
+    }
+    else {
+        std::cerr << "Failed to load crosshair texture!" << std::endl;
+    }
+
+
 }
 
 void UIManager::Cleanup() {

@@ -29,6 +29,14 @@ void Chunk::generateTerrain() {
     }
 }
 
+Block* Chunk::getBlock(int x, int y, int z) {
+    if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) {
+        return blocks[x][y][z]; // Return the block at the given coordinates
+    }
+
+    return nullptr; // Return nullptr if the coordinates are out of bounds
+}
+
 void Chunk::setBlock(int x, int y, int z, BlockType type) {
     if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) {
         delete blocks[x][y][z];  // Delete the old block to prevent memory leaks

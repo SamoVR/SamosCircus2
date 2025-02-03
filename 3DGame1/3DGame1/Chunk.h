@@ -13,7 +13,7 @@ public:
     Chunk();
     ~Chunk(); // Destructor to free memory
     void setBlock(int x, int y, int z, BlockType type);
-
+    Block* getBlock(int x, int y, int z); // Add this line
 
 private:
     void generateTerrain(); // Separate function for terrain logic

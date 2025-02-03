@@ -12,13 +12,17 @@ class Camera;
 class UIManager {
 public:
     void Init(GLFWwindow* window,Camera* camera); // Initialize ImGui with the GLFW window
-    void SetupImgui();            // Setup and render ImGui frames
+    void UpdateUI();            // Setup and render ImGui frames
+    void SetupCoreUI();
     void Cleanup();               // Properly shut down ImGui resources
 
 private:
     bool isInitialized = false;   // Track if ImGui has been initialized
     Camera* camera = nullptr;
     ImFont* headingFont;
+
+    GLuint crosshairTexture = 1;
+    int crosshairWidth = 1, crosshairHeight = 1;
 };
 
 #endif

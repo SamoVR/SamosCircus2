@@ -32,6 +32,8 @@ public:
     virtual void render(const glm::mat4& modelMatrix, GLuint shaderProgram);
 
     static void loadTextureAtlas(const std::string& filePath);
+
+    BlockType getType();
 };
 
 #endif // BLOCK_H

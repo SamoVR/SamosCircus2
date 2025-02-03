@@ -9,6 +9,7 @@
 #include "World.h"
 #include "Block.h"
 #include "BlockFactory.h"
+#include "Player.h"
 
 class Game {
 public:
@@ -24,6 +25,7 @@ private:
     void cleanup(); // Cleans up resources when the game ends
 
     // Game components
+    Player player;
     Camera camera;
     InputManager inputManager;
     Renderer renderer;

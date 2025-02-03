@@ -1,5 +1,7 @@
 #include "Camera.h"
 #include "Window.h"
+#include "Block.h"
+#include "World.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -104,6 +106,36 @@ void Camera::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
     camera->processMouseMovement(xoffset, yoffset);
 }
+
+bool Camera::GetBlockLookingAt(World* world, glm::ivec3& targetBlock, glm::ivec3& placePos) {
+    glm::vec3 rayStart = position; // Start from the camera position
+    glm::vec3 rayDir = front; // Direction of the camera's front vector
+
+    // Define how far we want the ray to go (e.g., 5.0f)
+    float maxDistance = 5.0f;
+
+    // Raycasting logic (simple version)
+    for (float i = 0.0f; i < maxDistance; i += 0.5f) { // Iterate in steps of 0.5f for simplicity
+        glm::vec3 rayEnd = rayStart + rayDir * i;
+
+        // Convert rayEnd to block coordinates
+        glm::ivec3 blockCoord = glm::ivec3(glm::floor(rayEnd.x), glm::floor(rayEnd.y), glm::floor(rayEnd.z));
+
+        Block* blockPtr = world->getChunkAt(blockCoord.x, blockCoord.z)->getBlock(blockCoord.x, blockCoord.y, blockCoord.z);
+
+        // Now, we access the 'type' field of the block
+        BlockType blockType = blockPtr->getType();
+
+        if (blockType != BlockType::AIR) {
+            targetBlock = blockCoord;
+            placePos = blockCoord + glm::ivec3(0, 1, 0);  // Block above the target (for placing blocks)
+            return true;
+        }
+    }
+
+    return false;
+}
+
 
 // Set initial mouse position (used for resetting)
 void Camera::setInitialMousePosition(float x, float y) {

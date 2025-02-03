@@ -1,5 +1,6 @@
 #include "InputManager.h"
 #include "Camera.h"
+#include "Player.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>  
@@ -30,8 +31,6 @@ void InputManager::handleKeyboard(GLFWwindow* window, Camera& camera, float delt
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
         camera.processKeyboard(CameraMovement::CTRL, deltaTime);
 
-    //////////////////
-
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS && cursorLocked) {
         cursorLocked = false;
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); // Unlock cursor
@@ -39,7 +38,7 @@ void InputManager::handleKeyboard(GLFWwindow* window, Camera& camera, float delt
     }
 }
 
-void InputManager::handleMouse(GLFWwindow* window)
+void InputManager::handleMouse(GLFWwindow* window, Player& player)
 {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -48,4 +47,14 @@ void InputManager::handleMouse(GLFWwindow* window)
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // Lock cursor
         std::cout << "Cursor locked." << std::endl;
     }
+
+    //// INTERACTION ////
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
+        player.MineBlock();
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS)
+        player.PlaceBlock();
+
+    /////////////////
+
 }

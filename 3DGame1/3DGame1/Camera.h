@@ -1,6 +1,8 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include "World.h"
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -41,6 +43,8 @@ public:
 
     // Setters
     void setMovementSpeed(float speed);
+
+    bool GetBlockLookingAt(World* world, glm::ivec3& targetBlock, glm::ivec3& placePos);
 
     // Process inputs
     void processKeyboard(CameraMovement direction, float deltaTime);

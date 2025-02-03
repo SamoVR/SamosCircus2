@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <iostream>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -65,9 +66,26 @@ Block::Block(BlockType type, float breakTime, bool isSolid, std::array<int, 6> t
     setup();
 }
 
+
 Block::~Block() {
     if (VBO) glDeleteBuffers(1, &VBO);
     if (VAO) glDeleteVertexArrays(1, &VAO);
+}
+
+std::string blockTypeToString(BlockType type) {
+    switch (type) {
+    case BlockType::GRASS:
+        return "GRASS";
+    case BlockType::STONE:
+        return "STONE";
+    case BlockType::DIRT:
+        return "DIRT";
+    case BlockType::BEDROCK:
+        return "BEDROCK";
+        // Add other cases...
+    default:
+        return "UNKNOWN";
+    }
 }
 
 void Block::setup() {
@@ -77,8 +95,8 @@ void Block::setup() {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    const int atlasSize = 16; // Example: A 4x4 grid in the texture atlas
-    float texSize = 1.0f; // Size of each texture in UV space
+    const int atlasSize = 16;
+    float texSize = 1.0f;
 
     float adjustedVertices[180]; // 36 vertices * (3 pos + 2 UV)
 
@@ -161,4 +179,9 @@ void Block::loadTextureAtlas(const std::string& filePath) {
 
     stbi_image_free(data);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+BlockType Block::getType() {
+    //std::cout << blockTypeToString(this->type);
+    return BlockType::GRASS;
 }

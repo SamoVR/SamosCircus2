@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Player.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -10,9 +11,11 @@
 const int width = 1200, height = 800;
 
 Game::Game()
-    : camera(glm::vec3(0.0f, camera.normalHeight, 3.0f)), lastFrame(0.0f)
+    : camera(glm::vec3(0.0f, camera.normalHeight, 3.0f)),
+    world(),
+    player(&camera, &world),  // Pass camera and world to Player constructor
+    lastFrame(0.0f)
 {
-    
     window = initWindow(width, height, "3DGame1", camera); // Initialize the window
     if (!window) {
         throw std::runtime_error("Failed to initialize the window.");
@@ -73,7 +76,7 @@ void Game::init() {
 void Game::update(float deltaTime) {
     inputManager.handleKeyboard(window, camera, deltaTime);
 
-    inputManager.handleMouse(window);
+    inputManager.handleMouse(window, player);
 }
 
 void Game::render() {
@@ -99,7 +102,7 @@ void Game::render() {
     renderer.renderChunks(world);
 
     // Render ImGui
-    uiManager.SetupImgui();
+    uiManager.UpdateUI();
 }
 
 void Game::cleanup() {
