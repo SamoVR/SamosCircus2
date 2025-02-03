@@ -64,10 +64,20 @@ void UIManager::SetupImgui() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::Begin("Debug Controls");
+    ImGui::Begin("Debug Menu");
+
+    ImGui::PushFont(headingFont);
+    ImGui::Text("Debug Info");
+    ImGui::PopFont();
+
+    ImGui::Text("XYZ: (%.0f, %.0f, %.0f)", camera->position.x, camera->position.y, camera->position.z);
+
+    ImGui::Separator();
+
     ImGui::PushFont(headingFont);
     ImGui::Text("Player Controls");
     ImGui::PopFont();
+
     ImGui::Separator();
 
     float movementSpeed = camera->getMovementSpeed();

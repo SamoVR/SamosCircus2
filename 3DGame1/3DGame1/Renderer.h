@@ -19,7 +19,6 @@ public:
     void clear(float r, float g, float b, float a);
 
     void renderChunks(World& world);
-    void setupCube();
 
 private:
     GLuint shaderProgram;

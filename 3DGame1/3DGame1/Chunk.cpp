@@ -1,11 +1,37 @@
 #include "Chunk.h"
+#include "BlockFactory.h"
 
 Chunk::Chunk() {
+    generateTerrain(); // Call separate function for terrain
+}
+
+Chunk::~Chunk() {
+    // Free memory to prevent leaks
     for (int x = 0; x < CHUNK_SIZE; x++) {
         for (int y = 0; y < CHUNK_SIZE; y++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
-                blocks[x][y][z] = (y == 0) ? Block(BlockType::GRASS) : Block(BlockType::AIR); 
+                delete blocks[x][y][z]; // Free each allocated block
             }
         }
+    }
+}
+
+void Chunk::generateTerrain() {
+    for (int x = 0; x < CHUNK_SIZE; x++) {
+        for (int y = 0; y < CHUNK_SIZE; y++) {
+            for (int z = 0; z < CHUNK_SIZE; z++) {
+                // Grass on the bottom, air above
+                blocks[x][y][z] = (y == 0)
+                    ? BlockFactory::createBlock(BlockType::GRASS)
+                    : BlockFactory::createBlock(BlockType::AIR);
+            }
+        }
+    }
+}
+
+void Chunk::setBlock(int x, int y, int z, BlockType type) {
+    if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) {
+        delete blocks[x][y][z];  // Delete the old block to prevent memory leaks
+        blocks[x][y][z] = BlockFactory::createBlock(type);
     }
 }

@@ -48,6 +48,11 @@ void Camera::processKeyboard(CameraMovement direction, float deltaTime) {
         position -= right * velocity;
     if (direction == CameraMovement::RIGHT)
         position += right * velocity;
+    if (direction == CameraMovement::SHIFT)
+        position.y = crouchHeight;
+    if (direction == CameraMovement::SHIFT_RELEASED)
+        position.y = standHeight;
+
 }
 
 // Processes input received from mouse movement

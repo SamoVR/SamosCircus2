@@ -11,11 +11,24 @@ enum class CameraMovement {
     FORWARD,
     BACKWARD,
     LEFT,
-    RIGHT
+    RIGHT,
+
+    SPACE,
+    SHIFT,
+    SHIFT_RELEASED,
+    CTRL
 };
 
 class Camera {
 public:
+
+    glm::vec3 position;
+    glm::vec3 front;
+    glm::vec3 characterFront;
+    glm::vec3 up;
+    glm::vec3 right;
+    glm::vec3 worldUp;
+
     // Constructor
     Camera(glm::vec3 position, glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
         float yaw = -90.0f, float pitch = 0.0f);
@@ -39,14 +52,13 @@ public:
     // Set initial mouse position
     void setInitialMousePosition(float x, float y);
 
+    bool isCrouching = false;
+    float standHeight = 2.0f;
+    float crouchHeight = 1.25f;
+
 private:
     // Camera attributes
-    glm::vec3 position;
-    glm::vec3 front;
-    glm::vec3 characterFront;
-    glm::vec3 up;
-    glm::vec3 right;
-    glm::vec3 worldUp;
+    //moved to public
 
     // Euler angles
     float yaw;

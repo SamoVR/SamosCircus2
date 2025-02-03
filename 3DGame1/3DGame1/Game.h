@@ -5,9 +5,10 @@
 #include "InputManager.h"
 #include "Renderer.h"
 #include "UIManager.h"
-#include "Room.h"
 #include "Window.h"
 #include "World.h"
+#include "Block.h"
+#include "BlockFactory.h"
 
 class Game {
 public:
@@ -27,7 +28,6 @@ private:
     InputManager inputManager;
     Renderer renderer;
     UIManager uiManager;
-    Room room;
     World world;
 
     GLFWwindow* window;

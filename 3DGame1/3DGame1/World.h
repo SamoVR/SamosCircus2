@@ -18,6 +18,8 @@ public:
     World();
     Chunk* getChunk(int x, int z);
     void generateChunks(int radius); // Load chunks around player
+    void placeBlock(int x, int y, int z, BlockType type);
+    Chunk* getChunkAt(int x, int z);
 
     // Use custom hash function
     std::unordered_map<std::pair<int, int>, Chunk*, pair_hash> chunks;

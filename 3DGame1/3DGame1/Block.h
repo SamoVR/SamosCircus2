@@ -3,25 +3,35 @@
 
 #include <glm/glm.hpp>
 #include <GL/glew.h>
+#include <array>
+#include <string>
 
 enum class BlockType {
     AIR,
-    GRASS
+    GRASS,
+    DIRT,
+    STONE,
+    BEDROCK
 };
 
 class Block {
 public:
     BlockType type;
     GLuint VAO, VBO;
+    float breakTime;
+    bool isSolid;
+    std::array<int, 6> textureIDs; // Six different textures (one per face)
 
-    // Declare the static vertices array, but don't define it here
-    static float vertices[180]; // Static so that it can be shared among all instances of Block
+    static GLuint textureAtlasID;  // Holds the Minecraft texture atlas
+    static float vertices[180];
 
-    Block(BlockType type = BlockType::AIR);  // Constructor to set block type
-    ~Block();
+    Block(BlockType type, float breakTime, bool isSolid, std::array<int, 6> textureIDs);
+    virtual ~Block();
 
-    void setup();  // Set up the cube (block) geometry
-    void render(const glm::mat4& modelMatrix,GLuint shaderProgram);  // Render the block at a specific position
+    void setup();
+    virtual void render(const glm::mat4& modelMatrix, GLuint shaderProgram);
+
+    static void loadTextureAtlas(const std::string& filePath);
 };
 
 #endif // BLOCK_H

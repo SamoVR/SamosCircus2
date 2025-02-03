@@ -3,6 +3,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+GLuint Block::textureAtlasID = 0;
+
 // Cube vertices (Position + Texture Coords) for one block
 float Block::vertices[] = {
     // Front face
@@ -55,49 +60,104 @@ float Block::vertices[] = {
 };
 
 // Constructor
-Block::Block(BlockType type) : type(type), VAO(0), VBO(0) {
-    setup();  // Set up the geometry for the block when it is created
+Block::Block(BlockType type, float breakTime, bool isSolid, std::array<int, 6> textureIDs)
+    : type(type), breakTime(breakTime), isSolid(isSolid), textureIDs(textureIDs), VAO(0), VBO(0) {
+    setup();
 }
 
-// Destructor
 Block::~Block() {
-    if (VBO) {
-        glDeleteBuffers(1, &VBO);
-    }
-    if (VAO) {
-        glDeleteVertexArrays(1, &VAO);
-    }
+    if (VBO) glDeleteBuffers(1, &VBO);
+    if (VAO) glDeleteVertexArrays(1, &VAO);
 }
 
-// Setup the block's geometry
 void Block::setup() {
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
 
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-        // Set position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
+    const int atlasSize = 16; // Example: A 4x4 grid in the texture atlas
+    float texSize = 1.0f; // Size of each texture in UV space
 
-        // Set texture coordinate attribute
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
+    float adjustedVertices[180]; // 36 vertices * (3 pos + 2 UV)
 
-        glBindVertexArray(0);
+    for (int i = 0; i < 6; i++) { // For each face
+        int texIndex = textureIDs[i]; // Get the texture index for this face
+        int texX = texIndex / atlasSize; //texIndex % atlasSize;
+        int texY = texIndex % atlasSize;
+
+        float uMin = texX * texSize;
+        float vMin = texY * texSize;
+        float uMax = uMin + texSize;
+        float vMax = vMin + texSize;
+
+        // Copy vertex positions while adjusting UV coordinates
+        for (int j = 0; j < 6; j++) {
+            int vertIndex = (i * 30) + (j * 5);
+            adjustedVertices[vertIndex] = vertices[vertIndex];     // X
+            adjustedVertices[vertIndex + 1] = vertices[vertIndex + 1]; // Y
+            adjustedVertices[vertIndex + 2] = vertices[vertIndex + 2]; // Z
+
+            // Modify UV coordinates
+            float originalU = vertices[vertIndex + 3];
+            float originalV = vertices[vertIndex + 4];
+
+            adjustedVertices[vertIndex + 3] = (originalU == 0.0f) ? uMin : uMax;
+            adjustedVertices[vertIndex + 4] = (originalV == 0.0f) ? vMin : vMax;
+        }
+    }
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(adjustedVertices), adjustedVertices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Texture attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
 }
 
-// Render the block at a given position
-void Block::render(const glm::mat4& modelMatrix,GLuint shaderProgram) {
+
+void Block::render(const glm::mat4& modelMatrix, GLuint shaderProgram) {
+    glUseProgram(shaderProgram);
     glBindVertexArray(VAO);
 
-    // Assuming shaderProgram is set and ready to go
     GLuint modelLoc = glGetUniformLocation(shaderProgram, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureAtlasID);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
 
+    glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
+}
+
+void Block::loadTextureAtlas(const std::string& filePath) {
+    glGenTextures(1, &textureAtlasID);
+    glBindTexture(GL_TEXTURE_2D, textureAtlasID);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    int width, height, numChannels;
+    unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &numChannels, 0);
+    if (data) {
+        GLenum format = (numChannels == 3) ? GL_RGB : GL_RGBA;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        std::cout << "Texture atlas loaded: " << filePath << std::endl;
+    }
+    else {
+        std::cerr << "Failed to load texture atlas: " << filePath << std::endl;
+    }
+
+    stbi_image_free(data);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }

@@ -10,8 +10,9 @@
 const int width = 1200, height = 800;
 
 Game::Game()
-    : camera(glm::vec3(0.0f, 2.0f, 3.0f)), lastFrame(0.0f)
+    : camera(glm::vec3(0.0f, camera.standHeight, 3.0f)), lastFrame(0.0f)
 {
+    
     window = initWindow(width, height, "3DGame1", camera); // Initialize the window
     if (!window) {
         throw std::runtime_error("Failed to initialize the window.");
@@ -51,13 +52,20 @@ void Game::init() {
     shaderProgram = renderer.compileShader("vertex.glsl", "fragment.glsl");
     renderer.setShaderProgram(shaderProgram);
 
+    BlockFactory::init();
+
     //World generation
     glEnable(GL_CULL_FACE); // Cull back faces
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW); // Counter-clockwise vertex order
-    renderer.setupCube();
-    world.generateChunks(3);
+
+    world.generateChunks(1);
     //room.init();
+
+    world.placeBlock(0, 2, 0, BlockType::GRASS);
+    world.placeBlock(3, 2, 0, BlockType::DIRT);
+    world.placeBlock(6, 2, 0, BlockType::STONE);
+    world.placeBlock(9, 2, 0, BlockType::BEDROCK);
 
     glEnable(GL_DEPTH_TEST);
 }
@@ -69,7 +77,7 @@ void Game::update(float deltaTime) {
 }
 
 void Game::render() {
-    renderer.clear(0.2f, 0.2f, 0.3f, 1.0f);
+    renderer.clear(0.05f, 0.6f, 1.0f, 1.0f);
 
     // Use the shader program
     glUseProgram(shaderProgram);

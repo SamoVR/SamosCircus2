@@ -148,16 +148,19 @@
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Room.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BedrockBlock.h" />
     <ClInclude Include="Block.h" />
+    <ClInclude Include="BlockFactory.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Chunk.h" />
+    <ClInclude Include="DirtBlock.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GrassBlock.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
@@ -169,7 +172,7 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="Room.h" />
+    <ClInclude Include="StoneBlock.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="World.h" />

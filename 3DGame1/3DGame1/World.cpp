@@ -19,3 +19,16 @@ void World::generateChunks(int radius) {
     }
     std::cout << "Generated " << (radius * 2 + 1) * (radius * 2 + 1) << " chunks." << std::endl;
 }
+
+Chunk* World::getChunkAt(int x, int z) {
+    int chunkX = x / CHUNK_SIZE;
+    int chunkZ = z / CHUNK_SIZE;
+    return getChunk(chunkX, chunkZ);
+}
+
+void World::placeBlock(int x, int y, int z, BlockType type) {
+    Chunk* chunk = getChunkAt(x, z);
+    if (chunk) {
+        chunk->setBlock(x, y, z, type);
+    }
+}
