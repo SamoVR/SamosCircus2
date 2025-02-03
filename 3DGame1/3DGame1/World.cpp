@@ -28,6 +28,15 @@ Chunk* World::getChunkAt(int x, int z) {
     return getChunk(chunkX, chunkZ);
 }
 
+// Function to get a block at a specific position
+Block* World::getBlockAt(int x, int y, int z) {
+    Chunk* chunk = getChunkAt(x, z);
+    if (chunk) {
+        return chunk->getBlock(x, y, z); // Assuming Chunk has a getBlock method
+    }
+    return nullptr; // Return nullptr if no valid block is found
+}
+
 void World::placeBlock(int x, int y, int z, BlockType type) {
     Chunk* chunk = getChunkAt(x, z);
     if (chunk) {

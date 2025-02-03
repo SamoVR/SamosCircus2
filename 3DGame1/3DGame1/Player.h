@@ -9,7 +9,7 @@ class Player {
 public:
     Player(Camera* camera, World* world);
 
-    void Update(float deltaTime);
+    void Update();
     void PlaceBlock();
     void MineBlock();
 

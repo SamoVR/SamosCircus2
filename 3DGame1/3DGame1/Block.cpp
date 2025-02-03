@@ -182,6 +182,6 @@ void Block::loadTextureAtlas(const std::string& filePath) {
 }
 
 BlockType Block::getType() {
-    //std::cout << blockTypeToString(this->type);
+    //to be done later
     return BlockType::GRASS;
 }

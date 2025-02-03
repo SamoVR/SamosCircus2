@@ -20,6 +20,8 @@ public:
     void generateChunks(int radius); // Load chunks around player
     void placeBlock(int x, int y, int z, BlockType type);
     Chunk* getChunkAt(int x, int z);
+    Block* getBlockAt(int x, int y, int z);
+    bool isPositionInsideSolidBlock(glm::vec3 position);
 
     // Use custom hash function
     std::unordered_map<std::pair<int, int>, Chunk*, pair_hash> chunks;

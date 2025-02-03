@@ -159,6 +159,7 @@
     <ClInclude Include="BlockFactory.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Chunk.h" />
+    <ClInclude Include="Collider.h" />
     <ClInclude Include="DirtBlock.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GrassBlock.h" />

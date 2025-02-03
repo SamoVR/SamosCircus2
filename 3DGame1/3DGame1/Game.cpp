@@ -77,6 +77,9 @@ void Game::update(float deltaTime) {
     inputManager.handleKeyboard(window, camera, deltaTime);
 
     inputManager.handleMouse(window, player);
+
+    player.Update();
+
 }
 
 void Game::render() {

@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <optional>
 
 // Enum for camera movement
 enum class CameraMovement {
@@ -44,11 +45,11 @@ public:
     // Setters
     void setMovementSpeed(float speed);
 
-    bool GetBlockLookingAt(World* world, glm::ivec3& targetBlock, glm::ivec3& placePos);
-
     // Process inputs
     void processKeyboard(CameraMovement direction, float deltaTime);
     void processMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
+
+    bool getTargetBlock(World* world, glm::ivec3& outBlockPos, Block*& outBlock);
 
     // Static mouse callback for GLFW
     static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -64,6 +65,8 @@ public:
     float runMovementSpeed = 6.0f;
     float normalMovementSpeed = 4.0f;
     float crouchMovementSpeed = 1.0f;
+
+    float MAX_REACH_DISTANCE = 5.0f;
 
 private:
     // Camera attributes
