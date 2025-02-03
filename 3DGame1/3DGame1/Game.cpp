@@ -10,7 +10,7 @@
 const int width = 1200, height = 800;
 
 Game::Game()
-    : camera(glm::vec3(0.0f, camera.standHeight, 3.0f)), lastFrame(0.0f)
+    : camera(glm::vec3(0.0f, camera.normalHeight, 3.0f)), lastFrame(0.0f)
 {
     
     window = initWindow(width, height, "3DGame1", camera); // Initialize the window

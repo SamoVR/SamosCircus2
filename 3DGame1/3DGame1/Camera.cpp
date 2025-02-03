@@ -31,7 +31,7 @@ void Camera::updateCameraVectors() {
 // Constructor with initial values
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     : position(position), worldUp(up), yaw(yaw), pitch(pitch),
-    movementSpeed(5.0f), mouseSensitivity(0.1f), fov(60.0f),
+    movementSpeed(normalMovementSpeed), mouseSensitivity(0.1f), fov(60.0f),
     lastX(400), lastY(300), firstMouse(true) {
     updateCameraVectors();
 }
@@ -48,10 +48,23 @@ void Camera::processKeyboard(CameraMovement direction, float deltaTime) {
         position -= right * velocity;
     if (direction == CameraMovement::RIGHT)
         position += right * velocity;
-    if (direction == CameraMovement::SHIFT)
+
+    if (direction == CameraMovement::SHIFT) //crouching
+    {
+        movementSpeed = crouchMovementSpeed;
         position.y = crouchHeight;
-    if (direction == CameraMovement::SHIFT_RELEASED)
-        position.y = standHeight;
+    }
+    if (direction == CameraMovement::SHIFT_RELEASED) //standing
+    {
+        movementSpeed = normalMovementSpeed;
+        position.y = normalHeight;
+    }
+
+    if (direction == CameraMovement::CTRL) //run
+    {
+        movementSpeed = runMovementSpeed;
+    }
+        
 
 }
 

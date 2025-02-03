@@ -53,8 +53,13 @@ public:
     void setInitialMousePosition(float x, float y);
 
     bool isCrouching = false;
-    float standHeight = 2.0f;
-    float crouchHeight = 1.25f;
+
+    float normalHeight = 2.0f;
+    float crouchHeight = 1.75f;
+
+    float runMovementSpeed = 6.0f;
+    float normalMovementSpeed = 4.0f;
+    float crouchMovementSpeed = 1.0f;
 
 private:
     // Camera attributes

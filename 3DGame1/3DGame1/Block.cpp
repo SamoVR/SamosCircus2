@@ -84,6 +84,7 @@ void Block::setup() {
 
     for (int i = 0; i < 6; i++) { // For each face
         int texIndex = textureIDs[i]; // Get the texture index for this face
+
         int texX = texIndex / atlasSize; //texIndex % atlasSize;
         int texY = texIndex % atlasSize;
 
