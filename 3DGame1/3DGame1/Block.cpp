@@ -62,7 +62,9 @@ float Block::vertices[] = {
 
 // Constructor
 Block::Block(BlockType type, float breakTime, bool isSolid, std::array<int, 6> textureIDs)
-    : type(type), breakTime(breakTime), isSolid(isSolid), textureIDs(textureIDs), VAO(0), VBO(0) {
+    : type(type), breakTime(breakTime), isSolid(isSolid), textureIDs(textureIDs), VAO(0), VBO(0),
+    collider(glm::vec3(0.0f), glm::vec3(1.0f)) // Initialize collider with default 1x1x1 size
+{
     setup();
 }
 
@@ -98,12 +100,12 @@ void Block::setup() {
     const int atlasSize = 16;
     float texSize = 1.0f;
 
-    float adjustedVertices[180]; // 36 vertices * (3 pos + 2 UV)
+    float adjustedVertices[180];
 
-    for (int i = 0; i < 6; i++) { // For each face
-        int texIndex = textureIDs[i]; // Get the texture index for this face
+    for (int i = 0; i < 6; i++) {
+        int texIndex = textureIDs[i];
 
-        int texX = texIndex / atlasSize; //texIndex % atlasSize;
+        int texX = texIndex / atlasSize;
         int texY = texIndex % atlasSize;
 
         float uMin = texX * texSize;
@@ -111,14 +113,12 @@ void Block::setup() {
         float uMax = uMin + texSize;
         float vMax = vMin + texSize;
 
-        // Copy vertex positions while adjusting UV coordinates
         for (int j = 0; j < 6; j++) {
             int vertIndex = (i * 30) + (j * 5);
-            adjustedVertices[vertIndex] = vertices[vertIndex];     // X
-            adjustedVertices[vertIndex + 1] = vertices[vertIndex + 1]; // Y
-            adjustedVertices[vertIndex + 2] = vertices[vertIndex + 2]; // Z
+            adjustedVertices[vertIndex] = vertices[vertIndex];
+            adjustedVertices[vertIndex + 1] = vertices[vertIndex + 1];
+            adjustedVertices[vertIndex + 2] = vertices[vertIndex + 2];
 
-            // Modify UV coordinates
             float originalU = vertices[vertIndex + 3];
             float originalV = vertices[vertIndex + 4];
 
@@ -129,18 +129,16 @@ void Block::setup() {
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(adjustedVertices), adjustedVertices, GL_STATIC_DRAW);
 
-    // Position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Texture attribute
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
 }
 
-
+// Render the block
 void Block::render(const glm::mat4& modelMatrix, GLuint shaderProgram) {
     glUseProgram(shaderProgram);
     glBindVertexArray(VAO);
@@ -154,8 +152,25 @@ void Block::render(const glm::mat4& modelMatrix, GLuint shaderProgram) {
 
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
+
+    renderCollider(modelMatrix, shaderProgram);
 }
 
+void Block::renderCollider(const glm::mat4& modelMatrix, GLuint shaderProgram) {
+    glm::vec3 colliderMin = collider.getMin();
+    glm::vec3 colliderMax = collider.getMax();
+
+    // Scale and translate to fit the collider
+    glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(colliderMin.x, colliderMin.y, colliderMin.z));
+    transform = glm::scale(transform, glm::vec3(colliderMax.x - colliderMin.x, colliderMax.y - colliderMin.y, colliderMax.z - colliderMin.z));
+
+    // Create an instance of ColliderVisualizer and call render with all 4 arguments
+    ColliderVisualizer visualizer;
+    visualizer.render(transform, shaderProgram, colliderMin, colliderMax);
+}
+
+
+// Load the texture atlas for the block
 void Block::loadTextureAtlas(const std::string& filePath) {
     glGenTextures(1, &textureAtlasID);
     glBindTexture(GL_TEXTURE_2D, textureAtlasID);
@@ -182,6 +197,11 @@ void Block::loadTextureAtlas(const std::string& filePath) {
 }
 
 BlockType Block::getType() {
-    //to be done later
-    return BlockType::GRASS;
+    return type;
+}
+
+// Set the collider position based on the block's world position (determined later)
+void Block::updateColliderPosition(const glm::vec3& position) {
+    // Translate the collider to the block's world position
+    collider.translate(position);
 }

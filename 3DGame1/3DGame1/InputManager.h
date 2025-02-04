@@ -3,6 +3,7 @@
 
 #include "Camera.h"
 #include "Player.h"
+#include "World.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -10,12 +11,14 @@
 class InputManager {
 
 public:
+	InputManager(World* world);
+
 	void handleKeyboard(GLFWwindow* window, Camera& camera, float deltaTime);
 	void handleMouse(GLFWwindow* window, Player& player);
 
 private:
 	bool cursorLocked = true;
-
+	World* world;
 
 };
 

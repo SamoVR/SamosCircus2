@@ -41,36 +41,56 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
 }
 
 // Processes input received from keyboard
-void Camera::processKeyboard(CameraMovement direction, float deltaTime) {
+void Camera::processKeyboard(CameraMovement direction, float deltaTime, World* world) {
     float velocity = movementSpeed * deltaTime;
+    glm::vec3 movementDirection = glm::vec3(0.0f);
 
     if (direction == CameraMovement::FORWARD)
-        position += characterFront * velocity;
+        movementDirection = characterFront * velocity;
     if (direction == CameraMovement::BACKWARD)
-        position -= characterFront * velocity;
+        movementDirection = -characterFront * velocity;
     if (direction == CameraMovement::LEFT)
-        position -= right * velocity;
+        movementDirection = -right * velocity;
     if (direction == CameraMovement::RIGHT)
-        position += right * velocity;
+        movementDirection = right * velocity;
 
-    if (direction == CameraMovement::SHIFT) //crouching
-    {
+    // Check if the movement is possible (no collision in the direction)
+    if (canMoveInDirection(movementDirection, world)) {
+        position += movementDirection;  // Move the player
+    }
+
+    if (direction == CameraMovement::SHIFT) { // Crouching
         movementSpeed = crouchMovementSpeed;
         position.y = crouchHeight;
     }
-    if (direction == CameraMovement::SHIFT_RELEASED) //standing
-    {
+    if (direction == CameraMovement::SHIFT_RELEASED) { // Standing
         movementSpeed = normalMovementSpeed;
         position.y = normalHeight;
     }
 
-    if (direction == CameraMovement::CTRL) //run
-    {
+    if (direction == CameraMovement::CTRL) { // Running
         movementSpeed = runMovementSpeed;
     }
-        
-
 }
+
+bool Camera::canMoveInDirection(const glm::vec3& direction, World* world) {
+    // Calculate the target position based on current position and direction
+    glm::vec3 targetPosition = position + direction;
+
+    // Get the block coordinates at the target position
+    glm::ivec3 targetBlockCoords = glm::ivec3(floor(targetPosition.x), floor(targetPosition.y), floor(targetPosition.z));
+
+    // Get the block at the target coordinates from the world
+    Block* targetBlock = world->getBlockAt(targetBlockCoords.x, targetBlockCoords.y, targetBlockCoords.z);
+
+    // If there is a block at the target position, prevent movement
+    if (targetBlock != nullptr) {
+        return false; // Block detected, can't move
+    }
+
+    return true; // No block detected, can move
+}
+
 
 // Processes input received from mouse movement
 void Camera::processMouseMovement(float xoffset, float yoffset, bool constrainPitch) {
@@ -139,15 +159,48 @@ bool Camera::getTargetBlock(World* world, glm::ivec3& blockPos, Block*& blockPtr
     glm::vec3 rayOrigin = position;
     glm::vec3 rayDirection = glm::normalize(front);
 
+    // Function to check for ray-box intersection
+    auto rayIntersectsBox = [](const glm::vec3& rayOrigin, const glm::vec3& rayDir, const Collider& collider) -> bool {
+        glm::vec3 invDir = 1.0f / rayDir; // Inverse of the ray direction
+        glm::vec3 min = collider.getMin();
+        glm::vec3 max = collider.getMax();
+
+        float tmin = (min.x - rayOrigin.x) * invDir.x;
+        float tmax = (max.x - rayOrigin.x) * invDir.x;
+        if (tmin > tmax) std::swap(tmin, tmax);
+
+        float tymin = (min.y - rayOrigin.y) * invDir.y;
+        float tymax = (max.y - rayOrigin.y) * invDir.y;
+        if (tymin > tymax) std::swap(tymin, tymax);
+
+        if ((tmin > tymax) || (tymin > tmax))
+            return false;
+
+        if (tymin > tmin) tmin = tymin;
+        if (tymax < tmax) tmax = tymax;
+
+        float tzmin = (min.z - rayOrigin.z) * invDir.z;
+        float tzmax = (max.z - rayOrigin.z) * invDir.z;
+        if (tzmin > tzmax) std::swap(tzmin, tzmax);
+
+        if ((tmin > tzmax) || (tzmin > tmax))
+            return false;
+
+        return true;
+        };
+
     for (float t = 0.0f; t < maxDistance; t += 0.1f) { // Step through the ray
         glm::vec3 checkPos = rayOrigin + rayDirection * t;
         glm::ivec3 blockCoords = glm::ivec3(floor(checkPos.x), floor(checkPos.y), floor(checkPos.z));
 
         Block* block = world->getBlockAt(blockCoords.x, blockCoords.y, blockCoords.z);
         if (block) { // If a block exists at this position
-            blockPos = blockCoords;
-            blockPtr = block;
-            return true;
+            // Check for intersection with the block's collider
+            if (rayIntersectsBox(rayOrigin, rayDirection, block->getCollider())) {
+                blockPos = blockCoords;
+                blockPtr = block;
+                return true; // Ray hit the block's collider
+            }
         }
     }
 

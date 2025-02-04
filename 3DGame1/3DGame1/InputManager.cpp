@@ -8,28 +8,32 @@
 
 #include <iostream>
 
+InputManager::InputManager(World* world)
+    : world(world) {
+}
+
 void InputManager::handleKeyboard(GLFWwindow* window, Camera& camera, float deltaTime)
 {
     //// MOVEMENT ////
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.processKeyboard(CameraMovement::FORWARD, deltaTime);
+        camera.processKeyboard(CameraMovement::FORWARD, deltaTime, world);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.processKeyboard(CameraMovement::BACKWARD, deltaTime);
+        camera.processKeyboard(CameraMovement::BACKWARD, deltaTime, world);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.processKeyboard(CameraMovement::LEFT, deltaTime);
+        camera.processKeyboard(CameraMovement::LEFT, deltaTime, world);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.processKeyboard(CameraMovement::RIGHT, deltaTime);
+        camera.processKeyboard(CameraMovement::RIGHT, deltaTime, world);
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        camera.processKeyboard(CameraMovement::SPACE,deltaTime);
+        camera.processKeyboard(CameraMovement::SPACE,deltaTime, world);
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        camera.processKeyboard(CameraMovement::SHIFT, deltaTime); //might be a bad way to have it done like this but wtv fuck optimization
+        camera.processKeyboard(CameraMovement::SHIFT, deltaTime, world); //might be a bad way to have it done like this but wtv fuck optimization
     else
-        camera.processKeyboard(CameraMovement::SHIFT_RELEASED, deltaTime);
+        camera.processKeyboard(CameraMovement::SHIFT_RELEASED, deltaTime, world);
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-        camera.processKeyboard(CameraMovement::CTRL, deltaTime);
+        camera.processKeyboard(CameraMovement::CTRL, deltaTime, world);
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS && cursorLocked) {
         cursorLocked = false;

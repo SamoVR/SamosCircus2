@@ -14,6 +14,7 @@ Game::Game()
     : camera(glm::vec3(0.0f, camera.normalHeight, 3.0f)),
     world(),
     player(&camera, &world),  // Pass camera and world to Player constructor
+    inputManager(&world),
     lastFrame(0.0f)
 {
     window = initWindow(width, height, "3DGame1", camera); // Initialize the window
@@ -56,6 +57,8 @@ void Game::init() {
     renderer.setShaderProgram(shaderProgram);
 
     BlockFactory::init();
+
+    ColliderVisualizer::setup();
 
     //World generation
     glEnable(GL_CULL_FACE); // Cull back faces

@@ -41,5 +41,10 @@ void Chunk::setBlock(int x, int y, int z, BlockType type) {
     if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) {
         delete blocks[x][y][z];  // Delete the old block to prevent memory leaks
         blocks[x][y][z] = BlockFactory::createBlock(type);
+
+        // Set the collider's position based on the block's world position
+        glm::vec3 blockWorldPos = glm::vec3(x, y, z); // Position in world space (or chunk coordinates)
+        blocks[x][y][z]->updateColliderPosition(blockWorldPos);
     }
 }
+

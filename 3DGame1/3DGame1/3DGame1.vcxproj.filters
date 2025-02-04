@@ -76,6 +76,9 @@
     <ClCompile Include="main.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="ColliderVisualizer.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -151,6 +154,9 @@
       <Filter>player</Filter>
     </ClInclude>
     <ClInclude Include="Collider.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="ColliderVisualizer.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>
