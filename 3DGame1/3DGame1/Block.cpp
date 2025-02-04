@@ -63,7 +63,7 @@ float Block::vertices[] = {
 // Constructor
 Block::Block(BlockType type, float breakTime, bool isSolid, std::array<int, 6> textureIDs)
     : type(type), breakTime(breakTime), isSolid(isSolid), textureIDs(textureIDs), VAO(0), VBO(0),
-    collider(glm::vec3(0.0f), glm::vec3(1.0f)) // Initialize collider with default 1x1x1 size
+    collider(glm::vec3(-1.0f), glm::vec3(1.0f)) // Initialize collider with default 1x1x1 size
 {
     setup();
 }
@@ -202,6 +202,7 @@ BlockType Block::getType() {
 
 // Set the collider position based on the block's world position (determined later)
 void Block::updateColliderPosition(const glm::vec3& position) {
-    // Translate the collider to the block's world position
+    std::cout << "collider updated";
+
     collider.translate(position);
 }
