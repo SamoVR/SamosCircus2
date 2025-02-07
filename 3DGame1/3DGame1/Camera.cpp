@@ -92,8 +92,8 @@ bool Camera::canMoveInDirection(const glm::vec3& direction, World* world) {
         glm::vec3 playerMax = position + glm::vec3(0.5f, 0.5f, 0.5f);
 
         // Define the block's bounding box **correctly**
-        glm::vec3 targetMin = glm::vec3(targetBlockCoords) - glm::vec3(0.99f, 0.0f, 0.99f); // Expand outward properly
-        glm::vec3 targetMax = glm::vec3(targetBlockCoords) + glm::vec3(0.99f, 1.0f, 0.99f); // Upper bound correctly set
+        glm::vec3 targetMin = glm::vec3(targetBlockCoords) - glm::vec3(1.0f, 0.0f, 1.0f); // Expand outward properly
+        glm::vec3 targetMax = glm::vec3(targetBlockCoords) + glm::vec3(1.0f, 1.0f, 1.0f); // Upper bound correctly set
 
         // Check for collision
         if (playerMax.x > targetMin.x && playerMin.x < targetMax.x &&
