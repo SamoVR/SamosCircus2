@@ -77,7 +77,7 @@ void UIManager::UpdateUI() {
     ImGui::Text("Debug Info");
     ImGui::PopFont();
 
-    ImGui::Text("XYZ: (%.0f, %.0f, %.0f)", camera->position.x, camera->position.y, camera->position.z);
+    ImGui::Text("XYZ: (%.2f, %.2f, %.2f)", camera->position.x, camera->position.y, camera->position.z);
 
     ImGui::Separator();
 

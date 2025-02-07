@@ -62,8 +62,7 @@ float Block::vertices[] = {
 
 // Constructor
 Block::Block(BlockType type, float breakTime, bool isSolid, std::array<int, 6> textureIDs)
-    : type(type), breakTime(breakTime), isSolid(isSolid), textureIDs(textureIDs), VAO(0), VBO(0),
-    collider(glm::vec3(-1.0f), glm::vec3(1.0f)) // Initialize collider with default 1x1x1 size
+    : type(type), breakTime(breakTime), isSolid(isSolid), textureIDs(textureIDs), VAO(0), VBO(0)
 {
     setup();
 }
@@ -153,22 +152,7 @@ void Block::render(const glm::mat4& modelMatrix, GLuint shaderProgram) {
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
 
-    renderCollider(modelMatrix, shaderProgram);
 }
-
-void Block::renderCollider(const glm::mat4& modelMatrix, GLuint shaderProgram) {
-    glm::vec3 colliderMin = collider.getMin();
-    glm::vec3 colliderMax = collider.getMax();
-
-    // Scale and translate to fit the collider
-    glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(colliderMin.x, colliderMin.y, colliderMin.z));
-    transform = glm::scale(transform, glm::vec3(colliderMax.x - colliderMin.x, colliderMax.y - colliderMin.y, colliderMax.z - colliderMin.z));
-
-    // Create an instance of ColliderVisualizer and call render with all 4 arguments
-    ColliderVisualizer visualizer;
-    visualizer.render(transform, shaderProgram, colliderMin, colliderMax);
-}
-
 
 // Load the texture atlas for the block
 void Block::loadTextureAtlas(const std::string& filePath) {
@@ -198,11 +182,4 @@ void Block::loadTextureAtlas(const std::string& filePath) {
 
 BlockType Block::getType() {
     return type;
-}
-
-// Set the collider position based on the block's world position (determined later)
-void Block::updateColliderPosition(const glm::vec3& position) {
-    std::cout << "collider updated";
-
-    collider.translate(position);
 }

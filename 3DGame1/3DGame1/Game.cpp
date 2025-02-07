@@ -58,8 +58,6 @@ void Game::init() {
 
     BlockFactory::init();
 
-    ColliderVisualizer::setup();
-
     //World generation
     glEnable(GL_CULL_FACE); // Cull back faces
     glCullFace(GL_BACK);
