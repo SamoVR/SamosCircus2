@@ -121,8 +121,6 @@ void Camera::processMouseMovement(float xoffset, float yoffset, bool constrainPi
             pitch = -89.0f;
     }*/
 
-
-
     updateCameraVectors();
 }
 

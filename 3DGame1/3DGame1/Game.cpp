@@ -64,7 +64,6 @@ void Game::init() {
     glFrontFace(GL_CCW); // Counter-clockwise vertex order
 
     world.generateChunks(1);
-    //room.init();
 
     world.placeBlock(0, 2, 0, BlockType::GRASS);
     world.placeBlock(3, 2, 0, BlockType::DIRT);
