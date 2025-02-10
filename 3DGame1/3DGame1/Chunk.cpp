@@ -1,5 +1,6 @@
 #include "Chunk.h"
 #include "BlockFactory.h"
+#include <iostream>
 
 Chunk::Chunk() {
     generateTerrain(); // Call separate function for terrain
@@ -38,6 +39,7 @@ Block* Chunk::getBlock(int x, int y, int z) {
 }
 
 void Chunk::setBlock(int x, int y, int z, BlockType type) {
+    std::cout << x;
     if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) {
         delete blocks[x][y][z];  // Delete the old block to prevent memory leaks
         blocks[x][y][z] = BlockFactory::createBlock(type);
