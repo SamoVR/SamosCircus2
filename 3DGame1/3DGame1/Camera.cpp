@@ -88,8 +88,8 @@ bool Camera::canMoveInDirection(const glm::vec3& direction, World* world) {
     // If the block is solid, check for collision
     if (targetBlock != nullptr && targetBlock->isSolid) {
         // Define player's bounding box (assuming player is a 1x1x1 cube)
-        glm::vec3 playerMin = position - glm::vec3(0.5f, 0.5f, 0.5f);
-        glm::vec3 playerMax = position + glm::vec3(0.5f, 0.5f, 0.5f);
+        glm::vec3 playerMin = position - glm::vec3(1.0f, 2.0f, 1.0f);
+        glm::vec3 playerMax = position + glm::vec3(1.0f, 2.0f, 1.0f);
 
         // Define the block's bounding box **correctly**
         glm::vec3 targetMin = glm::vec3(targetBlockCoords) - glm::vec3(1.0f, 0.0f, 1.0f); // Expand outward properly
