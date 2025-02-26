@@ -168,10 +168,56 @@ float Camera::getMovementSpeed() const {
     return movementSpeed;
 }
 
-bool Camera::getTargetBlock(World* world, glm::ivec3& blockPos, Block*& blockPtr) {
-    
-    return false;
+bool rayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
+    const glm::vec3& boxMin, const glm::vec3& boxMax, float& tHit) {
+    glm::vec3 invDir = 1.0f / rayDir; // Inverse of ray direction
+    glm::vec3 tMin = (boxMin - rayOrigin) * invDir;
+    glm::vec3 tMax = (boxMax - rayOrigin) * invDir;
+
+    glm::vec3 t1 = glm::min(tMin, tMax);
+    glm::vec3 t2 = glm::max(tMin, tMax);
+
+    float tNear = glm::max(glm::max(t1.x, t1.y), t1.z);
+    float tFar = glm::min(glm::min(t2.x, t2.y), t2.z);
+
+    if (tNear > tFar || tFar < 0.0f) {
+        return false; // No intersection
+    }
+
+    tHit = tNear; // First intersection point
+    return true;
 }
+
+
+
+bool Camera::getBlockLookingAt(World* world, glm::ivec3& blockPos, glm::vec3& hitPoint) {
+    glm::vec3 rayOrigin = position;
+    glm::vec3 rayDirection = glm::normalize(front); // Normalized look direction
+
+    for (float t = 0.0f; t < MAX_REACH_DISTANCE; t += 0.1f) { // Step along the ray
+        glm::vec3 currentPos = rayOrigin + rayDirection * t;
+        glm::ivec3 candidateBlockPos = glm::floor(currentPos);
+
+        Block* block = world->getBlockAt(candidateBlockPos.x, candidateBlockPos.y, candidateBlockPos.z);
+        if (block != nullptr && block->isSolid) {
+            // Get block's AABB collider bounds
+            glm::vec3 blockMin(candidateBlockPos.x, candidateBlockPos.y, candidateBlockPos.z);
+            glm::vec3 blockMax = blockMin + glm::vec3(1.0f); // AABB for a full 1x1x1 block
+
+            // Perform Ray-AABB intersection test
+            float tHit;
+            if (rayIntersectsAABB(rayOrigin, rayDirection, blockMin, blockMax, tHit)) {
+                hitPoint = rayOrigin + rayDirection * tHit; // Save exact hit location
+                blockPos = candidateBlockPos; // Save the block position
+                return true; // Block was hit
+            }
+        }
+    }
+
+    return false; // No block found
+}
+
+
 
 /* Setters */
 
