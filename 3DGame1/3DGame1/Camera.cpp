@@ -74,36 +74,38 @@ void Camera::processKeyboard(CameraMovement direction, float deltaTime, World* w
 }
 
 bool Camera::canMoveInDirection(const glm::vec3& direction, World* world) {
-    // Calculate the target position based on current position and direction
+    // Define player's bounding box size
+    const glm::vec3 playerHalfSize(0.5f, 1.0f, 0.5f);
+
+    // Compute target position after movement
     glm::vec3 targetPosition = position + direction;
 
-    // Get the block coordinates at the target position
-    glm::ivec3 targetBlockCoords = glm::ivec3(targetPosition.x, targetPosition.y, targetPosition.z);
+    // Define player's new bounding box (AABB)
+    glm::vec3 playerMin = targetPosition - playerHalfSize;
+    glm::vec3 playerMax = targetPosition + playerHalfSize;
 
-    std::cout << "Target Block Coordinates: " << targetBlockCoords.x << ", " << targetBlockCoords.y << ", " << targetBlockCoords.z << std::endl;
+    // Check collision with surrounding blocks
+    for (int x = std::floor(playerMin.x); x <= std::floor(playerMax.x); ++x) {
+        for (int y = std::floor(playerMin.y); y <= std::floor(playerMax.y); ++y) {
+            for (int z = std::floor(playerMin.z); z <= std::floor(playerMax.z); ++z) {
+                Block* block = world->getBlockAt(x, y, z);
 
-    // Get the block at the target coordinates from the world
-    Block* targetBlock = world->getBlockAt(targetBlockCoords.x, targetBlockCoords.y, targetBlockCoords.z);
+                if (block != nullptr && block->isSolid) {
+                    // Get block's bounding box (AABB)
+                    glm::vec3 blockMin(x - 0.5f, y - 0.5f, z - 0.5f);
+                    glm::vec3 blockMax(x + 0.5f, y + 0.5f, z + 0.5f);
 
-    // If the block is solid, check for collision
-    if (targetBlock != nullptr && targetBlock->isSolid) {
-        // Define player's bounding box (assuming player is a 1x1x1 cube)
-        glm::vec3 playerMin = position - glm::vec3(1.0f, 2.0f, 1.0f);
-        glm::vec3 playerMax = position + glm::vec3(1.0f, 2.0f, 1.0f);
-
-        // Define the block's bounding box **correctly**
-        glm::vec3 targetMin = glm::vec3(targetBlockCoords) - glm::vec3(1.0f, 0.0f, 1.0f); // Expand outward properly
-        glm::vec3 targetMax = glm::vec3(targetBlockCoords) + glm::vec3(1.0f, 1.0f, 1.0f); // Upper bound correctly set
-
-        // Check for collision
-        if (playerMax.x > targetMin.x && playerMin.x < targetMax.x &&
-            playerMax.y > targetMin.y && playerMin.y < targetMax.y &&
-            playerMax.z > targetMin.z && playerMin.z < targetMax.z) {
-            return false;  // Collision detected, block prevents movement
+                    // AABB Collision Detection
+                    if (playerMax.x > blockMin.x && playerMin.x < blockMax.x &&
+                        playerMax.y > blockMin.y && playerMin.y < blockMax.y &&
+                        playerMax.z > blockMin.z && playerMin.z < blockMax.z) {
+                        return false;  // Collision detected
+                    }
+                }
+            }
         }
     }
-
-    return true;  // No collision, the player can move
+    return true;  // No collision, movement allowed
 }
 
 // Processes input received from mouse movement

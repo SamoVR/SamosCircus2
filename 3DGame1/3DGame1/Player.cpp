@@ -24,8 +24,10 @@ void Player::Update() {
 
 void Player::PlaceBlock() {
     // Implementation needed
+    std::cout << "Place block test" << std::endl;  
 }
 
 void Player::MineBlock() {
     // Implementation needed
+    std::cout << "Mine block test" << std::endl;
 }

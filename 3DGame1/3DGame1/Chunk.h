@@ -5,18 +5,22 @@
 #include "BlockFactory.h"
 
 const int CHUNK_SIZE = 16;
+const int CHUNK_HEIGHT = 256; // Define a proper world height
 
 class Chunk {
 public:
-    Block* blocks[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE]; // Pointer array
+    Block* blocks[CHUNK_SIZE][CHUNK_HEIGHT][CHUNK_SIZE]; // 3D grid of blocks
 
-    Chunk();
-    ~Chunk(); // Destructor to free memory
+    int chunkX, chunkZ;  // Store chunk coordinates
+
+    Chunk(int chunkX, int chunkZ);
+    ~Chunk();
+
     void setBlock(int x, int y, int z, BlockType type);
-    Block* getBlock(int x, int y, int z); // Add this line
+    Block* getBlock(int x, int y, int z);
 
 private:
-    void generateTerrain(); // Separate function for terrain logic
+    void generateTerrain();
 };
 
 #endif

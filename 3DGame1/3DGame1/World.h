@@ -2,31 +2,34 @@
 #define WORLD_H
 
 #include "Chunk.h"
-#include <vector>
 #include <unordered_map>
 
-// Custom hash function for std::pair<int, int>
-struct pair_hash {
-    template <typename T1, typename T2>
-    std::size_t operator()(const std::pair<T1, T2>& p) const {
-        return std::hash<T1>{}(p.first) ^ (std::hash<T2>{}(p.second) << 1);
+// Define chunk positioning grid (Minecraft-style)
+inline int worldToChunkCoord(int coord) {
+    return coord / CHUNK_SIZE - (coord < 0);
+}
+
+// Custom hash function for chunk coordinate pairs
+struct ChunkCoordHash {
+    std::size_t operator()(const std::pair<int, int>& p) const {
+        return std::hash<int>()(p.first) ^ (std::hash<int>()(p.second) << 1);
     }
 };
 
 class World {
 public:
     World();
-    Chunk* getChunk(int x, int z);
-    void generateChunks(int radius); // Load chunks around player
-    void placeBlock(int x, int y, int z, BlockType type);
-    Chunk* getChunkAt(int x, int z);
-    Block* getBlockAt(int x, int y, int z);
-    bool isPositionInsideSolidBlock(glm::vec3 position);
 
-    // Use custom hash function
-    std::unordered_map<std::pair<int, int>, Chunk*, pair_hash> chunks;
+    void generateChunks(int radius);
+    Chunk* getChunk(int chunkX, int chunkZ);
+    Chunk* getChunkAt(int worldX, int worldZ);
+
+    Block* getBlockAt(int x, int y, int z);
+    void placeBlock(int x, int y, int z, BlockType type);
+    std::unordered_map<std::pair<int, int>, Chunk*, ChunkCoordHash> chunks;
 
 private:
+    //
 };
 
 #endif
