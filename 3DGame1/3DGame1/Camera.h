@@ -44,12 +44,12 @@ public:
 
     // Setters
     void setMovementSpeed(float speed);
-
+    
     // Process inputs
     void processKeyboard(CameraMovement direction, float deltaTime, World* world);
     void processMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
 
-    bool getTargetBlock(World* world, glm::ivec3& outBlockPos, Block*& outBlock);
+    bool getBlockLookingAt(World* world, glm::ivec3& blockPos, glm::vec3& hitpoint);
     bool canMoveInDirection(const glm::vec3& direction, World* world);
 
     // Static mouse callback for GLFW

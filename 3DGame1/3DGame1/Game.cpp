@@ -69,6 +69,7 @@ void Game::init() {
     world.placeBlock(3, 2, 0, BlockType::DIRT);
     world.placeBlock(6, 2, 0, BlockType::STONE);
     world.placeBlock(9, 2, 0, BlockType::BEDROCK);
+    world.placeBlock(12, 2, 0, BlockType::WATER);
 
     glEnable(GL_DEPTH_TEST);
 }

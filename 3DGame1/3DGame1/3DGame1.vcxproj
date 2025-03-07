@@ -176,6 +176,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="StoneBlock.h" />
     <ClInclude Include="UIManager.h" />
+    <ClInclude Include="WaterBlock.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>

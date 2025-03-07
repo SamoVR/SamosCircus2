@@ -8,6 +8,7 @@
 #include "DirtBlock.h"
 #include "StoneBlock.h"
 #include "BedrockBlock.h"
+#include "WaterBlock.h"
 
 class BlockFactory {
 public:
@@ -21,6 +22,7 @@ public:
         case BlockType::DIRT: return new DirtBlock();
         case BlockType::STONE: return new StoneBlock();
         case BlockType::BEDROCK: return new BedrockBlock();
+        case BlockType::WATER: return new WaterBlock();
         default: return nullptr;
         }
     }
