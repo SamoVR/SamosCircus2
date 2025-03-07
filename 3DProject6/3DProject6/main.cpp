@@ -1,8 +1,15 @@
+//
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 #include <vector>
 #include <iostream>
 
@@ -87,7 +94,7 @@ public:
     glm::vec3 LastPos = position;
     bool glow;
 
-    Object(glm::vec3 initPosition, glm::vec3 initVelocity, float mass, float density = 3344, glm::vec4 color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), bool Glow = false) {
+    Object(glm::vec3 initPosition, glm::vec3 initVelocity, float mass, float density = 3344, glm::vec4 color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), bool Glow = false) {
         this->position = initPosition;
         this->velocity = initVelocity;
         this->mass = mass;
@@ -147,7 +154,7 @@ public:
 
         // update VBO with new vertex data
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_DYNAMIC_DRAW);
     }
     glm::vec3 GetPos() const {
         return this->position;
@@ -184,6 +191,13 @@ int main() {
     GLint objectColorLoc = glGetUniformLocation(shaderProgram, "objectColor");
     glUseProgram(shaderProgram);
 
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -196,12 +210,12 @@ int main() {
 
 
     objs = {
-        //Object(glm::vec3(3844, 0, 0), glm::vec3(0, 0, 228), 7.34767309*pow(10, 22), 3344),
-        //Object(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), 1.989 * pow(10, 30), 5515, glm::vec4(1.0f, 0.929f, 0.176f, 1.0f)),
+       Object(glm::vec3(5844, 0, 0), glm::vec3(0, 0, 228), 7.34767309*pow(10, 22), 3344),
+       //Object(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), 1.989 * pow(10, 30), 5515, glm::vec4(1.0f, 0.929f, 0.176f, 1.0f)),
        //Object(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), 5.97219*pow(10, 24), 5515, glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)),
-       Object(glm::vec3(-5000, 650, -350), glm::vec3(0, 0, 1500), 5.97219 * pow(10, 22), 5515, glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)),
-       Object(glm::vec3(5000, 650, -350), glm::vec3(0, 0, -1500), 5.97219 * pow(10, 22), 5515, glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)),
-       Object(glm::vec3(0, 0, -350), glm::vec3(0, 0, 0), 1.989 * pow(10, 25), 5515, glm::vec4(1.0f, 0.929f, 0.176f, 1.0f), true),
+       //Object(glm::vec3(-5000, 650, -350), glm::vec3(0, 0, 1500), 5.97219 * pow(10, 22), 5515, glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)),
+       //Object(glm::vec3(5000, 650, -350), glm::vec3(0, 0, -1500), 5.97219 * pow(10, 22), 5515, glm::vec4(0.0f, 1.0f, 1.0f, 1.0f)),
+       Object(glm::vec3(0, 0, -350), glm::vec3(0, 0, 0), 1.989 * pow(10, 25), 5515, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), true),
 
     };
     std::vector<float> gridVertices = CreateGridVertices(20000.0f, 25, objs);
@@ -214,11 +228,30 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("Simulation Controls");
+
+        ImGui::Checkbox("Pause Simulation", &pause);
+        ImGui::SliderFloat3("Camera Position", glm::value_ptr(cameraPos), -10000.0f, 10000.0f);
+
+        if (ImGui::Button("Spawn Object")) {
+            objs.emplace_back(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), 1e22);
+            objs.back().Initalizing = true;
+        }
+
+        ImGui::End();
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
         glfwSetKeyCallback(window, keyCallback);
         glfwSetMouseButtonCallback(window, mouseButtonCallback);
         UpdateCam(shaderProgram, cameraPos);
         if (!objs.empty() && objs.back().Initalizing) {
-            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+            /*if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
                 // increase mass by 1% per second
                 objs.back().mass *= 1.0 + 1.0 * deltaTime;
 
@@ -231,7 +264,7 @@ int main() {
 
                 // update vertex data
                 objs.back().UpdateVertices();
-            }
+            }*/
         }
 
         // Draw the grid
@@ -301,6 +334,10 @@ int main() {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     for (auto& obj : objs) {
         glDeleteVertexArrays(1, &obj.VAO);
@@ -444,10 +481,15 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
 
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-        glfwTerminate();
-        glfwWindowShouldClose(window);
-        running = false;
+        objs.push_back(Object(glm::vec3(5844, 0, 0), glm::vec3(0, 0, 228), 7.34767309 * pow(10, 22), 3344));
     }
+
+    if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
+        static bool locked = true;
+        locked = !locked;
+        glfwSetInputMode(window, GLFW_CURSOR, locked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    }
+
 
     // init arrows pos up down left right
     if (!objs.empty() && objs[objs.size() - 1].Initalizing) {
@@ -501,7 +543,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     cameraFront = glm::normalize(front);
 }
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+    /*if (button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_PRESS) {
             objs.emplace_back(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0f, 0.0f, 0.0f), initMass);
             objs[objs.size() - 1].Initalizing = true;
@@ -516,7 +558,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
             objs[objs.size() - 1].mass *= 1.2;
         }
         std::cout << "MASS: " << objs[objs.size() - 1].mass << std::endl;
-    }
+    }*/
 };
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     float cameraSpeed = 250000.0f * deltaTime;
