@@ -11,6 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
+#include <string>
 #include <iostream>
 
 const char* vertexShaderSource = R"glsl(
@@ -62,12 +63,11 @@ const float c = 299792458.0;
 float initMass = float(pow(10, 22));
 float sizeRatio = 30000.0f;
 
-GLFWwindow* StartGLU();
 GLuint CreateShaderProgram(const char* vertexSource, const char* fragmentSource);
 void CreateVBOVAO(GLuint& VAO, GLuint& VBO, const float* vertices, size_t vertexCount);
 void UpdateCam(GLuint shaderProgram, glm::vec3 cameraPos);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+//void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -182,9 +182,52 @@ std::vector<float> UpdateGridVertices(std::vector<float> vertices, const std::ve
 
 GLuint gridVAO, gridVBO;
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
 
 int main() {
-    GLFWwindow* window = StartGLU();
+    if (!glfwInit()) {
+        std::cout << "Failed to initialize GLFW, panic" << std::endl;
+        return -1;
+    }
+
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Universe Simulation", NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        return -1;
+    }
+
+    glfwMakeContextCurrent(window);
+
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) {
+        std::cerr << "Failed to initialize GLEW." << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+    const char* glsl_version = "#version 100";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#elif defined(__APPLE__)
+    const char* glsl_version = "#version 150";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#else
+    const char* glsl_version = "#version 130";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+#endif
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     GLuint shaderProgram = CreateShaderProgram(vertexShaderSource, fragmentShaderSource);
 
     GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
@@ -193,13 +236,32 @@ int main() {
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 330");
 
-    glfwSetCursorPosCallback(window, mouse_callback);
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+    int screen_width = mode->width;
+    int screen_height = mode->height;
+
+
+    const int base_width = 1920;
+    const int base_height = 1080;
+
+    float dpi_scale = (float)screen_width / base_width;
+
+    io.FontGlobalScale = dpi_scale;
+
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     //projection matrix
@@ -228,6 +290,8 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        ImGuiIO& io = ImGui::GetIO();
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -242,13 +306,56 @@ int main() {
             objs.back().Initalizing = true;
         }
 
+        ImGui::Text("Objects");
+        ImGui::Separator();
+
+        for (size_t i = 0; i < objs.size(); ++i) {
+            ImGui::PushID(i); // Ensure unique IDs for ImGui widgets
+
+            std::string objLabel = "Object " + std::to_string(i);
+            if (ImGui::CollapsingHeader(objLabel.c_str())) {
+
+                // Position Editor
+                ImGui::Text("Position");
+                ImGui::DragFloat3("##Position", glm::value_ptr(objs[i].position), 10.0f, -10000.0f, 10000.0f);
+
+                // Velocity Editor
+                ImGui::Text("Velocity");
+                ImGui::DragFloat3("##Velocity", glm::value_ptr(objs[i].velocity), 1.0f, -1000.0f, 1000.0f);
+
+                // Mass Editor
+                ImGui::Text("Mass");
+                ImGui::DragFloat("##Mass", &objs[i].mass, 1e20, 1e10, 1e30, "%.3e");
+
+                // Density Editor
+                ImGui::Text("Density");
+                ImGui::DragFloat("##Density", &objs[i].density, 10.0f, 100.0f, 10000.0f);
+
+                // Color Editor
+                ImGui::Text("Color");
+                ImGui::ColorEdit4("##Color", glm::value_ptr(objs[i].color));
+
+                // Glow Toggle
+                ImGui::Checkbox("Glow", &objs[i].glow);
+
+                // Delete Object Button
+                if (ImGui::Button("Delete Object")) {
+                    objs.erase(objs.begin() + i);
+                    ImGui::PopID();
+                    break; // Prevent iterating over modified vector
+                }
+            }
+
+            ImGui::PopID();
+        }
+
         ImGui::End();
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-
         glfwSetKeyCallback(window, keyCallback);
-        glfwSetMouseButtonCallback(window, mouseButtonCallback);
+        //glfwSetMouseButtonCallback(window, mouseButtonCallback);
         UpdateCam(shaderProgram, cameraPos);
         if (!objs.empty() && objs.back().Initalizing) {
             /*if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
@@ -354,34 +461,6 @@ int main() {
     return 0;
 }
 
-GLFWwindow* StartGLU() {
-    if (!glfwInit()) {
-        std::cout << "Failed to initialize GLFW, panic" << std::endl;
-        return nullptr;
-    }
-    GLFWwindow* window = glfwCreateWindow(800, 600, "3D_TEST", NULL, NULL);
-    if (!window) {
-        std::cerr << "Failed to create GLFW window." << std::endl;
-        glfwTerminate();
-        return nullptr;
-    }
-    glfwMakeContextCurrent(window);
-
-    glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK) {
-        std::cerr << "Failed to initialize GLEW." << std::endl;
-        glfwTerminate();
-        return nullptr;
-    }
-
-    glEnable(GL_DEPTH_TEST);
-    glViewport(0, 0, 800, 600);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    return window;
-}
-
 GLuint CreateShaderProgram(const char* vertexSource, const char* fragmentSource) {
     // Vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -451,40 +530,30 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     bool shiftPressed = (mods & GLFW_MOD_SHIFT) != 0;
     Object& lastObj = objs[objs.size() - 1];
 
-
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraFront;
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         cameraPos -= cameraSpeed * cameraFront;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         cameraPos -= cameraSpeed * glm::normalize(glm::cross(cameraFront, cameraUp));
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += cameraSpeed * glm::normalize(glm::cross(cameraFront, cameraUp));
-    }
 
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraUp;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         cameraPos -= cameraSpeed * cameraUp;
-    }
 
     if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-        pause = true;
-    }
-    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_RELEASE) {
-        pause = false;
+        static bool paused = true;
+        pause = !pause;
     }
 
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
         objs.push_back(Object(glm::vec3(5844, 0, 0), glm::vec3(0, 0, 228), 7.34767309 * pow(10, 22), 3344));
     }
 
-    if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         static bool locked = true;
         locked = !locked;
         glfwSetInputMode(window, GLFW_CURSOR, locked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
@@ -520,7 +589,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 };
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-
     float xoffset = xpos - lastX;
     float yoffset = lastY - ypos;
     lastX = xpos;
@@ -542,8 +610,9 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(front);
 }
-void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-    /*if (button == GLFW_MOUSE_BUTTON_LEFT) {
+
+/*void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_PRESS) {
             objs.emplace_back(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0f, 0.0f, 0.0f), initMass);
             objs[objs.size() - 1].Initalizing = true;
@@ -558,8 +627,9 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
             objs[objs.size() - 1].mass *= 1.2;
         }
         std::cout << "MASS: " << objs[objs.size() - 1].mass << std::endl;
-    }*/
-};
+    }
+};*/
+
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     float cameraSpeed = 250000.0f * deltaTime;
     if (yoffset > 0) {
@@ -576,6 +646,7 @@ glm::vec3 sphericalToCartesian(float r, float theta, float phi) {
     float z = r * sin(theta) * sin(phi);
     return glm::vec3(x, y, z);
 };
+
 void DrawGrid(GLuint shaderProgram, GLuint gridVAO, size_t vertexCount) {
     glUseProgram(shaderProgram);
     glm::mat4 model = glm::mat4(1.0f); // Identity matrix for the grid
