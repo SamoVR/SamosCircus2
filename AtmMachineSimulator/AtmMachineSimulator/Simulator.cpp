@@ -48,7 +48,7 @@ void Simulator::exit()
 
 void Simulator::start()
 {
-	bank.name = "TatraBanka";
+	bank.name = "Tatra banka";
 
 	atm.bank = bank;
 	atm.balance = 10000.0f;
