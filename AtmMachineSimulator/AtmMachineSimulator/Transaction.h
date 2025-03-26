@@ -8,8 +8,8 @@
 class Transaction
 {
 public:
-	bool authorized(float amount, User user, Bank bank, ATM atm);
-	void withdraw(float amount, User user, Bank bank, ATM atm);
+	bool authorized(float amount, User& user, Bank& bank, ATM& atm);
+	void withdraw(float amount, User& user, Bank& bank, ATM& atm);
 
 private:
 

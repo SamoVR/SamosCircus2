@@ -11,7 +11,7 @@ Simulator::~Simulator()
 }
 
 
-void Simulator::withdraw(User user, Bank bank, ATM atm)
+void Simulator::withdraw(User& user, Bank& bank, ATM& atm)
 {
 	float amount;
 	std::cout << std::endl << "Enter an amount you wish to withdraw: ";
@@ -20,11 +20,14 @@ void Simulator::withdraw(User user, Bank bank, ATM atm)
 	if (transaction.authorized(amount,user,bank,atm))
 	{
 		transaction.withdraw(amount, user, bank, atm);
+		std::cout << "Transaction authorized.";	
 	}
 	else
-		std::cout << "Transaction is not authorized, press ENTER to continue.";
+	{
+		std::cout << "Transaction unauthorized.";
+	}
 
-	std::cout << "Transaction authorized, press ENTER to continue.";
+	std::cout << std::endl << std::endl << "Press ENTER to continue.";
 	std::cin.ignore();
 	std::cin.ignore();
 
@@ -33,7 +36,7 @@ void Simulator::withdraw(User user, Bank bank, ATM atm)
 	Simulator::menu();
 }
 
-void Simulator::insert(User user, Bank bank, ATM atm)
+void Simulator::insert(User& user, Bank& bank, ATM& atm)
 {
 
 }
@@ -60,7 +63,7 @@ void Simulator::start()
 
 void Simulator::init()
 {
-	std::cout << "Presse ENTER to continue";
+	std::cout << std::endl << "Presse ENTER to continue";
 	std::cin.ignore();
 	system("cls");
 
@@ -79,6 +82,7 @@ void Simulator::info()
 	std::cout << "User Name: " << user.name << std::endl;
 	std::cout << "User Bank: " << user.bank.name << std::endl;
 	std::cout << "User Balance: " << user.balance << std::endl;
+	std::cout << "User Wallet: " << user.wallet << std::endl;
 
 	std::cout << std::endl << "-- ATM Information --" << std::endl;
 	std::cout << "ATM Bank: " << atm.bank.name << std::endl;
