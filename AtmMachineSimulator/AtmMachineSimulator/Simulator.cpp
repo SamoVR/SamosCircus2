@@ -14,10 +14,10 @@ Simulator::~Simulator()
 void Simulator::withdraw(User& user, Bank& bank, ATM& atm)
 {
 	float amount;
-	std::cout << std::endl << "Enter an amount you wish to withdraw: ";
+	std::cout << std::endl << "Enter the amount you wish to withdraw: ";
 	std::cin >> amount;
 	Transaction transaction;
-	if (transaction.authorized(amount,user,bank,atm))
+	if (transaction.authorized(amount,false,user,bank,atm))
 	{
 		transaction.withdraw(amount, user, bank, atm);
 		std::cout << "Transaction authorized.";	
@@ -38,7 +38,27 @@ void Simulator::withdraw(User& user, Bank& bank, ATM& atm)
 
 void Simulator::insert(User& user, Bank& bank, ATM& atm)
 {
+	float amount;
+	std::cout << std::endl << "Enter the amount you wish to insert: ";
+	std::cin >> amount;
+	Transaction transaction;
+	if (transaction.authorized(amount,true, user, bank, atm))
+	{
+		transaction.insert(amount, user, bank, atm);
+		std::cout << "Transaction authorized.";
+	}
+	else
+	{
+		std::cout << "Transaction unauthorized.";
+	}
 
+	std::cout << std::endl << std::endl << "Press ENTER to continue.";
+	std::cin.ignore();
+	std::cin.ignore();
+
+	system("cls");
+	Simulator::info();
+	Simulator::menu();
 }
 
 void Simulator::exit()
@@ -55,7 +75,8 @@ void Simulator::start()
 
 	user.name = "Ado Hornak";
 	user.bank = bank;
-	user.balance = 200.0f;
+	user.balance = 2000.0f;
+	user.accountBlocked = false;
 
 	Simulator::init();
 
@@ -83,6 +104,11 @@ void Simulator::info()
 	std::cout << "User Bank: " << user.bank.name << std::endl;
 	std::cout << "User Balance: " << user.balance << std::endl;
 	std::cout << "User Wallet: " << user.wallet << std::endl;
+	std::cout << "User Blocked: ";
+	if (user.accountBlocked)
+		 std::cout << "true" << std::endl;
+	else
+		std::cout << "false" << std::endl;
 
 	std::cout << std::endl << "-- ATM Information --" << std::endl;
 	std::cout << "ATM Bank: " << atm.bank.name << std::endl;

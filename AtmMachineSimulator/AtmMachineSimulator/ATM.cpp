@@ -2,7 +2,7 @@
 
 ATM::ATM()
 {
-	std::cout << "[DEBUG] > ATM created!" << std::endl;
+	std::cout << "[DEBUG] > ATM created" << std::endl;
 }
 
 ATM::~ATM()
