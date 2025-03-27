@@ -37,6 +37,6 @@ void Transaction::insert(float amount, User& user, ATM& atm)
 	user.wallet -= amount;
 	user.balance += amount;
 	atm.balance += amount;
-	bank.balance += amount;
+	user.bank.balance += amount;
 
 }

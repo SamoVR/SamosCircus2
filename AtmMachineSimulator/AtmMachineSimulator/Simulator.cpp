@@ -19,7 +19,7 @@ void Simulator::withdraw(User& user, Bank& bank, ATM& atm)
 	Transaction transaction;
 	if (transaction.authorized(amount,false,user,bank,atm))
 	{
-		transaction.withdraw(amount, user, bank, atm);
+		transaction.withdraw(amount, user, atm);
 		std::cout << "Transaction authorized.";	
 	}
 	else
@@ -44,7 +44,7 @@ void Simulator::insert(User& user, Bank& bank, ATM& atm)
 	Transaction transaction;
 	if (transaction.authorized(amount,true, user, bank, atm))
 	{
-		transaction.insert(amount, user, bank, atm);
+		transaction.insert(amount, user, atm);
 		std::cout << "Transaction authorized.";
 	}
 	else
@@ -114,9 +114,9 @@ void Simulator::info()
 	std::cout << "ATM Bank: " << atm.bank.name << std::endl;
 	std::cout << "ATM Balance: " << atm.balance << std::endl;
 
-	std::cout << std::endl << "-- Bank Information-- " << std::endl;
-	std::cout << "Bank Name: " << bank.name << std::endl;
-	std::cout << "Bank Balance: " << bank.balance << std::endl;
+	std::cout << std::endl << "-- Users Bank Information-- " << std::endl;
+	std::cout << "Bank Name: " << user.bank.name << std::endl;
+	std::cout << "Bank Balance: " << user.bank.balance << std::endl;
 
 }
 
