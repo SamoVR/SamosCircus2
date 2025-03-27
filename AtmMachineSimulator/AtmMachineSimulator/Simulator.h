@@ -20,7 +20,7 @@ public:
 private:
 	void init();
 	void withdraw(User& user, Bank& bank, ATM& atm);
-	void insert(User& user, Bank& bank, ATM& atm);
+	void deposit(User& user, Bank& bank, ATM& atm);
 	void transhistory(User& user);
 	void exit();
 

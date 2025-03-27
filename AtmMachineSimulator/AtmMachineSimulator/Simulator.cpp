@@ -1,8 +1,15 @@
 #include "Simulator.h"
 
+#define RED		"\033[1;31m"
+#define GREEN   "\033[1;32m"
+#define YELLOW  "\033[1;33m"
+#define MAGENTA "\033[1;35m"
+#define CYAN    "\033[1;36m"
+#define RESET   "\033[0m"
+
 Simulator::Simulator()
 {
-	std::cout << "[DEBUG] > Simulator initialized" << std::endl;
+	std::cout << MAGENTA << "[DEBUG] > Simulator initialized" << RESET << std::endl;
 }
 
 Simulator::~Simulator()
@@ -14,17 +21,17 @@ Simulator::~Simulator()
 void Simulator::withdraw(User& user, Bank& bank, ATM& atm)
 {
 	float amount;
-	std::cout << std::endl << "Enter the amount you wish to withdraw: ";
+	std::cout << std::endl << CYAN << "Enter the amount you wish to withdraw: " << RESET;
 	std::cin >> amount;
 	Transaction transaction;
 	if (transaction.authorized(amount,false,user,bank,atm))
 	{
 		transaction.withdraw(amount, user, atm);
-		std::cout << "Transaction authorized.";	
+		std::cout << GREEN << "Transaction authorized." << RESET;	
 	}
 	else
 	{
-		std::cout << "Transaction unauthorized.";
+		std::cout << RED << "Transaction unauthorized." << RESET;
 	}
 
 	std::cout << std::endl << std::endl << "Press ENTER to continue.";
@@ -36,20 +43,20 @@ void Simulator::withdraw(User& user, Bank& bank, ATM& atm)
 	Simulator::menu();
 }
 
-void Simulator::insert(User& user, Bank& bank, ATM& atm)
+void Simulator::deposit(User& user, Bank& bank, ATM& atm)
 {
 	float amount;
-	std::cout << std::endl << "Enter the amount you wish to insert: ";
+	std::cout << std::endl << CYAN << "Enter the amount you wish to deposit: " << RESET;
 	std::cin >> amount;
 	Transaction transaction;
 	if (transaction.authorized(amount,true, user, bank, atm))
 	{
 		transaction.deposit(amount, user, atm);
-		std::cout << "Transaction authorized.";
+		std::cout << GREEN << "Transaction authorized." << RESET;
 	}
 	else
 	{
-		std::cout << "Transaction unauthorized.";
+		std::cout << RED << "Transaction unauthorized." << RESET;
 	}
 
 	std::cout << std::endl << std::endl << "Press ENTER to continue.";
@@ -64,10 +71,10 @@ void Simulator::insert(User& user, Bank& bank, ATM& atm)
 void Simulator::transhistory(User& user)
 {
 	if (user.history.empty())
-		std::cout << "User history is empty." << std::endl;
+		std::cout << CYAN << "User history is empty." << RESET << std::endl;
 	else
 	{
-		std::cout << std::endl << "User history for " << user.name << ":\n";
+		std::cout << std::endl << CYAN << "User history for " << RESET << user.name << CYAN << ":\n" << RESET;
 		for (std::string& transaction : user.history) {
 			std::cout << "> " << transaction << std::endl;
 		}
@@ -106,7 +113,7 @@ void Simulator::start()
 
 void Simulator::init()
 {
-	std::cout << std::endl << "Presse ENTER to continue";
+	std::cout << std::endl << "Presse ENTER to continue" << std::endl;
 	std::cin.ignore();
 	system("cls");
 
@@ -117,11 +124,11 @@ void Simulator::init()
 
 void Simulator::info()
 {
-	std::cout << std::endl << "=======================";
-	std::cout << std::endl << " ATM Machine Simulator" << std::endl;
-	std::cout << "=======================" << std::endl;
+	std::cout << std::endl << CYAN << "=======================" << RESET;
+	std::cout << std::endl << YELLOW << " ATM Machine Simulator" << RESET << std::endl;
+	std::cout << CYAN << "=======================" << RESET << std::endl;
 
-	std::cout << std::endl << "-- User Information --" << std::endl;
+	std::cout << std::endl << CYAN << "-- User Information --" << RESET << std::endl;
 	std::cout << "User Name: " << user.name << std::endl;
 	std::cout << "User Bank: " << user.bank.name << std::endl;
 	std::cout << "User Balance: " << user.balance << std::endl;
@@ -132,11 +139,11 @@ void Simulator::info()
 	else
 		std::cout << "false" << std::endl;
 
-	std::cout << std::endl << "-- ATM Information --" << std::endl;
+	std::cout << std::endl << CYAN << "-- ATM Information --" << RESET << std::endl;
 	std::cout << "ATM Bank: " << atm.bank.name << std::endl;
 	std::cout << "ATM Balance: " << atm.balance << std::endl;
 
-	std::cout << std::endl << "-- Users Bank Information-- " << std::endl;
+	std::cout << std::endl << CYAN << "-- Users Bank Information-- " << RESET << std::endl;
 	std::cout << "Bank Name: " << user.bank.name << std::endl;
 	std::cout << "Bank Balance: " << user.bank.balance << std::endl;
 
@@ -146,11 +153,9 @@ void Simulator::menu()
 {
 	int choice = 0;
 
-	std::cout << std::endl << "================================" << std::endl;
-
-	std::cout << std::endl << "==================";
-	std::cout << std::endl << " Choose an option" << std::endl;
-	std::cout << "==================" << std::endl;
+	std::cout << std::endl << CYAN << "==================" << RESET;
+	std::cout << std::endl << YELLOW << " Choose an option" << RESET << std::endl;
+	std::cout << CYAN << "==================" << RESET << std::endl;
 
 	std::cout << std::endl << "[1] > Withdraw Money";
 	std::cout << std::endl << "[2] > Insert Money";
@@ -163,7 +168,7 @@ void Simulator::menu()
 	if (choice == 1)
 		withdraw(user, bank, atm);
 	else if (choice == 2)
-		insert(user, bank, atm);
+		deposit(user, bank, atm);
 	else if (choice == 3)
 		transhistory(user);
 	else if (choice == 4)
