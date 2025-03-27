@@ -21,16 +21,18 @@ bool Transaction::authorized(float amount, bool insert, User& user, Bank& bank, 
 	return false;
 }
 
-void Transaction::withdraw(float amount, User& user, Bank& bank, ATM& atm)
+void Transaction::withdraw(float amount, User& user, ATM& atm)
 {
-	bank.balance -= amount;
+	user.bank.balance -= amount;
 	atm.balance -= amount;
 	user.balance -= amount;
-	user.wallet += amount;
-
+	if (user.bank.name != atm.bank.name)
+		user.wallet += (amount - user.bank.atmFee);
+	else
+		user.wallet += amount;
 }
 
-void Transaction::insert(float amount, User& user, Bank& bank, ATM& atm)
+void Transaction::insert(float amount, User& user, ATM& atm)
 {
 	user.wallet -= amount;
 	user.balance += amount;
