@@ -27,16 +27,22 @@ void Transaction::withdraw(float amount, User& user, ATM& atm)
 	atm.balance -= amount;
 	user.balance -= amount;
 	if (user.bank.name != atm.bank.name)
+	{
 		user.wallet += (amount - user.bank.atmFee);
+		user.history.push_back("- " + std::to_string(user.bank.atmFee));
+	}
 	else
 		user.wallet += amount;
+
+	user.history.push_back("- " + std::to_string(amount));
 }
 
-void Transaction::insert(float amount, User& user, ATM& atm)
+void Transaction::deposit(float amount, User& user, ATM& atm)
 {
 	user.wallet -= amount;
 	user.balance += amount;
 	atm.balance += amount;
 	user.bank.balance += amount;
 
+	user.history.push_back("+ " + std::to_string(amount));
 }

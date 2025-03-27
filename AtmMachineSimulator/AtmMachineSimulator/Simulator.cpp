@@ -44,7 +44,7 @@ void Simulator::insert(User& user, Bank& bank, ATM& atm)
 	Transaction transaction;
 	if (transaction.authorized(amount,true, user, bank, atm))
 	{
-		transaction.insert(amount, user, atm);
+		transaction.deposit(amount, user, atm);
 		std::cout << "Transaction authorized.";
 	}
 	else
@@ -61,14 +61,36 @@ void Simulator::insert(User& user, Bank& bank, ATM& atm)
 	Simulator::menu();
 }
 
+void Simulator::transhistory(User& user)
+{
+	if (user.history.empty())
+		std::cout << "User history is empty." << std::endl;
+	else
+	{
+		std::cout << std::endl << "User history for " << user.name << ":\n";
+		for (std::string& transaction : user.history) {
+			std::cout << "> " << transaction << std::endl;
+		}
+	}
+	std::cout << std::endl << "Press ENTER to continue.";
+	std::cin.ignore();
+	std::cin.ignore();
+
+	system("cls");
+	Simulator::info();
+	Simulator::menu();
+}
+
 void Simulator::exit()
 {
-
+	system("cls");
+	//
 }
 
 void Simulator::start()
 {
 	bank.name = "Tatra banka";
+	bank.atmFee = 2.0f;
 
 	atm.bank = bank;
 	atm.balance = 10000.0f;
@@ -132,16 +154,19 @@ void Simulator::menu()
 
 	std::cout << std::endl << "[1] > Withdraw Money";
 	std::cout << std::endl << "[2] > Insert Money";
-	std::cout << std::endl << "[3] > Exit";
+	std::cout << std::endl << "[3] > View Transaction History";
+	std::cout << std::endl << "[4] > Exit";
 	std::cout << std::endl;
 
 	std::cin >> choice;
 	
 	if (choice == 1)
-		withdraw(user,bank,atm);
+		withdraw(user, bank, atm);
 	else if (choice == 2)
-		insert(user,bank,atm);
+		insert(user, bank, atm);
 	else if (choice == 3)
+		transhistory(user);
+	else if (choice == 4)
 		exit();
 	else
 	{
