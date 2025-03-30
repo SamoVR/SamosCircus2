@@ -46,3 +46,8 @@ void Transaction::deposit(float amount, User& user, ATM& atm)
 
 	user.history.push_back("\033[1;32m [+] " + std::to_string(amount) + "\033[0m");
 }
+
+void Transaction::transfer(float amount, User& sender, User& receiver)
+{
+
+}

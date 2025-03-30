@@ -67,6 +67,12 @@ void Simulator::deposit(User& user, Bank& bank, ATM& atm)
 	Simulator::info();
 	Simulator::menu();
 }
+void Simulator::transfer(User& sender, User& receiver)
+{
+	float amount;
+
+
+}
 
 void Simulator::transhistory(User& user)
 {
