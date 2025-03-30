@@ -12,6 +12,7 @@ public:
 	bool authorized(float amount,bool insert, User& user, Bank& bank, ATM& atm);
 	void withdraw(float amount, User& user, ATM& atm);
 	void deposit(float amount, User& user, ATM& atm);
+	void transfer(float amount, User& sender, User& receiver);
 
 private:
 
