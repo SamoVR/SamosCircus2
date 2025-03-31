@@ -51,3 +51,8 @@ void Transaction::transfer(float amount, User& sender, User& receiver)
 {
 
 }
+
+void Transaction::addMoney(float amount, User& user)
+{
+	user.balance += amount;
+}

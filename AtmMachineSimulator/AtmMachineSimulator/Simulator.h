@@ -21,8 +21,9 @@ private:
 	void init();
 	void withdraw(User& user, Bank& bank, ATM& atm);
 	void deposit(User& user, Bank& bank, ATM& atm);
-	void transfer(User& sender, User& receiver);
 	void transhistory(User& user);
+	void transfer(User& sender, User& receiver);
+	void test(User& user, Bank& bank, ATM& atm);
 	void exit();
 
 	Bank bank;

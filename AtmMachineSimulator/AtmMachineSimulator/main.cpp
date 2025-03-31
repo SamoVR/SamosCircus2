@@ -4,7 +4,6 @@
 int main()
 {
     std::cout << "Program started!\n\n";
-
     try 
     {
         Simulator simulator;
@@ -15,6 +14,5 @@ int main()
         std::cerr << "Error: " << e.what() << std::endl;
         return -1;
     }
-
     return 0;
 }

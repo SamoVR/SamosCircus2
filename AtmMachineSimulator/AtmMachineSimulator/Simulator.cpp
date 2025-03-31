@@ -17,7 +17,6 @@ Simulator::~Simulator()
 
 }
 
-
 void Simulator::withdraw(User& user, Bank& bank, ATM& atm)
 {
 	float amount;
@@ -34,13 +33,7 @@ void Simulator::withdraw(User& user, Bank& bank, ATM& atm)
 		std::cout << RED << "Transaction unauthorized." << RESET;
 	}
 
-	std::cout << std::endl << std::endl << "Press ENTER to continue.";
-	std::cin.ignore();
-	std::cin.ignore();
-
-	system("cls");
-	Simulator::info();
-	Simulator::menu();
+	Simulator::init();
 }
 
 void Simulator::deposit(User& user, Bank& bank, ATM& atm)
@@ -59,19 +52,7 @@ void Simulator::deposit(User& user, Bank& bank, ATM& atm)
 		std::cout << RED << "Transaction unauthorized." << RESET;
 	}
 
-	std::cout << std::endl << std::endl << "Press ENTER to continue.";
-	std::cin.ignore();
-	std::cin.ignore();
-
-	system("cls");
-	Simulator::info();
-	Simulator::menu();
-}
-void Simulator::transfer(User& sender, User& receiver)
-{
-	float amount;
-
-
+	Simulator::init();
 }
 
 void Simulator::transhistory(User& user)
@@ -85,13 +66,22 @@ void Simulator::transhistory(User& user)
 			std::cout << "> " << transaction << std::endl;
 		}
 	}
-	std::cout << std::endl << "Press ENTER to continue.";
-	std::cin.ignore();
-	std::cin.ignore();
 
-	system("cls");
-	Simulator::info();
-	Simulator::menu();
+	Simulator::init();
+}
+
+void Simulator::transfer(User& sender, User& receiver)
+{
+	float amount;
+
+
+}
+
+void Simulator::test(User& user, Bank& bank, ATM& atm)
+{
+	Transaction transaction;
+	transaction.addMoney(1000.0f, user);
+	Simulator::init();
 }
 
 void Simulator::exit()
@@ -112,6 +102,7 @@ void Simulator::start()
 	user.bank = bank;
 	user.balance = 2000.0f;
 	user.accountBlocked = false;
+	user.pinCode = 1234;
 
 	Simulator::init();
 
@@ -119,7 +110,8 @@ void Simulator::start()
 
 void Simulator::init()
 {
-	std::cout << std::endl << "Presse ENTER to continue" << std::endl;
+	std::cout << std::endl << "Presse ENTER to continue." << std::endl;
+	std::cin.ignore();
 	std::cin.ignore();
 	system("cls");
 
@@ -166,7 +158,7 @@ void Simulator::menu()
 	std::cout << std::endl << "[1] > Withdraw Money";
 	std::cout << std::endl << "[2] > Insert Money";
 	std::cout << std::endl << "[3] > View Transaction History";
-	std::cout << std::endl << "[4] > Exit";
+	std::cout << std::endl << "[6] > Exit";
 	std::cout << std::endl;
 
 	std::cin >> choice;
@@ -178,12 +170,12 @@ void Simulator::menu()
 	else if (choice == 3)
 		transhistory(user);
 	else if (choice == 4)
+		test(user,bank,atm);
+	else if (choice == 6)
 		exit();
 	else
 	{
-		system("cls");
-		Simulator::info();
-		Simulator::menu();
+		Simulator::init();
 
 	}
 
