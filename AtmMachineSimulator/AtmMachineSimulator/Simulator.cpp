@@ -70,11 +70,12 @@ void Simulator::transhistory(User& user)
 	Simulator::init();
 }
 
-void Simulator::transfer(User& sender, User& receiver)
+void Simulator::transfer(User& sender)
 {
+	User receiver;
 	float amount;
 
-
+	Simulator::init();
 }
 
 void Simulator::test(User& user, Bank& bank, ATM& atm)
@@ -158,6 +159,7 @@ void Simulator::menu()
 	std::cout << std::endl << "[1] > Withdraw Money";
 	std::cout << std::endl << "[2] > Insert Money";
 	std::cout << std::endl << "[3] > View Transaction History";
+	std::cout << std::endl << "[4] > Transfer Money";
 	std::cout << std::endl << "[6] > Exit";
 	std::cout << std::endl;
 
@@ -170,6 +172,8 @@ void Simulator::menu()
 	else if (choice == 3)
 		transhistory(user);
 	else if (choice == 4)
+		transfer(user);
+	else if (choice == 7)
 		test(user,bank,atm);
 	else if (choice == 6)
 		exit();

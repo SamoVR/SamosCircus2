@@ -22,7 +22,7 @@ private:
 	void withdraw(User& user, Bank& bank, ATM& atm);
 	void deposit(User& user, Bank& bank, ATM& atm);
 	void transhistory(User& user);
-	void transfer(User& sender, User& receiver);
+	void transfer(User& sender);
 	void test(User& user, Bank& bank, ATM& atm);
 	void exit();
 
