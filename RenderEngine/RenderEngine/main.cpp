@@ -91,6 +91,7 @@ bool cameraMovementEnabled = false;
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 glm::vec3 defaultRotationDirection = glm::vec3(0.5f, 1.0f, 0.0f);
 glm::vec3 rotationDirection = defaultRotationDirection;
+glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
 // Variables
 //float defaultRotationSpeed = 50.0f;
@@ -275,7 +276,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Cube with ImGui", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "RIFT Engine", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -493,6 +494,7 @@ int main() {
 
             ImGui::SliderFloat("Rotation Speed", &rotationSpeed, 0.0f, 2500.0f);
             ImGui::SliderFloat3("Rotation Direction", glm::value_ptr(rotationDirection), -5.0f, 5.0f);
+            ImGui::SliderFloat3("Position", glm::value_ptr(cubePosition),-10.0f,10.0f);
 
             ImGui::Separator();
 
@@ -689,7 +691,10 @@ int main() {
         glm::mat4 projection = glm::perspective(glm::radians(fov), aspect, 0.1f, 100.0f);
 
         // Cube transformation
-        glm::mat4 modelCube = glm::rotate(glm::mat4(1.0f), glm::radians(rotationAngle), glm::vec3(rotationDirection));
+        glm::mat4 modelCube = glm::translate(glm::mat4(1.0f), cubePosition);
+
+        modelCube = glm::rotate(modelCube, glm::radians(rotationAngle), glm::vec3(rotationDirection));
+
         glm::mat4 mvpCube = projection * view * modelCube;
 
         // Use shader program and set the MVP matrix for the cube
