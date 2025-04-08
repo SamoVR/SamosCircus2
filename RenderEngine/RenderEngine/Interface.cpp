@@ -79,21 +79,25 @@ void Interface::displayObjectProperties(Object& object) {
 
     ImGui::Text("Selected Object:");
 
+    positionSlider = object.position;
+    rotationSlider = object.rotation;
+    scaleSlider = object.scale;
+
     // Display position with sliders
     ImGui::Text("Position:");
-    if (ImGui::SliderFloat3("Position", glm::value_ptr(object.position), -10.0f, 10.0f)) {
-        object.setPosition(object.position);  // Apply changes to position
+    if (ImGui::InputFloat3("Position", glm::value_ptr(positionSlider))) {
+        object.setPosition(positionSlider);  // Apply changes to position
     }
 
     // Display rotation with sliders
     ImGui::Text("Rotation:");
-    if (ImGui::SliderFloat3("Rotation", glm::value_ptr(object.rotation), -180.0f, 180.0f)) {
-        object.setRotation(object.rotation);  // Apply changes to rotation
+    if (ImGui::SliderFloat3("Rotation", glm::value_ptr(rotationSlider), -180.0f, 180.0f)) {
+        object.setRotation(rotationSlider);  // Apply changes to rotation
     }
 
     // Display scale with sliders
     ImGui::Text("Scale:");
-    if (ImGui::SliderFloat3("Scale", glm::value_ptr(object.scale), 0.1f, 5.0f)) {
-        object.setScale(object.scale);  // Apply changes to scale
+    if (ImGui::SliderFloat3("Scale", glm::value_ptr(scaleSlider), 0.1f, 5.0f)) {
+        object.setScale(scaleSlider);  // Apply changes to scale
     }
 }

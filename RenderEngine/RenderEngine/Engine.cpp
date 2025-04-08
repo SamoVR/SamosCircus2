@@ -88,6 +88,20 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+void setAppIcon(GLFWwindow* window)
+{
+    GLFWimage icon;
+    int channels;
+    icon.pixels = stbi_load("assets/images/icon.png", &icon.width, &icon.height, &channels, 4);
+    if (icon.pixels) {
+        glfwSetWindowIcon(window, 1, &icon);
+        stbi_image_free(icon.pixels);
+    }
+    else {
+        std::cerr << "Failed to load window icon\n";
+    }
+}
+
 bool Engine::init()
 {
     if (!glfwInit()) {
@@ -120,6 +134,8 @@ bool Engine::init()
         return false;
     }
 
+    setAppIcon(window);
+
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
 
@@ -131,7 +147,6 @@ bool Engine::init()
     cube = new Object(createCubeVertices(), cubeTexture);
 
     scene.addObject(*cube);
-
 
     UI = new Interface(window,scene);
 
@@ -233,11 +248,9 @@ void Engine::render()
     shader->use();
     shader->setMat4("view", camera->getViewMatrix());
     shader->setMat4("projection", camera->getProjectionMatrix());
-
     cube->draw(*shader);
 
     UI->update();
-
 }
 
 void Engine::cleanup()
