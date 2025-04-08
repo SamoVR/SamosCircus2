@@ -8,7 +8,7 @@ public:
     Scene();
 
     void addObject(const Object& object);
-    const std::vector<Object>& getObjects() const;
+    std::vector<Object>& getObjects();  // Return non-const reference
 
 private:
     std::vector<Object> objects;

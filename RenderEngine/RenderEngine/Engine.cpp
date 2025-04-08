@@ -1,7 +1,7 @@
 #include "Engine.h"
 
 Engine::Engine()
-    : window(nullptr), width(1600), height(1000), windowTitle("RIFT Engine"), UI(nullptr)
+    : window(nullptr), width(1600), height(800), windowTitle("RIFT Engine"), UI(nullptr)
 {
 
 }
@@ -11,55 +11,68 @@ Engine::~Engine()
     cleanup();
 }
 
-std::vector<glm::vec3> createCubeVertices() {
+std::vector<Vertex> createCubeVertices() {
     return {
         // Front face
-        {-0.5f, -0.5f,  0.5f},
-        { 0.5f, -0.5f,  0.5f},
-        { 0.5f,  0.5f,  0.5f},
-        {-0.5f, -0.5f,  0.5f},
-        { 0.5f,  0.5f,  0.5f},
-        {-0.5f,  0.5f,  0.5f},
+        {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
+        {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f}},
+        {{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
+        {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
+        {{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
+        {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f}},
 
         // Back face
-        {-0.5f, -0.5f, -0.5f},
-        {-0.5f,  0.5f, -0.5f},
-        { 0.5f,  0.5f, -0.5f},
-        {-0.5f, -0.5f, -0.5f},
-        { 0.5f,  0.5f, -0.5f},
-        { 0.5f, -0.5f, -0.5f},
+        {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
+        {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
+        {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+        {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
+        {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}},
 
         // Left face
-        {-0.5f, -0.5f, -0.5f},
-        {-0.5f, -0.5f,  0.5f},
-        {-0.5f,  0.5f,  0.5f},
-        {-0.5f, -0.5f, -0.5f},
-        {-0.5f,  0.5f,  0.5f},
-        {-0.5f,  0.5f, -0.5f},
+        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+        {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f}},
+        {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
+        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+        {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
+        {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}},
 
         // Right face
-        {0.5f, -0.5f, -0.5f},
-        {0.5f,  0.5f, -0.5f},
-        {0.5f,  0.5f,  0.5f},
-        {0.5f, -0.5f, -0.5f},
-        {0.5f,  0.5f,  0.5f},
-        {0.5f, -0.5f,  0.5f},
+        {{ 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
+        {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
+        {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
+        {{ 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
+        {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
+        {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f}},
 
         // Top face
-        {-0.5f,  0.5f, -0.5f},
-        {-0.5f,  0.5f,  0.5f},
-        { 0.5f,  0.5f,  0.5f},
-        {-0.5f,  0.5f, -0.5f},
-        { 0.5f,  0.5f,  0.5f},
-        { 0.5f,  0.5f, -0.5f},
+        {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f}},
+        {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f}},
+        {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
+        {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f}},
+        {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
+        {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}},
 
         // Bottom face
-        {-0.5f, -0.5f, -0.5f},
-        { 0.5f, -0.5f, -0.5f},
-        { 0.5f, -0.5f,  0.5f},
-        {-0.5f, -0.5f, -0.5f},
-        { 0.5f, -0.5f,  0.5f},
-        {-0.5f, -0.5f,  0.5f}
+        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+        {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
+        {{ 0.5f, -0.5f,  0.5f}, {1.0f, 1.0f}},
+        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+        {{ 0.5f, -0.5f,  0.5f}, {1.0f, 1.0f}},
+        {{-0.5f, -0.5f,  0.5f}, {0.0f, 1.0f}},
+    };
+}
+
+std::vector<Vertex> createFullScreenQuadVertices() {
+    return {
+        // Positions           // Texture Coordinates
+        {{-1.0f, -1.0f,  0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  0.0f}, {1.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  0.0f}, {1.0f, 1.0f}},
+
+        {{-1.0f, -1.0f,  0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  0.0f}, {1.0f, 1.0f}},
+        {{-1.0f,  1.0f,  0.0f}, {0.0f, 1.0f}}
     };
 }
 
@@ -107,15 +120,61 @@ bool Engine::init()
         return false;
     }
 
-    shader = new Shader("vertex.glsl", "fragment.glsl");
-    camera = new Camera(width / (float)height);
-    cube = new Object(createCubeVertices());
-    UI = new Interface(window);
-
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
 
+    shader = new Shader("vertex.glsl", "fragment.glsl");
+    backgroundShader = new Shader("background_vertex.glsl", "background_fragment.glsl");
+    camera = new Camera(width / (float)height);
+
+    Texture* cubeTexture = new Texture("assets/textures/texture_08.png");
+    cube = new Object(createCubeVertices(), cubeTexture);
+
+    scene.addObject(*cube);
+
+
+    UI = new Interface(window,scene);
+
+    initFullScreenQuad();
+
     return true;
+}
+
+void Engine::initFullScreenQuad() {
+    std::vector<Vertex> quadVertices = createFullScreenQuadVertices();
+
+    // Create the VAO and VBO for the full-screen quad
+    glGenVertexArrays(1, &fullScreenQuadVAO);
+    glGenBuffers(1, &fullScreenQuadVBO);
+
+    glBindVertexArray(fullScreenQuadVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, fullScreenQuadVBO);
+    glBufferData(GL_ARRAY_BUFFER, quadVertices.size() * sizeof(Vertex), &quadVertices[0], GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Texture coordinate attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(glm::vec3)));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);  // Unbind VAO
+}
+
+void Engine::renderBackground() {
+    glDisable(GL_DEPTH_TEST);  // Disable depth testing to render background behind other objects
+
+    backgroundShader->use();  // Use the shader for the background gradient
+    backgroundShader->setMat4("view", glm::mat4(1.0f));  // Identity view matrix (no camera)
+    backgroundShader->setMat4("projection", glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));  // 2D orthographic projection
+
+    // Bind the full-screen quad VAO and draw it
+    glBindVertexArray(fullScreenQuadVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);  // Draw the quad with the gradient
+
+    glEnable(GL_DEPTH_TEST);  // Re-enable depth testing for 3D rendering
 }
 
 void Engine::run()
@@ -124,8 +183,11 @@ void Engine::run()
         return;
 
     while (!glfwWindowShouldClose(window)) {
+        float currentFrame = glfwGetTime();
+        float deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
-        update();
+        update(deltaTime);
         render();
 
         glfwSwapBuffers(window);
@@ -155,10 +217,9 @@ void Engine::processInput()
 
 }
 
-void Engine::update()
+void Engine::update(float deltaTime)
 {
     processInput();
-    UI->update();
 
 }
 
@@ -167,17 +228,20 @@ void Engine::render()
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    renderBackground();
+
     shader->use();
     shader->setMat4("view", camera->getViewMatrix());
     shader->setMat4("projection", camera->getProjectionMatrix());
 
     cube->draw(*shader);
+
+    UI->update();
+
 }
 
 void Engine::cleanup()
 {
     glfwDestroyWindow(window);
     glfwTerminate();
-
-    delete UI;
 }

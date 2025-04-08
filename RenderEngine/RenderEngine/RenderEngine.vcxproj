@@ -140,10 +140,12 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Interface.cpp" />
+    <ClCompile Include="libraries\stb\stb_vorbis.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -158,13 +160,37 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Interface.h" />
+    <ClInclude Include="libraries\stb\stb_connected_components.h" />
+    <ClInclude Include="libraries\stb\stb_c_lexer.h" />
+    <ClInclude Include="libraries\stb\stb_divide.h" />
+    <ClInclude Include="libraries\stb\stb_ds.h" />
+    <ClInclude Include="libraries\stb\stb_dxt.h" />
+    <ClInclude Include="libraries\stb\stb_easy_font.h" />
+    <ClInclude Include="libraries\stb\stb_herringbone_wang_tile.h" />
+    <ClInclude Include="libraries\stb\stb_hexwave.h" />
+    <ClInclude Include="libraries\stb\stb_image.h" />
+    <ClInclude Include="libraries\stb\stb_image_resize2.h" />
+    <ClInclude Include="libraries\stb\stb_image_write.h" />
+    <ClInclude Include="libraries\stb\stb_include.h" />
+    <ClInclude Include="libraries\stb\stb_leakcheck.h" />
+    <ClInclude Include="libraries\stb\stb_perlin.h" />
+    <ClInclude Include="libraries\stb\stb_rect_pack.h" />
+    <ClInclude Include="libraries\stb\stb_sprintf.h" />
+    <ClInclude Include="libraries\stb\stb_textedit.h" />
+    <ClInclude Include="libraries\stb\stb_tilemap_editor.h" />
+    <ClInclude Include="libraries\stb\stb_truetype.h" />
+    <ClInclude Include="libraries\stb\stb_voxel_render.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\fragment.glsl" />
-    <None Include="shaders\vertex.glsl" />
+    <None Include="background_fragment.glsl" />
+    <None Include="background_vertex.glsl" />
+    <None Include="fragment.glsl" />
+    <None Include="vertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

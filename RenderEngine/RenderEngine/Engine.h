@@ -32,19 +32,27 @@ public:
 
 private:
     Shader* shader;
+    Shader* backgroundShader;
     Camera* camera;
     GLFWwindow* window;
     Interface* UI;
+    Scene scene;
 
     int width;
     int height;
     std::string windowTitle;
 
+    float lastFrame;
+
+    GLuint fullScreenQuadVAO, fullScreenQuadVBO;
+
     static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
     bool init();
-    void update();
+    void update(float deltaTime);
     void render();
+    void initFullScreenQuad();
+    void renderBackground();
     void processInput();
     void cleanup();
 };

@@ -1,7 +1,8 @@
 #include "Object.h"
 
-Object::Object(const std::vector<glm::vec3>& vertices)
-    : vertexCount(vertices.size()) {
+Object::Object(const std::vector<Vertex>& vertices, Texture* texture)
+    : vertexCount(vertices.size()), texture(texture)
+{
     setup(vertices);
 }
 
@@ -10,31 +11,24 @@ Object::~Object() {
     glDeleteBuffers(1, &VBO);
 }
 
-void Object::setup(const std::vector<glm::vec3>& vertices) {
+void Object::setup(const std::vector<Vertex>& vertices) {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0); // layout (location = 0)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    // Position attribute
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+    // TexCoord attribute
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
 
     glBindVertexArray(0);
-}
-
-void Object::setPosition(const glm::vec3& pos) {
-    position = pos;
-}
-
-void Object::setScale(const glm::vec3& s) {
-    scale = s;
-}
-
-void Object::setRotation(const glm::vec3& axis) {
-    rotation = axis;
 }
 
 glm::mat4 Object::getModelMatrix() const {
@@ -47,9 +41,27 @@ glm::mat4 Object::getModelMatrix() const {
 }
 
 void Object::draw(Shader& shader) const {
+    // Ensure the updated model matrix is passed to the shader
     shader.setMat4("model", getModelMatrix());
+    if (texture) {
+        texture->bind();
+        shader.setInt("tex", 0);
+    }
+
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCount));
     glBindVertexArray(0);
 }
 
+
+void Object::setPosition(const glm::vec3& pos) {
+    position = pos;
+}
+
+void Object::setScale(const glm::vec3& s) {
+    scale = s;
+}
+
+void Object::setRotation(const glm::vec3& axis) {
+    rotation = axis;
+}
