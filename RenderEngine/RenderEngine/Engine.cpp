@@ -1,7 +1,7 @@
 #include "Engine.h"
 
 Engine::Engine()
-    : window(nullptr), width(1600), height(1000), windowTitle("RIFT Engine")
+    : window(nullptr), width(1600), height(1000), windowTitle("RIFT Engine"), UI(nullptr)
 {
 
 }
@@ -110,6 +110,7 @@ bool Engine::init()
     shader = new Shader("vertex.glsl", "fragment.glsl");
     camera = new Camera(width / (float)height);
     cube = new Object(createCubeVertices());
+    UI = new Interface(window);
 
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
@@ -123,7 +124,6 @@ void Engine::run()
         return;
 
     while (!glfwWindowShouldClose(window)) {
-        processInput();
 
         update();
         render();
@@ -157,7 +157,9 @@ void Engine::processInput()
 
 void Engine::update()
 {
-    // Game logic, timing, animation etc
+    processInput();
+    UI->update();
+
 }
 
 void Engine::render()
@@ -176,4 +178,6 @@ void Engine::cleanup()
 {
     glfwDestroyWindow(window);
     glfwTerminate();
+
+    delete UI;
 }

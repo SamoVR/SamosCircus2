@@ -6,6 +6,11 @@
 #include "Object.h"
 #include "Scene.h"
 #include "Shader.h"
+#include "Interface.h"
+
+#include <imgui.h>
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -29,6 +34,8 @@ private:
     Shader* shader;
     Camera* camera;
     GLFWwindow* window;
+    Interface* UI;
+
     int width;
     int height;
     std::string windowTitle;
