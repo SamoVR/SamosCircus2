@@ -34,6 +34,14 @@ void Engine::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+
+    // Update camera aspect ratio
+    Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    if (engine && engine->camera) {
+        engine->width = width;
+        engine->height = height;
+        engine->camera->setAspectRatio(static_cast<float>(width) / height);
+    }
 }
 
 void setAppIcon(GLFWwindow* window)
@@ -190,19 +198,19 @@ void Engine::render()
 {
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    
     renderBackground();
 
     shader->use();
     shader->setMat4("view", camera->getViewMatrix());
     shader->setMat4("projection", camera->getProjectionMatrix());
-    
-    UI->update();
 
     for (auto* obj : scene.getObjects()) {
         obj->draw(*shader);
     }
     
+    UI->update();
+
 }
 
 void Engine::cleanup()

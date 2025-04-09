@@ -28,20 +28,22 @@ public:
     Engine();
     ~Engine();
 
+    Camera* camera;
     Object* cube;
     Scene scene;
+
+    int width;
+    int height;
 
     void run();
 
 private:
     Shader* shader;
     Shader* backgroundShader;
-    Camera* camera;
+
     GLFWwindow* window;
     Interface* UI;
 
-    int width;
-    int height;
     std::string windowTitle;
 
     float lastFrame;

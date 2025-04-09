@@ -32,6 +32,8 @@ private:
     Scene& scene;  // Reference to the current scene
     Texture* defaultTexture;
 
+    bool showShapePopup = false;
     void displayObjectProperties(Object* object, int index);
     void displayObjectList();
+    void showShapeSelectionPopup();
 };
