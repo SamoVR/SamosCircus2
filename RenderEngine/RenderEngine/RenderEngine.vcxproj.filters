@@ -25,6 +25,9 @@
     <Filter Include="dependancies\stb">
       <UniqueIdentifier>{c4f0b581-39f0-494a-a2b1-9a4ea40abf35}</UniqueIdentifier>
     </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{222fc0a7-af87-4260-8412-8f18a6bfd38c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -74,6 +77,9 @@
     </ClCompile>
     <ClCompile Include="libraries\stb\stb_vorbis.c">
       <Filter>dependancies\stb</Filter>
+    </ClCompile>
+    <ClCompile Include="Geometry.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -188,6 +194,9 @@
     <ClInclude Include="libraries\stb\stb_voxel_render.h">
       <Filter>dependancies\stb</Filter>
     </ClInclude>
+    <ClInclude Include="Geometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.glsl">
@@ -202,5 +211,50 @@
     <None Include="background_fragment.glsl">
       <Filter>shaders</Filter>
     </None>
+    <None Include="glew32.dll">
+      <Filter>dependancies</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="glew32.lib">
+      <Filter>dependancies</Filter>
+    </Library>
+    <Library Include="glfw3.lib">
+      <Filter>dependancies</Filter>
+    </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="assets\fonts\Cousine-Regular.ttf">
+      <Filter>assets</Filter>
+    </Font>
+    <Font Include="assets\fonts\DroidSans.ttf">
+      <Filter>assets</Filter>
+    </Font>
+    <Font Include="assets\fonts\Karla-Regular.ttf">
+      <Filter>assets</Filter>
+    </Font>
+    <Font Include="assets\fonts\ProggyClean.ttf">
+      <Filter>assets</Filter>
+    </Font>
+    <Font Include="assets\fonts\ProggyTiny.ttf">
+      <Filter>assets</Filter>
+    </Font>
+    <Font Include="assets\fonts\ProggyVector-Regular.ttf">
+      <Filter>assets</Filter>
+    </Font>
+    <Font Include="assets\fonts\Roboto-Medium.ttf">
+      <Filter>assets</Filter>
+    </Font>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\images\icon.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\textures\texture_01.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\textures\texture_08.png">
+      <Filter>assets</Filter>
+    </Image>
   </ItemGroup>
 </Project>
