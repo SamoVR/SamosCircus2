@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
@@ -28,32 +20,14 @@
     <Filter Include="assets">
       <UniqueIdentifier>{222fc0a7-af87-4260-8412-8f18a6bfd38c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{139f86af-bf60-4cd0-9425-6c50bac7afd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts">
+      <UniqueIdentifier>{18d10929-ebcb-4fe6-84eb-6d54342b7acf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Interface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="imgui\imgui.cpp">
       <Filter>dependancies\imgui</Filter>
     </ClCompile>
@@ -78,32 +52,35 @@
     <ClCompile Include="libraries\stb\stb_vorbis.c">
       <Filter>dependancies\stb</Filter>
     </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="Interface.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
     <ClCompile Include="Geometry.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>scripts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Engine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Interface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Vertex.h">
       <Filter>shaders</Filter>
     </ClInclude>
@@ -194,11 +171,32 @@
     <ClInclude Include="libraries\stb\stb_voxel_render.h">
       <Filter>dependancies\stb</Filter>
     </ClInclude>
+    <ClInclude Include="Engine.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>scripts</Filter>
+    </ClInclude>
     <ClInclude Include="Geometry.h">
-      <Filter>Header Files</Filter>
+      <Filter>scripts</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
+      <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
