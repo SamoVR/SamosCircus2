@@ -7,9 +7,11 @@ class Scene {
 public:
     Scene();
 
-    void addObject(const Object& object);
-    std::vector<Object>& getObjects();  // Return non-const reference
+    void addObject(Object* object);  // store pointer
+    void removeObject(size_t index);
+    std::vector<Object*>& getObjects();  // return list of pointers
 
 private:
-    std::vector<Object> objects;
+    std::vector<Object*> objects;
 };
+

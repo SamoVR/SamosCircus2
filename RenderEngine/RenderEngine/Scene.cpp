@@ -3,10 +3,17 @@
 Scene::Scene() {
 }
 
-void Scene::addObject(const Object& object) {
+void Scene::addObject(Object* object) {
     objects.push_back(object);
 }
 
-std::vector<Object>& Scene::getObjects() {
-    return objects;  // Non-const reference to allow modifications
+void Scene::removeObject(size_t index) {
+    if (index < objects.size()) {
+        delete objects[index]; // Optional: if Scene owns memory
+        objects.erase(objects.begin() + index);
+    }
+}
+
+std::vector<Object*>& Scene::getObjects() {
+    return objects;
 }

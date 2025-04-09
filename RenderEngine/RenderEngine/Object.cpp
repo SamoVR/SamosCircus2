@@ -1,7 +1,7 @@
 #include "Object.h"
 
-Object::Object(const std::vector<Vertex>& vertices, Texture* texture)
-    : vertexCount(vertices.size()), texture(texture)
+Object::Object(std::string name, const std::vector<Vertex>& vertices, Texture* texture)
+    : name(name), vertexCount(vertices.size()), texture(texture)
 {
     setup(vertices);
 }

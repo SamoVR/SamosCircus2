@@ -7,6 +7,7 @@
 #include "Scene.h"
 #include "Shader.h"
 #include "Interface.h"
+#include "Geometry.h"
 
 #include "stb_image.h"
 #include <imgui.h>
@@ -28,6 +29,7 @@ public:
     ~Engine();
 
     Object* cube;
+    Scene scene;
 
     void run();
 
@@ -37,7 +39,6 @@ private:
     Camera* camera;
     GLFWwindow* window;
     Interface* UI;
-    Scene scene;
 
     int width;
     int height;

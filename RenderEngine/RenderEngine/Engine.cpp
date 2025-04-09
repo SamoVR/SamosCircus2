@@ -11,58 +11,6 @@ Engine::~Engine()
     cleanup();
 }
 
-std::vector<Vertex> createCubeVertices() {
-    return {
-        // Front face
-        {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f}},
-        {{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
-        {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
-        {{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
-        {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f}},
-
-        // Back face
-        {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
-        {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
-        {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
-        {{-0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
-        {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}},
-
-        // Left face
-        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
-        {{-0.5f, -0.5f,  0.5f}, {1.0f, 0.0f}},
-        {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
-        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
-        {{-0.5f,  0.5f,  0.5f}, {1.0f, 1.0f}},
-        {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}},
-
-        // Right face
-        {{ 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
-        {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
-        {{ 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
-        {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
-        {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f}},
-
-        // Top face
-        {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f}},
-        {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f}},
-        {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
-        {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f}},
-        {{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f}},
-        {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f}},
-
-        // Bottom face
-        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
-        {{ 0.5f, -0.5f,  0.5f}, {1.0f, 1.0f}},
-        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f,  0.5f}, {1.0f, 1.0f}},
-        {{-0.5f, -0.5f,  0.5f}, {0.0f, 1.0f}},
-    };
-}
-
 std::vector<Vertex> createFullScreenQuadVertices() {
     return {
         // Positions           // Texture Coordinates
@@ -144,9 +92,9 @@ bool Engine::init()
     camera = new Camera(width / (float)height);
 
     Texture* cubeTexture = new Texture("assets/textures/texture_08.png");
-    cube = new Object(createCubeVertices(), cubeTexture);
+    cube = new Object("cube", createCubeVertices(), cubeTexture);
 
-    scene.addObject(*cube);
+    scene.addObject(cube);
 
     UI = new Interface(window,scene);
 
@@ -249,7 +197,7 @@ void Engine::render()
     shader->setMat4("view", camera->getViewMatrix());
     shader->setMat4("projection", camera->getProjectionMatrix());
     cube->draw(*shader);
-
+    //cube->scale.x = cube->scale.x + 0.001f;
     UI->update();
 }
 

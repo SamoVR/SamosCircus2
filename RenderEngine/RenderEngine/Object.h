@@ -14,9 +14,10 @@
 
 class Object {
 public:
-    Object(const std::vector<Vertex>& vertices, Texture* texture = nullptr);
+    Object(std::string name, const std::vector<Vertex>& vertices, Texture* texture = nullptr);
     ~Object();
 
+    std::string name = "Obj";
     glm::vec3 position = { 0.0f, 0.0f, 0.0f };
     glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
     glm::vec3 scale = { 1.0f, 1.0f, 1.0f };

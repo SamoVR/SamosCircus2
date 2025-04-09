@@ -51,8 +51,14 @@ void Interface::update() {
 }
 
 void Interface::createUI() {
-    // Create a window to display the UI
     ImGui::Begin("Scene Object Controls");
+
+    // Add Object Button
+    if (ImGui::Button("Add Object")) {
+        scene.addObject(new Object("PlaceHolderObject", createCubeVertices(), nullptr));  // Add a new default object to the scene
+    }
+
+    ImGui::Separator();
 
     displayObjectList();  // Display all objects in the scene
 
@@ -60,44 +66,41 @@ void Interface::createUI() {
 }
 
 void Interface::displayObjectList() {
-    // Display the list of objects in the scene
     ImGui::Text("Objects in Scene:");
 
-    for (size_t i = 0; i < scene.getObjects().size(); ++i) {
-        Object& object = scene.getObjects()[i];
+    // Track index to remove after the loop
+    int indexToRemove = -1;
 
-        // Create a collapsing header for each object
-        if (ImGui::CollapsingHeader(("Object " + std::to_string(i)).c_str())) {
-            // Display object properties inside the header's collapsed section
-            displayObjectProperties(object);
+    for (size_t i = 0; i < scene.getObjects().size(); ++i) {
+        Object* object = scene.getObjects()[i];
+        std::string headerLabel = "Object " + std::to_string(i);
+
+        if (ImGui::CollapsingHeader(headerLabel.c_str())) {
+            displayObjectProperties(object, static_cast<int>(i));  // <-- Pass index
+            ImGui::PushID(static_cast<int>(i));
+            if (ImGui::Button("Remove Object")) {
+                indexToRemove = static_cast<int>(i);
+            }
+            ImGui::PopID();
         }
     }
-}
 
-void Interface::displayObjectProperties(Object& object) {
-    // Display the properties of the selected object
 
-    ImGui::Text("Selected Object:");
-
-    positionSlider = object.position;
-    rotationSlider = object.rotation;
-    scaleSlider = object.scale;
-
-    // Display position with sliders
-    ImGui::Text("Position:");
-    if (ImGui::InputFloat3("Position", glm::value_ptr(positionSlider))) {
-        object.setPosition(positionSlider);  // Apply changes to position
-    }
-
-    // Display rotation with sliders
-    ImGui::Text("Rotation:");
-    if (ImGui::SliderFloat3("Rotation", glm::value_ptr(rotationSlider), -180.0f, 180.0f)) {
-        object.setRotation(rotationSlider);  // Apply changes to rotation
-    }
-
-    // Display scale with sliders
-    ImGui::Text("Scale:");
-    if (ImGui::SliderFloat3("Scale", glm::value_ptr(scaleSlider), 0.1f, 5.0f)) {
-        object.setScale(scaleSlider);  // Apply changes to scale
+    // Remove object *after* the loop to avoid iterator invalidation
+    if (indexToRemove >= 0) {
+        scene.removeObject(static_cast<size_t>(indexToRemove));
     }
 }
+
+void Interface::displayObjectProperties(Object* object, int index) {
+    ImGui::PushID(index);  // Ensure uniqueness of ImGui widgets
+
+    ImGui::InputFloat3("Position", glm::value_ptr(object->position));
+    
+    ImGui::SliderFloat3("Rotation", glm::value_ptr(object->rotation), -180.0f, 180.0f);
+
+    ImGui::SliderFloat3("Scale", glm::value_ptr(object->scale), 0.1f, 5.0f);
+
+    ImGui::PopID();
+}
+

@@ -2,11 +2,14 @@
 
 #include "Scene.h"
 #include "Object.h"
+#include "Vertex.h"
+#include "Geometry.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include <vector>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <iostream>
@@ -27,10 +30,6 @@ private:
     ImFont* headingFont;
     Scene& scene;  // Reference to the current scene
 
-    glm::vec3 positionSlider = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 rotationSlider = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 scaleSlider = glm::vec3(1.0f,1.0f,1.0f);
-
-    void displayObjectProperties(Object& object);
+    void displayObjectProperties(Object* object, int index);
     void displayObjectList();
 };
