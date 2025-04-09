@@ -3,17 +3,21 @@
 out vec4 FragColor;
 
 in vec2 TexCoord;
-in float vPosY;  // Receiving the Y position from the vertex shader
+in float vPosY;
 
 uniform sampler2D texture1;
+uniform vec3 color;
+uniform int hasTexture;  // New uniform
 
 void main() {
-    vec4 texColor = texture(texture1, TexCoord);
+    if (hasTexture == 1) {
+        vec4 texColor = texture(texture1, TexCoord);
 
-    // Simple vertical gradient mix (adjust as needed)
-    float gradient = clamp((vPosY + 2.0) / 4.0, 0.0, 1.0);  // You can tweak this formula
-    vec3 bgGradient = mix(vec3(0.05, 0.05, 0.1), vec3(0.1, 0.1, 0.3), gradient);
+        float gradient = clamp((vPosY + 2.0) / 4.0, 0.0, 1.0);
+        vec3 bgGradient = mix(vec3(0.05, 0.05, 0.1), vec3(0.1, 0.1, 0.3), gradient);
 
-    // Mix the background gradient with the texture color
-    FragColor = mix(vec4(bgGradient, 1.0), texColor, texColor.a);
+        FragColor = mix(vec4(bgGradient, 1.0), texColor, texColor.a);
+    } else {
+        FragColor = vec4(color, 1.0);  // Use color when no texture
+    }
 }

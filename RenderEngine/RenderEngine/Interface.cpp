@@ -32,14 +32,14 @@ void Interface::update() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    createUI();
-    
+    coreUI();
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void Interface::createUI() {
-    ImGui::Begin("Scene Object Controls");
+void Interface::coreUI() {
+    ImGui::Begin("Scene Controls");
 
     // Add Object Button with Shape Selection Popup
     if (ImGui::Button("Add Object")) {
@@ -49,6 +49,19 @@ void Interface::createUI() {
 
     // Call the shape selection popup function
     showShapeSelectionPopup();
+
+    ImGui::SameLine();
+
+    // Save and Load buttons
+    if (ImGui::Button("Save Scene")) {
+        scene.saveToFile("scene.json");  // Save the scene to a file (use a file path of your choice)
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Load Scene")) {
+        scene.loadFromFile("scene.json");  // Load the scene from a file (use a file path of your choice)
+    }
 
     ImGui::Separator();
     displayObjectList();  // Display all objects in the scene
@@ -90,21 +103,26 @@ void Interface::showShapeSelectionPopup() {
 }
 
 void Interface::displayObjectList() {
-    ImGui::Text("Objects in Scene:");
+    ImGui::PushFont(headingFont);
+    ImGui::Text("Objects:");
+    ImGui::PopFont();
 
     int indexToRemove = -1;
     for (size_t i = 0; i < scene.getObjects().size(); ++i) {
         Object* object = scene.getObjects()[i];
         std::string headerLabel = object->name;
 
+        ImGui::PushID(static_cast<int>(i));
+
         if (ImGui::CollapsingHeader(headerLabel.c_str())) {
             displayObjectProperties(object, static_cast<int>(i));  // Display object properties
-            ImGui::PushID(static_cast<int>(i));
+            ImGui::Separator();
             if (ImGui::Button("Remove Object")) {
                 indexToRemove = static_cast<int>(i);
             }
-            ImGui::PopID();
         }
+            ImGui::PopID();
+        
     }
 
     if (indexToRemove >= 0) {
@@ -115,10 +133,75 @@ void Interface::displayObjectList() {
 void Interface::displayObjectProperties(Object* object, int index) {
     ImGui::PushID(index);
 
+    ImGui::PushFont(headingFont);
+    ImGui::Text("General");
+    ImGui::PopFont();
+
+    static char tempName[128] = {};
+    static bool nameInitialized = false;
+    if (!nameInitialized) {
+        strncpy_s(tempName, object->name.c_str(), sizeof(tempName) - 1);
+        nameInitialized = true;
+    }
+
+    ImGui::InputText("Object Name##", tempName, IM_ARRAYSIZE(tempName));
+
+    if (ImGui::Button("Apply##"))
+        object->name = std::string(tempName);
+
+    ImGui::Separator();
+
+    ImGui::PushFont(headingFont);
+    ImGui::Text("Transform");
+    ImGui::PopFont();
+
+    // Display Position, Rotation, and Scale
     ImGui::DragFloat3("Position", glm::value_ptr(object->position), 0.1f);
     ImGui::DragFloat3("Rotation", glm::value_ptr(object->rotation), 1.0f, -180.0f, 180.0f);
     ImGui::DragFloat3("Scale", glm::value_ptr(object->scale), 0.01f, 0.1f, 10.0f);
 
+    ImGui::Separator();
+
+    ImGui::PushFont(headingFont);
+    ImGui::Text("Texture/Color");
+    ImGui::PopFont();
+
+    // Show current texture or message
+    if (object->texture) {
+        ImGui::Text("Current Texture: %s", object->texture->getFilePath().c_str());
+    }
+    else {
+        ImGui::Text("No texture applied");
+    }
+
+    // Add button to choose a new texture (open file dialog)
+    if (ImGui::Button("Choose Texture")) {
+        std::string newTexturePath = openTextureFileDialog();  // Implement this method as before
+        if (!newTexturePath.empty()) {
+            object->setTexture(new Texture(newTexturePath));
+        }
+    }
+
+    ImGui::SameLine();
+
+    // Add button to remove texture and apply color
+    if (ImGui::Button("Remove Texture")) {
+        object->removeTexture();  // Remove texture
+        object->setColor(glm::vec3(1.0f, 1.0f, 1.0f));  // Example: Apply white color if texture is removed
+    }
+
+    // Allow user to change object color (if texture is removed)
+    static glm::vec3 color(1.0f, 1.0f, 1.0f);  // Default color is white
+    if (!object->texture) {  // Only show color controls if there's no texture
+        ImGui::ColorEdit3("Object Color", &color[0]);
+        if (ImGui::Button("Apply Color")) {
+            object->setColor(color);  // Apply color if no texture
+        }
+    }
 
     ImGui::PopID();
+}
+
+std::string Interface::openTextureFileDialog() {
+    return "assets/textures/texture_08.png";
 }

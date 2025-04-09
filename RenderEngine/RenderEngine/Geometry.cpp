@@ -125,3 +125,16 @@ std::vector<Vertex> createSphereVertices(float radius, int stacks, int slices) {
 
     return sphere;
 }
+
+std::vector<Vertex> createFullScreenQuadVertices() {
+    return {
+        // Positions           // Texture Coordinates
+        {{-1.0f, -1.0f,  0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f,  0.0f}, {1.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  0.0f}, {1.0f, 1.0f}},
+
+        {{-1.0f, -1.0f,  0.0f}, {0.0f, 0.0f}},
+        {{ 1.0f,  1.0f,  0.0f}, {1.0f, 1.0f}},
+        {{-1.0f,  1.0f,  0.0f}, {0.0f, 1.0f}}
+    };
+}

@@ -7,6 +7,7 @@
 #include "Texture.h"
 
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
@@ -17,13 +18,14 @@
 #include <sstream>
 #include <string>
 #include <glm/gtc/type_ptr.hpp>
+#include <filesystem>
 
 class Interface {
 public:
     Interface(GLFWwindow* window, Scene& scene);
     ~Interface();
 
-    void createUI();  // Create UI elements for the objects
+    void coreUI();  // Create UI elements for the objects
     void update();    // Update the ImGui frame and render it
 
 private:
@@ -36,4 +38,5 @@ private:
     void displayObjectProperties(Object* object, int index);
     void displayObjectList();
     void showShapeSelectionPopup();
+    std::string openTextureFileDialog();
 };

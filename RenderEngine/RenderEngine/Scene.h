@@ -2,6 +2,8 @@
 
 #include "Object.h"
 #include <vector>
+#include <nlohmann/json.hpp>
+#include <fstream>
 
 class Scene {
 public:
@@ -13,6 +15,9 @@ public:
     void addInternalObject(Object* object);
     const std::vector<Object*>& getInternalObjects() const;
     
+    void saveToFile(const std::string& filename);
+    void loadFromFile(const std::string& filename);
+    std::vector<Vertex> fromJSONToVertices(const nlohmann::json& jsonVertices);
 
 private:
     std::vector<Object*> objects;

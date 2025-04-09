@@ -11,20 +11,6 @@ Engine::~Engine()
     cleanup();
 }
 
-std::vector<Vertex> createFullScreenQuadVertices() {
-    return {
-        // Positions           // Texture Coordinates
-        {{-1.0f, -1.0f,  0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f,  0.0f}, {1.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  0.0f}, {1.0f, 1.0f}},
-
-        {{-1.0f, -1.0f,  0.0f}, {0.0f, 0.0f}},
-        {{ 1.0f,  1.0f,  0.0f}, {1.0f, 1.0f}},
-        {{-1.0f,  1.0f,  0.0f}, {0.0f, 1.0f}}
-    };
-}
-
-
 void Engine::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     // Get the engine instance back from the window's user pointer
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
@@ -175,8 +161,8 @@ bool Engine::init()
     Texture* cubeTexture = new Texture("assets/textures/texture_08.png");
     cube = new Object("Starting Cube", createCubeVertices(), cubeTexture);
     scene.addObject(cube);
-    Texture* dummyTexture = new Texture("assets/textures/texture_01.png"); // or reuse existing
-    targetVisualizer = new Object("target_marker", createCubeVertices(), dummyTexture);
+
+    targetVisualizer = new Object("target_marker", createCubeVertices(), nullptr);
     targetVisualizer->setScale(glm::vec3(0.1f)); // Make it small
     scene.addInternalObject(targetVisualizer);
 
@@ -228,7 +214,10 @@ void Engine::render()
     shader->setMat4("projection", camera->getProjectionMatrix());
 
     for (auto* obj : scene.getObjects()) {
-        obj->draw(*shader);
+        // Check if the object has a texture
+        if (!obj->texture) 
+            shader->setVec3("color", obj->color);
+            obj->draw(*shader,*camera);
     }
 
     for (auto* obj : scene.getInternalObjects()) {
@@ -236,7 +225,11 @@ void Engine::render()
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        obj->draw(*shader);
+        // Same handling for internal objects (checking texture or color)
+        if (!obj->texture)
+            shader->setVec3("color", obj->color);
+            
+        obj->draw(*shader, *camera);  // Use the color instead
 
         glDisable(GL_BLEND);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

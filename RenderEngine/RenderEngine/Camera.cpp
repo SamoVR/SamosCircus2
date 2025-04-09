@@ -1,9 +1,11 @@
 #include "Camera.h"
 
 Camera::Camera(float aspectRatio)
-    : target(0.0f), distance(5.0f), yaw(0.0f), pitch(0.0f),
+    : position(0.0f, 0.0f, 5.0f),  // Set initial position (can be adjusted later)
+    target(0.0f), distance(5.0f), yaw(0.0f), pitch(0.0f),
     zoomSpeed(1.0f), rotateSpeed(0.3f), panSpeed(0.005f),
     fov(glm::radians(45.0f)), aspect(aspectRatio), nearPlane(0.1f), farPlane(100.0f) {
+
 }
 
 void Camera::handleMouseInput(float deltaX, float deltaY, bool rotating, bool panning) {
