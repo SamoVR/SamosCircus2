@@ -2,17 +2,25 @@
 
 Camera::Camera(float aspectRatio)
     : target(0.0f), distance(5.0f), yaw(0.0f), pitch(0.0f),
-    zoomSpeed(1.0f), rotateSpeed(0.3f),
+    zoomSpeed(1.0f), rotateSpeed(0.3f), panSpeed(0.005f),
     fov(glm::radians(45.0f)), aspect(aspectRatio), nearPlane(0.1f), farPlane(100.0f) {
 }
 
-void Camera::handleMouseInput(float deltaX, float deltaY, bool rotating) {
+void Camera::handleMouseInput(float deltaX, float deltaY, bool rotating, bool panning) {
     if (rotating) {
         yaw += deltaX * rotateSpeed;
         pitch += deltaY * rotateSpeed;
-        pitch = glm::clamp(pitch, -89.0f, 89.0f); // prevent flip
+        pitch = glm::clamp(pitch, -89.0f, 89.0f);
+    }
+
+    if (panning) {
+        glm::vec3 right = glm::normalize(glm::cross(getPosition() - target, glm::vec3(0.0f, 1.0f, 0.0f)));
+        glm::vec3 up = glm::normalize(glm::cross(right, getPosition() - target));
+        target -= right * deltaX * panSpeed;
+        target += up * deltaY * panSpeed;
     }
 }
+
 
 void Camera::handleScrollInput(float yOffset) {
     distance -= yOffset * zoomSpeed;

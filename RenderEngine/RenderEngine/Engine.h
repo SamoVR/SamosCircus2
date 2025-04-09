@@ -40,6 +40,7 @@ public:
 private:
     Shader* shader;
     Shader* backgroundShader;
+    Object* targetVisualizer;
 
     GLFWwindow* window;
     Interface* UI;

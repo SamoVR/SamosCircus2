@@ -40,7 +40,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     if (engine && engine->camera) {
         engine->width = width;
         engine->height = height;
-        engine->camera->setAspectRatio(static_cast<float>(width) / height);
+        //engine->camera->setAspectRatio(static_cast<float>(width) / height);
     }
 }
 
@@ -55,6 +55,79 @@ void setAppIcon(GLFWwindow* window)
     }
     else {
         std::cerr << "Failed to load window icon\n";
+    }
+}
+
+void Engine::initFullScreenQuad() {
+    std::vector<Vertex> quadVertices = createFullScreenQuadVertices();
+
+    // Create the VAO and VBO for the full-screen quad
+    glGenVertexArrays(1, &fullScreenQuadVAO);
+    glGenBuffers(1, &fullScreenQuadVBO);
+
+    glBindVertexArray(fullScreenQuadVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, fullScreenQuadVBO);
+    glBufferData(GL_ARRAY_BUFFER, quadVertices.size() * sizeof(Vertex), &quadVertices[0], GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Texture coordinate attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(glm::vec3)));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);  // Unbind VAO
+}
+
+void Engine::renderBackground() {
+    glDisable(GL_DEPTH_TEST);  // Disable depth testing to render background behind other objects
+
+    backgroundShader->use();  // Use the shader for the background gradient
+    backgroundShader->setMat4("view", glm::mat4(1.0f));  // Identity view matrix (no camera)
+    backgroundShader->setMat4("projection", glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));  // 2D orthographic projection
+
+    // Bind the full-screen quad VAO and draw it
+    glBindVertexArray(fullScreenQuadVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);  // Draw the quad with the gradient
+
+    glEnable(GL_DEPTH_TEST);  // Re-enable depth testing for 3D rendering
+}
+
+void Engine::processInput()
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+
+        static double lastX = xpos, lastY = ypos;
+        float deltaX = xpos - lastX;
+        float deltaY = ypos - lastY;
+        camera->handleMouseInput(deltaX, -deltaY, true, false); // Invert Y if needed
+        lastX = xpos;
+        lastY = ypos;
+    }
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+
+        static double lastX = xpos, lastY = ypos;
+        float deltaX = xpos - lastX;
+        float deltaY = ypos - lastY;
+
+        bool rotating = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+        bool panning = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+
+        camera->handleMouseInput(deltaX, -deltaY, rotating, panning);
+
+        lastX = xpos;
+        lastY = ypos;
     }
 }
 
@@ -100,52 +173,18 @@ bool Engine::init()
     camera = new Camera(width / (float)height);
 
     Texture* cubeTexture = new Texture("assets/textures/texture_08.png");
-    cube = new Object("cube", createCubeVertices(), cubeTexture);
-
+    cube = new Object("Starting Cube", createCubeVertices(), cubeTexture);
     scene.addObject(cube);
+    Texture* dummyTexture = new Texture("assets/textures/texture_01.png"); // or reuse existing
+    targetVisualizer = new Object("target_marker", createCubeVertices(), dummyTexture);
+    targetVisualizer->setScale(glm::vec3(0.1f)); // Make it small
+    scene.addInternalObject(targetVisualizer);
 
-    UI = new Interface(window,scene);
+    UI = new Interface(window, scene);
 
     initFullScreenQuad();
 
     return true;
-}
-
-void Engine::initFullScreenQuad() {
-    std::vector<Vertex> quadVertices = createFullScreenQuadVertices();
-
-    // Create the VAO and VBO for the full-screen quad
-    glGenVertexArrays(1, &fullScreenQuadVAO);
-    glGenBuffers(1, &fullScreenQuadVBO);
-
-    glBindVertexArray(fullScreenQuadVAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, fullScreenQuadVBO);
-    glBufferData(GL_ARRAY_BUFFER, quadVertices.size() * sizeof(Vertex), &quadVertices[0], GL_STATIC_DRAW);
-
-    // Position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Texture coordinate attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(glm::vec3)));
-    glEnableVertexAttribArray(1);
-
-    glBindVertexArray(0);  // Unbind VAO
-}
-
-void Engine::renderBackground() {
-    glDisable(GL_DEPTH_TEST);  // Disable depth testing to render background behind other objects
-
-    backgroundShader->use();  // Use the shader for the background gradient
-    backgroundShader->setMat4("view", glm::mat4(1.0f));  // Identity view matrix (no camera)
-    backgroundShader->setMat4("projection", glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));  // 2D orthographic projection
-
-    // Bind the full-screen quad VAO and draw it
-    glBindVertexArray(fullScreenQuadVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);  // Draw the quad with the gradient
-
-    glEnable(GL_DEPTH_TEST);  // Re-enable depth testing for 3D rendering
 }
 
 void Engine::run()
@@ -168,29 +207,12 @@ void Engine::run()
     cleanup();
 }
 
-void Engine::processInput()
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-        double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
-
-        static double lastX = xpos, lastY = ypos;
-        float deltaX = xpos - lastX;
-        float deltaY = ypos - lastY;
-        camera->handleMouseInput(deltaX, -deltaY, true); // Invert Y if needed
-        lastX = xpos;
-        lastY = ypos;
-    }
-
-
-}
-
 void Engine::update(float deltaTime)
 {
     processInput();
+    if (targetVisualizer && camera) {
+        targetVisualizer->position = camera->target;
+    }
 
 }
 
@@ -207,6 +229,17 @@ void Engine::render()
 
     for (auto* obj : scene.getObjects()) {
         obj->draw(*shader);
+    }
+
+    for (auto* obj : scene.getInternalObjects()) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        obj->draw(*shader);
+
+        glDisable(GL_BLEND);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
     
     UI->update();

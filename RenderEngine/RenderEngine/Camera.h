@@ -10,19 +10,20 @@ public:
     Camera(float aspectRatio);
 
     void update(float deltaTime);
-    void handleMouseInput(float deltaX, float deltaY, bool rotating);
+    void handleMouseInput(float deltaX, float deltaY, bool rotating, bool panning);
     void handleScrollInput(float yOffset);
 
     glm::mat4 getViewMatrix() const;
     glm::mat4 getProjectionMatrix() const;
+    glm::vec3 target;
 
 private:
-    glm::vec3 target;
     float distance;
     float yaw;
     float pitch;
     float zoomSpeed;
     float rotateSpeed;
+    float panSpeed;
 
     float fov;
     float aspect;

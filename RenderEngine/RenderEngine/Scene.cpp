@@ -17,3 +17,11 @@ void Scene::removeObject(size_t index) {
 std::vector<Object*>& Scene::getObjects() {
     return objects;
 }
+
+void Scene::addInternalObject(Object* object) {
+    internalObjects.push_back(object);
+}
+
+const std::vector<Object*>& Scene::getInternalObjects() const {
+    return internalObjects;
+}

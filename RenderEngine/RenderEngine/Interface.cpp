@@ -95,7 +95,7 @@ void Interface::displayObjectList() {
     int indexToRemove = -1;
     for (size_t i = 0; i < scene.getObjects().size(); ++i) {
         Object* object = scene.getObjects()[i];
-        std::string headerLabel = "Object " + std::to_string(i);
+        std::string headerLabel = object->name;
 
         if (ImGui::CollapsingHeader(headerLabel.c_str())) {
             displayObjectProperties(object, static_cast<int>(i));  // Display object properties
@@ -115,9 +115,10 @@ void Interface::displayObjectList() {
 void Interface::displayObjectProperties(Object* object, int index) {
     ImGui::PushID(index);
 
-    ImGui::InputFloat3("Position", glm::value_ptr(object->position));
-    ImGui::SliderFloat3("Rotation", glm::value_ptr(object->rotation), -180.0f, 180.0f);
-    ImGui::SliderFloat3("Scale", glm::value_ptr(object->scale), 0.1f, 5.0f);
+    ImGui::DragFloat3("Position", glm::value_ptr(object->position), 0.1f);
+    ImGui::DragFloat3("Rotation", glm::value_ptr(object->rotation), 1.0f, -180.0f, 180.0f);
+    ImGui::DragFloat3("Scale", glm::value_ptr(object->scale), 0.01f, 0.1f, 10.0f);
+
 
     ImGui::PopID();
 }
