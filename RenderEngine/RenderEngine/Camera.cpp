@@ -21,7 +21,6 @@ void Camera::handleMouseInput(float deltaX, float deltaY, bool rotating, bool pa
     }
 }
 
-
 void Camera::handleScrollInput(float yOffset) {
     distance -= yOffset * zoomSpeed;
     distance = std::max(1.0f, distance);
@@ -40,6 +39,10 @@ glm::mat4 Camera::getViewMatrix() const {
 
 glm::mat4 Camera::getProjectionMatrix() const {
     return glm::perspective(fov, aspect, nearPlane, farPlane);
+}
+
+void Camera::setAspectRatio(float aspectRatio) {
+    aspect = aspectRatio;  // Update the aspect ratio
 }
 
 void Camera::update(float deltaTime) {

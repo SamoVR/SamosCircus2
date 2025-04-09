@@ -17,6 +17,8 @@ public:
     glm::mat4 getProjectionMatrix() const;
     glm::vec3 target;
 
+    void setAspectRatio(float aspectRatio);  // New method to set aspect ratio
+
 private:
     float distance;
     float yaw;

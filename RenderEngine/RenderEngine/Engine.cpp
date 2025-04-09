@@ -36,12 +36,12 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 
     // Update camera aspect ratio
-    /*Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     if (engine && engine->camera) {
         engine->width = width;
         engine->height = height;
         engine->camera->setAspectRatio(static_cast<float>(width) / height);
-    }*/
+    }
 }
 
 void setAppIcon(GLFWwindow* window)
