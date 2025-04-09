@@ -133,7 +133,7 @@ void Interface::displayObjectList() {
 void Interface::displayObjectProperties(Object* object, int index) {
     ImGui::PushID(index);
 
-    ImGui::PushFont(headingFont);
+    /*ImGui::PushFont(headingFont);
     ImGui::Text("General");
     ImGui::PopFont();
 
@@ -147,9 +147,9 @@ void Interface::displayObjectProperties(Object* object, int index) {
     ImGui::InputText("Object Name##", tempName, IM_ARRAYSIZE(tempName));
 
     if (ImGui::Button("Apply##"))
-        object->name = std::string(tempName);
+        object->setName(std::string(tempName));
 
-    ImGui::Separator();
+    ImGui::Separator();*/
 
     ImGui::PushFont(headingFont);
     ImGui::Text("Transform");

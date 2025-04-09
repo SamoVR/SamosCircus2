@@ -29,6 +29,7 @@ public:
 
     void draw(Shader& shader,Camera& camera) const;
 
+    void setName(const std::string& newName);
     void setPosition(const glm::vec3& pos);
     void setScale(const glm::vec3& scale);
     void setRotation(const glm::vec3& axis);

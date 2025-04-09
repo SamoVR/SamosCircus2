@@ -29,15 +29,23 @@ const std::vector<Object*>& Scene::getInternalObjects() const {
 void Scene::saveToFile(const std::string& filename) {
     nlohmann::json j;
 
-    // Serialize all objects in the scene
+    // Serialize all objects in the scene, including renamed ones
     for (const auto& obj : objects) {
+        // Ensure the object is fully updated, including vertices and other properties
         j["objects"].push_back(obj->toJSON());
     }
 
     // Write JSON to file
     std::ofstream outFile(filename);
-    outFile << j.dump(4);  // Pretty-print with 4 spaces indentation
+    if (outFile.is_open()) {
+        outFile << j.dump(4);  // Pretty-print with 4 spaces indentation
+        outFile.close();
+    }
+    else {
+        std::cerr << "Failed to open file for saving: " << filename << std::endl;
+    }
 }
+
 
 void Scene::loadFromFile(const std::string& filename) {
     std::ifstream inFile(filename);

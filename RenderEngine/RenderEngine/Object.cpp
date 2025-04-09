@@ -59,7 +59,9 @@ void Object::draw(Shader& shader, Camera& camera) const {
     glBindVertexArray(0);
 }
 
-
+void Object::setName(const std::string& newName) {
+    name = newName;
+}
 
 void Object::setPosition(const glm::vec3& pos) {
     position = pos;
@@ -86,7 +88,7 @@ void Object::removeTexture() {
     texture = nullptr;
 }
 
-nlohmann::json Object::toJSON() const {
+nlohmann::json Object::toJSON() const { //known issue: when object name is changed it fails to save vertices for all objects
     nlohmann::json j;
     j["name"] = name;
     j["position"] = { position.x, position.y, position.z };
