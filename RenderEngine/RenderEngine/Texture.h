@@ -8,6 +8,7 @@ public:
     Texture(const std::string& path);
     ~Texture();
 
+
     void bind(unsigned int unit = 0) const;
 
 private:

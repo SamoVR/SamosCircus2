@@ -5,6 +5,8 @@ Interface::Interface(GLFWwindow* window, Scene& scene) : window(window), scene(s
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    defaultTexture = new Texture("assets/textures/texture_08.png");
+
     // ImGui Setup
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -55,7 +57,7 @@ void Interface::createUI() {
 
     // Add Object Button
     if (ImGui::Button("Add Object")) {
-        scene.addObject(new Object("PlaceHolderObject", createCubeVertices(), nullptr));  // Add a new default object to the scene
+        scene.addObject(new Object("PlaceHolderObject", createCubeVertices(),defaultTexture));  // Add a new default object to the scene
     }
 
     ImGui::Separator();

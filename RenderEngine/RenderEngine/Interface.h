@@ -4,6 +4,7 @@
 #include "Object.h"
 #include "Vertex.h"
 #include "Geometry.h"
+#include "Texture.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -29,6 +30,7 @@ private:
     GLFWwindow* window;
     ImFont* headingFont;
     Scene& scene;  // Reference to the current scene
+    Texture* defaultTexture;
 
     void displayObjectProperties(Object* object, int index);
     void displayObjectList();

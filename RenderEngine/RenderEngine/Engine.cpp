@@ -196,9 +196,13 @@ void Engine::render()
     shader->use();
     shader->setMat4("view", camera->getViewMatrix());
     shader->setMat4("projection", camera->getProjectionMatrix());
-    cube->draw(*shader);
-    //cube->scale.x = cube->scale.x + 0.001f;
+    
     UI->update();
+
+    for (auto* obj : scene.getObjects()) {
+        obj->draw(*shader);
+    }
+    
 }
 
 void Engine::cleanup()
