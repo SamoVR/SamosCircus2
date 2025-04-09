@@ -4,6 +4,7 @@
 class TestClass {
 public:
     void printTest(); // Declare a function
+    bool changed = false;
 };
 
 #endif
