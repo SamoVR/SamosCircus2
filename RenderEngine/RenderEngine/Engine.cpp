@@ -44,6 +44,35 @@ void setAppIcon(GLFWwindow* window)
     }
 }
 
+void Engine::initGrid() {
+    const int gridSize = 10;
+    std::vector<glm::vec3> gridVertices;
+
+    for (int i = -gridSize; i <= gridSize; ++i) {
+        // Lines parallel to X axis
+        gridVertices.emplace_back(-gridSize, 0.0f, i);
+        gridVertices.emplace_back(gridSize, 0.0f, i);
+
+        // Lines parallel to Z axis
+        gridVertices.emplace_back(i, 0.0f, -gridSize);
+        gridVertices.emplace_back(i, 0.0f, gridSize);
+    }
+
+    gridLineCount = gridVertices.size();
+
+    glGenVertexArrays(1, &gridVAO);
+    glGenBuffers(1, &gridVBO);
+
+    glBindVertexArray(gridVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
+    glBufferData(GL_ARRAY_BUFFER, gridVertices.size() * sizeof(glm::vec3), gridVertices.data(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    glBindVertexArray(0);
+}
+
+
 void Engine::initFullScreenQuad() {
     std::vector<Vertex> quadVertices = createFullScreenQuadVertices();
 
@@ -79,6 +108,19 @@ void Engine::renderBackground() {
     glDrawArrays(GL_TRIANGLES, 0, 6);  // Draw the quad with the gradient
 
     glEnable(GL_DEPTH_TEST);  // Re-enable depth testing for 3D rendering
+}
+
+void Engine::renderGrid() {
+
+    gridShader->use();
+    gridShader->setMat4("view", camera->getViewMatrix());
+    gridShader->setMat4("projection", camera->getProjectionMatrix());
+    gridShader->setMat4("model", glm::mat4(1.0f));
+
+    glBindVertexArray(gridVAO);
+    glDrawArrays(GL_LINES, 0, gridLineCount);
+    glBindVertexArray(0);
+
 }
 
 void Engine::processInput()
@@ -156,6 +198,8 @@ bool Engine::init()
 
     shader = new Shader("vertex.glsl", "fragment.glsl");
     backgroundShader = new Shader("background_vertex.glsl", "background_fragment.glsl");
+    gridShader = new Shader("grid_vertex.glsl", "grid_fragment.glsl");
+
     camera = new Camera(width / (float)height);
 
     Texture* cubeTexture = new Texture("assets/images/icon.png");
@@ -168,6 +212,7 @@ bool Engine::init()
 
     UI = new Interface(window, scene);
 
+    initGrid();
     initFullScreenQuad();
 
     return true;
@@ -208,6 +253,8 @@ void Engine::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     renderBackground();
+
+    renderGrid();
 
     shader->use();
     shader->setMat4("view", camera->getViewMatrix());

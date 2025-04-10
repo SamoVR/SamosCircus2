@@ -257,6 +257,12 @@
     <None Include="glew32.dll">
       <Filter>dependancies</Filter>
     </None>
+    <None Include="grid_fragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="grid_vertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Library Include="glew32.lib">

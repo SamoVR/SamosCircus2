@@ -73,12 +73,18 @@ void Interface::update() {
 }
 
 void Interface::settingsUI() {
-    static bool showSettings = true;
-    if (!showSettings) return;
 
-    ImGui::Begin("Settings", &showSettings);
+    ImGui::Begin("Settings");
 
-    ImGui::Text("App Settings");
+    ImGui::PushFont(headingFont);
+    ImGui::Text("Camera");
+    ImGui::PopFont();
+
+    ImGui::Separator();
+
+    ImGui::PushFont(headingFont);
+    ImGui::Text("UI");
+    ImGui::PopFont();
 
     ImGui::End();
 }

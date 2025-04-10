@@ -40,7 +40,7 @@ public:
 private:
     Shader* shader;
     Shader* backgroundShader;
-    Shader* gizmoShader;
+    Shader* gridShader;
     Object* targetVisualizer;
 
     GLFWwindow* window;
@@ -48,21 +48,20 @@ private:
 
     std::string windowTitle;
 
+    int gridLineCount = 0;
     float lastFrame;
 
+    GLuint gridVAO, gridVBO;
     GLuint fullScreenQuadVAO, fullScreenQuadVBO;
-    GLuint gizmoVAO, gizmoVBO;
 
     static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
     bool init();
     void update(float deltaTime);
     void render();
-    void initGizmoLines();
+    void initGrid();
     void initFullScreenQuad();
-    void renderGizmoForObject(Object* object);
-    bool castRay(double mouseX, double mouseY, Object*& selectedObject);
-    void processGizmoInteraction(double mouseX, double mouseY);
+    void renderGrid();
     void renderBackground();
     void processInput();
     void cleanup();
