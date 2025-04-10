@@ -33,6 +33,8 @@ private:
     ImFont* headingFont;
     Scene& scene;  // Reference to the current scene
     Texture* defaultTexture;
+    Object* textureTargetObject = nullptr;
+
 
     bool showShapePopup = false;
     void displayObjectProperties(Object* object, int index);

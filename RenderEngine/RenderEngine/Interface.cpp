@@ -179,7 +179,9 @@ void Interface::displayObjectProperties(Object* object, int index) {
         IGFD::FileDialogConfig config;
         config.path = "assets/textures/";
         ImGuiFileDialog::Instance()->OpenDialog("ChooseTex", "Select Texture", ".png,.jpg,.jpeg,.bmp", config);
+        textureTargetObject = object;  //
     }
+
 
 
     ImGui::SameLine();
@@ -190,9 +192,8 @@ void Interface::displayObjectProperties(Object* object, int index) {
         object->setColor(glm::vec3(1.0f, 1.0f, 1.0f));  // Example: Apply white color if texture is removed
     }
 
-    // Allow user to change object color (if texture is removed)
-    static glm::vec3 color(1.0f, 1.0f, 1.0f);  // Default color is white
     if (!object->texture) {  // Only show color controls if there's no texture
+        static glm::vec3 color = object->color;
         ImGui::ColorEdit3("Object Color", &color[0]);
         if (ImGui::Button("Apply Color")) {
             object->setColor(color);  // Apply color if no texture
@@ -200,12 +201,14 @@ void Interface::displayObjectProperties(Object* object, int index) {
     }
 
     if (ImGuiFileDialog::Instance()->Display("ChooseTex")) {
-        if (ImGuiFileDialog::Instance()->IsOk()) {
+        if (ImGuiFileDialog::Instance()->IsOk() && textureTargetObject) {
             std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-            object->setTexture(new Texture(filePathName)); // <- Apply to object
+            textureTargetObject->setTexture(new Texture(filePathName));  // Apply to correct object
         }
         ImGuiFileDialog::Instance()->Close();
+        textureTargetObject = nullptr;  // Reset
     }
+
 
 
     ImGui::PopID();
