@@ -158,7 +158,7 @@ bool Engine::init()
     backgroundShader = new Shader("background_vertex.glsl", "background_fragment.glsl");
     camera = new Camera(width / (float)height);
 
-    Texture* cubeTexture = new Texture("assets/textures/texture_08.png");
+    Texture* cubeTexture = new Texture("assets/images/icon.png");
     cube = new Object("Starting Cube", createCubeVertices(), cubeTexture);
     scene.addObject(cube);
 
