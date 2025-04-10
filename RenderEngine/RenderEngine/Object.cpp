@@ -88,7 +88,13 @@ void Object::removeTexture() {
     texture = nullptr;
 }
 
-nlohmann::json Object::toJSON() const { //known issue: when object name is changed it fails to save vertices for all objects
+// known issues: when object name is changed it fails to save vertices for all objects;
+// when a saved scene is loaded and then saved again, the objects that were originally in the 1st saved scene 
+// fail to load (after being saved twice);
+//
+//
+
+nlohmann::json Object::toJSON() const { 
     nlohmann::json j;
     j["name"] = name;
     j["position"] = { position.x, position.y, position.z };
