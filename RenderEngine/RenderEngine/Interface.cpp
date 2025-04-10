@@ -12,8 +12,16 @@ Interface::Interface(GLFWwindow* window, Scene& scene)
     ImGui_ImplOpenGL3_Init("#version 130");
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    // Get the monitor's DPI scaling factor
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    float xscale, yscale;
+    glfwGetMonitorContentScale(monitor, &xscale, &yscale);
+
+    // Adjust font scaling based on DPI scale (average scale factor for both axes)
+    io.FontGlobalScale = (xscale + yscale) / 2.0f;
+
     // Load font
-    io.FontGlobalScale = 1.0f;
     io.Fonts->AddFontDefault();
     headingFont = io.Fonts->AddFontFromFileTTF("assets/fonts/ProggyVector-Regular.ttf", 18.0f);
     if (!headingFont) {
@@ -22,6 +30,7 @@ Interface::Interface(GLFWwindow* window, Scene& scene)
 
     ImGui_ImplOpenGL3_CreateFontsTexture();
 }
+
 
 Interface::~Interface() {
     ImGui_ImplOpenGL3_Shutdown();
