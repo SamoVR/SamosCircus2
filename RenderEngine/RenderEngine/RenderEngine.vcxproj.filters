@@ -302,6 +302,9 @@
     <Image Include="icon.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="assets\images\Mona_Lisa.png">
+      <Filter>assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RenderEngine.rc">
