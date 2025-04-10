@@ -176,11 +176,11 @@ void Interface::displayObjectProperties(Object* object, int index) {
 
     // Add button to choose a new texture (open file dialog)
     if (ImGui::Button("Choose Texture")) {
-        std::string newTexturePath = openTextureFileDialog();  // Implement this method as before
-        if (!newTexturePath.empty()) {
-            object->setTexture(new Texture(newTexturePath));
-        }
+        IGFD::FileDialogConfig config;
+        config.path = "assets/textures/";
+        ImGuiFileDialog::Instance()->OpenDialog("ChooseTex", "Select Texture", ".png,.jpg,.jpeg,.bmp", config);
     }
+
 
     ImGui::SameLine();
 
@@ -199,9 +199,15 @@ void Interface::displayObjectProperties(Object* object, int index) {
         }
     }
 
+    if (ImGuiFileDialog::Instance()->Display("ChooseTex")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+            object->setTexture(new Texture(filePathName)); // <- Apply to object
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+
+
     ImGui::PopID();
 }
 
-std::string Interface::openTextureFileDialog() {
-    return "assets/textures/texture_08.png";
-}

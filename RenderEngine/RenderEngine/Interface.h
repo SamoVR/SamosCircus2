@@ -18,7 +18,7 @@
 #include <sstream>
 #include <string>
 #include <glm/gtc/type_ptr.hpp>
-#include <filesystem>
+#include "ImGuiFileDialog-master/ImGuiFileDialog.h"
 
 class Interface {
 public:
@@ -38,5 +38,5 @@ private:
     void displayObjectProperties(Object* object, int index);
     void displayObjectList();
     void showShapeSelectionPopup();
-    std::string openTextureFileDialog();
+    std::string selectedTexturePath = "assets/textures/texture_08.png";
 };
