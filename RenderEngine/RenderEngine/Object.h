@@ -27,6 +27,8 @@ public:
     glm::vec3 color;
     Texture* texture;
 
+    bool isSelected = false;
+
     void draw(Shader& shader,Camera& camera) const;
 
     void setName(const std::string& newName);

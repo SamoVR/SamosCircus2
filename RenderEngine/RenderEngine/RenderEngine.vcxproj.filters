@@ -82,6 +82,21 @@
     <ClCompile Include="imgui\ImGuiFileDialog-master\ImGuiFileDialog.cpp">
       <Filter>dependancies\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="imgui\ImGuizmo-master\GraphEditor.cpp">
+      <Filter>dependancies\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\ImGuizmo-master\ImCurveEdit.cpp">
+      <Filter>dependancies\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\ImGuizmo-master\ImGradient.cpp">
+      <Filter>dependancies\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\ImGuizmo-master\ImGuizmo.cpp">
+      <Filter>dependancies\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\ImGuizmo-master\ImSequencer.cpp">
+      <Filter>dependancies\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vertex.h">
@@ -205,6 +220,24 @@
       <Filter>dependancies\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imgui\ImGuiFileDialog-master\ImGuiFileDialogConfig.h">
+      <Filter>dependancies\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\ImGuizmo-master\GraphEditor.h">
+      <Filter>dependancies\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\ImGuizmo-master\ImCurveEdit.h">
+      <Filter>dependancies\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\ImGuizmo-master\ImGradient.h">
+      <Filter>dependancies\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\ImGuizmo-master\ImGuizmo.h">
+      <Filter>dependancies\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\ImGuizmo-master\ImSequencer.h">
+      <Filter>dependancies\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\ImGuizmo-master\ImZoomSlider.h">
       <Filter>dependancies\imgui</Filter>
     </ClInclude>
   </ItemGroup>

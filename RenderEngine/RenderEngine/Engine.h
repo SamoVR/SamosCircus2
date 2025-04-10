@@ -40,6 +40,7 @@ public:
 private:
     Shader* shader;
     Shader* backgroundShader;
+    Shader* gizmoShader;
     Object* targetVisualizer;
 
     GLFWwindow* window;
@@ -50,13 +51,18 @@ private:
     float lastFrame;
 
     GLuint fullScreenQuadVAO, fullScreenQuadVBO;
+    GLuint gizmoVAO, gizmoVBO;
 
     static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
     bool init();
     void update(float deltaTime);
     void render();
+    void initGizmoLines();
     void initFullScreenQuad();
+    void renderGizmoForObject(Object* object);
+    bool castRay(double mouseX, double mouseY, Object*& selectedObject);
+    void processGizmoInteraction(double mouseX, double mouseY);
     void renderBackground();
     void processInput();
     void cleanup();

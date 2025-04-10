@@ -1,7 +1,7 @@
-    #pragma once
+#pragma once
 
-    #include "Vertex.h"
-    #include <vector>
+#include "Vertex.h"
+#include <vector>
 
 std::vector<Vertex> createCubeVertices();
 

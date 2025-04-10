@@ -147,6 +147,11 @@
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\ImGuiFileDialog-master\ImGuiFileDialog.cpp" />
+    <ClCompile Include="imgui\ImGuizmo-master\GraphEditor.cpp" />
+    <ClCompile Include="imgui\ImGuizmo-master\ImCurveEdit.cpp" />
+    <ClCompile Include="imgui\ImGuizmo-master\ImGradient.cpp" />
+    <ClCompile Include="imgui\ImGuizmo-master\ImGuizmo.cpp" />
+    <ClCompile Include="imgui\ImGuizmo-master\ImSequencer.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
@@ -168,6 +173,12 @@
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\ImGuiFileDialog-master\ImGuiFileDialog.h" />
     <ClInclude Include="imgui\ImGuiFileDialog-master\ImGuiFileDialogConfig.h" />
+    <ClInclude Include="imgui\ImGuizmo-master\GraphEditor.h" />
+    <ClInclude Include="imgui\ImGuizmo-master\ImCurveEdit.h" />
+    <ClInclude Include="imgui\ImGuizmo-master\ImGradient.h" />
+    <ClInclude Include="imgui\ImGuizmo-master\ImGuizmo.h" />
+    <ClInclude Include="imgui\ImGuizmo-master\ImSequencer.h" />
+    <ClInclude Include="imgui\ImGuizmo-master\ImZoomSlider.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
     <ClInclude Include="imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="imgui\imgui_impl_opengl3_loader.h" />

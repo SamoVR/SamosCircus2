@@ -19,6 +19,8 @@ public:
     glm::vec3 position;
 
     void setAspectRatio(float aspectRatio);  // New method to set aspect ratio
+    glm::vec2 worldToScreen(const glm::vec3& worldPos) const;
+
 
 private:
     float distance;

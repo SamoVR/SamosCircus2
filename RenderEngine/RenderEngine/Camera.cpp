@@ -50,3 +50,20 @@ void Camera::setAspectRatio(float aspectRatio) {
 void Camera::update(float deltaTime) {
     // No time-based motion for now
 }
+
+glm::vec2 Camera::worldToScreen(const glm::vec3& worldPos) const {
+    glm::mat4 view = getViewMatrix();
+    glm::mat4 projection = getProjectionMatrix();
+    glm::vec4 clipSpace = projection * view * glm::vec4(worldPos, 1.0f);
+
+    if (clipSpace.w == 0.0f) return glm::vec2(0.0f); // avoid divide-by-zero
+
+    glm::vec3 ndc = glm::vec3(clipSpace) / clipSpace.w; // Normalize
+
+    // Convert NDC [-1,1] to screen space [0, window]
+    float screenX = (ndc.x * 0.5f + 0.5f); // multiply by width later
+    float screenY = (1.0f - (ndc.y * 0.5f + 0.5f)); // flip y
+
+    return glm::vec2(screenX, screenY); // still normalized [0,1]
+}
+

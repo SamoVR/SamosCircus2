@@ -213,13 +213,6 @@ void Engine::render()
     shader->setMat4("view", camera->getViewMatrix());
     shader->setMat4("projection", camera->getProjectionMatrix());
 
-    for (auto* obj : scene.getObjects()) {
-        // Check if the object has a texture
-        if (!obj->texture) 
-            shader->setVec3("color", obj->color);
-            obj->draw(*shader,*camera);
-    }
-
     for (auto* obj : scene.getInternalObjects()) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glEnable(GL_BLEND);
@@ -233,6 +226,13 @@ void Engine::render()
 
         glDisable(GL_BLEND);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
+    for (auto* obj : scene.getObjects()) {
+        // Check if the object has a texture
+        if (!obj->texture)
+            shader->setVec3("color", obj->color);
+        obj->draw(*shader, *camera);
     }
     
     UI->update();
