@@ -25,7 +25,6 @@ public:
     Interface(GLFWwindow* window, Scene& scene);
     ~Interface();
 
-    void coreUI();  // Create UI elements for the objects
     void update();    // Update the ImGui frame and render it
 
 private:
@@ -38,7 +37,9 @@ private:
 
     bool showShapePopup = false;
     void displayObjectProperties(Object* object, int index);
-    void displayObjectList();
+    void sceneControlsUI();
+    void objectListUI();
+    void settingsUI();
     void showShapeSelectionPopup();
     std::string selectedTexturePath = "assets/textures/texture_08.png";
 };

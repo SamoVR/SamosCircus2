@@ -11,6 +11,7 @@ Interface::Interface(GLFWwindow* window, Scene& scene)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     // Load font
     io.FontGlobalScale = 1.0f;
     io.Fonts->AddFontDefault();
@@ -33,39 +34,97 @@ void Interface::update() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    coreUI();
+    // DockSpace
+    ImGuiWindowFlags windowFlags =
+        ImGuiWindowFlags_MenuBar |
+        ImGuiWindowFlags_NoDocking |
+        ImGuiWindowFlags_NoBackground |
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus;
+
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+
+
+    ImGui::Begin("MainDockspace", nullptr, windowFlags);
+    ImGui::PopStyleVar(1);
+
+    ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
+
+    ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode; // | ImGuiDockNodeFlags_NoDockingInCentralNode
+
+    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+    ImGui::End();
+
+    // Separate windows
+    sceneControlsUI();
+    objectListUI();
+    settingsUI(); // Floaty
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void Interface::coreUI() {
-    ImGui::Begin("Scene Controls");
+void Interface::settingsUI() {
+    static bool showSettings = true;
+    if (!showSettings) return;
 
-    // Add Object Button with Shape Selection Popup
-    if (ImGui::Button("Add Object")) {
-        showShapePopup = true; // Set the flag to true when the button is pressed
-        ImGui::OpenPopup("Select Object Shape"); // Explicitly open the popup
+    ImGui::Begin("Settings", &showSettings);
+
+    ImGui::Text("App Settings");
+
+    ImGui::End();
+}
+
+
+void Interface::objectListUI() {
+    ImGui::Begin("Object List");
+
+    ImGui::PushFont(headingFont);
+    ImGui::Text("Objects:");
+    ImGui::PopFont();
+
+    int indexToRemove = -1;
+    for (size_t i = 0; i < scene.getObjects().size(); ++i) {
+        Object* object = scene.getObjects()[i];
+        std::string headerLabel = object->name;
+
+        ImGui::PushID(static_cast<int>(i));
+        if (ImGui::CollapsingHeader(headerLabel.c_str())) {
+            displayObjectProperties(object, static_cast<int>(i));
+            if (ImGui::Button("Remove Object")) indexToRemove = static_cast<int>(i);
+        }
+        ImGui::PopID();
     }
 
-    // Call the shape selection popup function
+    if (indexToRemove >= 0) scene.removeObject(static_cast<size_t>(indexToRemove));
+
+    ImGui::End();
+}
+
+
+void Interface::sceneControlsUI() {
+    ImGui::Begin("Scene Controls");
+
+    if (ImGui::Button("Add Object")) {
+        showShapePopup = true;
+        ImGui::OpenPopup("Select Object Shape");
+    }
+
     showShapeSelectionPopup();
 
     ImGui::SameLine();
-
-    // Save and Load buttons
-    if (ImGui::Button("Save Scene")) {
-        scene.saveToFile("scene.json");  // Save the scene to a file (use a file path of your choice)
-    }
-
+    if (ImGui::Button("Save Scene")) scene.saveToFile("scene.json");
     ImGui::SameLine();
+    if (ImGui::Button("Load Scene")) scene.loadFromFile("scene.json");
 
-    if (ImGui::Button("Load Scene")) {
-        scene.loadFromFile("scene.json");  // Load the scene from a file (use a file path of your choice)
-    }
-
-    ImGui::Separator();
-    displayObjectList();  // Display all objects in the scene
     ImGui::End();
 }
 
@@ -100,34 +159,6 @@ void Interface::showShapeSelectionPopup() {
 
             ImGui::EndPopup();
         }
-    }
-}
-
-void Interface::displayObjectList() {
-    ImGui::PushFont(headingFont);
-    ImGui::Text("Objects:");
-    ImGui::PopFont();
-
-    int indexToRemove = -1;
-    for (size_t i = 0; i < scene.getObjects().size(); ++i) {
-        Object* object = scene.getObjects()[i];
-        std::string headerLabel = object->name;
-
-        ImGui::PushID(static_cast<int>(i));
-
-        if (ImGui::CollapsingHeader(headerLabel.c_str())) {
-            displayObjectProperties(object, static_cast<int>(i));  // Display object properties
-            ImGui::Separator();
-            if (ImGui::Button("Remove Object")) {
-                indexToRemove = static_cast<int>(i);
-            }
-        }
-            ImGui::PopID();
-        
-    }
-
-    if (indexToRemove >= 0) {
-        scene.removeObject(static_cast<size_t>(indexToRemove));
     }
 }
 
@@ -175,15 +206,17 @@ void Interface::displayObjectProperties(Object* object, int index) {
         ImGui::Text("No texture applied");
     }
 
-    // Add button to choose a new texture (open file dialog)
     if (ImGui::Button("Choose Texture")) {
         IGFD::FileDialogConfig config;
-        config.path = "assets/textures/";
-        ImGuiFileDialog::Instance()->OpenDialog("ChooseTex", "Select Texture", ".png,.jpg,.jpeg,.bmp", config);
-        textureTargetObject = object;  //
+        config.path = "assets/";
+        ImGuiFileDialog::Instance()->OpenDialog(
+            "ChooseTex",
+            "Select Texture",
+            "All Supported{.png,.jpg,.jpeg,.bmp},.png,.jpg,.jpeg,.bmp",
+            config
+        );
+        textureTargetObject = object;
     }
-
-
 
     ImGui::SameLine();
 
