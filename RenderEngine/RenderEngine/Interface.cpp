@@ -72,13 +72,42 @@ void Interface::update() {
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     ImGui::End();
 
-    // Separate windows
     sceneControlsUI();
     objectListUI();
-    settingsUI(); // Floaty
+    settingsUI();
+    updateFileBrowsers();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void Interface::updateFileBrowsers()
+{
+    if (ImGuiFileDialog::Instance()->Display("ChooseTex")) {
+        if (ImGuiFileDialog::Instance()->IsOk() && textureTargetObject) {
+            std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+            textureTargetObject->setTexture(new Texture(filePathName));
+        }
+        ImGuiFileDialog::Instance()->Close();
+        textureTargetObject = nullptr;
+    }
+    
+    if (ImGuiFileDialog::Instance()->Display("SaveSceneDialog")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+            scene.saveToFile(filePath);
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+
+    if (ImGuiFileDialog::Instance()->Display("LoadSceneDialog")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+            scene.loadFromFile(filePath);
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+
 }
 
 void Interface::settingsUI() {
@@ -136,40 +165,61 @@ void Interface::sceneControlsUI() {
     showShapeSelectionPopup();
 
     ImGui::SameLine();
-    if (ImGui::Button("Save Scene")) scene.saveToFile("scene.json");
+
+    // Save Scene Button with file dialog
+    if (ImGui::Button("Save Scene")) {
+        openSaveDialog();  // Open the file save dialog
+    }
+
     ImGui::SameLine();
-    if (ImGui::Button("Load Scene")) scene.loadFromFile("scene.json");
+
+    // Load Scene Button with file dialog
+    if (ImGui::Button("Load Scene")) {
+        openLoadDialog();  // Open the file load dialog
+    }
 
     ImGui::End();
 }
 
+void Interface::openSaveDialog() {
+    IGFD::FileDialogConfig config;
+    config.path = "assets/scenes";
+
+    ImGuiFileDialog::Instance()->OpenDialog("SaveSceneDialog", "Save Scene", ".json", config);
+}
+
+void Interface::openLoadDialog() {
+    IGFD::FileDialogConfig config;
+    config.path = "assets/scenes";
+
+    ImGuiFileDialog::Instance()->OpenDialog("LoadSceneDialog", "Load Scene", ".json", config);
+}
+
+
 void Interface::showShapeSelectionPopup() {
-    // Open the popup when necessary
-    if (showShapePopup) { // Make sure this flag is set when you want to show the popup
+    if (showShapePopup) {
         if (ImGui::BeginPopupModal("Select Object Shape", NULL)) {
             ImGui::Text("Choose Shape:");
 
-            // Button for Cube
             if (ImGui::Button("Cube")) {
                 scene.addObject(new Object("Cube", createCubeVertices(), defaultTexture));
-                ImGui::CloseCurrentPopup();  // Close the popup after adding the object
+                ImGui::CloseCurrentPopup();
             }
 
-            // Button for Triangle
             if (ImGui::Button("Triangle")) {
                 scene.addObject(new Object("Triangle", createTriangle3DVertices(), defaultTexture));
-                ImGui::CloseCurrentPopup();  // Close the popup after adding the object
+                ImGui::CloseCurrentPopup();
             }
 
-            // Button for Sphere
             if (ImGui::Button("Sphere")) {
                 scene.addObject(new Object("Sphere", createSphereVertices(), defaultTexture));
-                ImGui::CloseCurrentPopup();  // Close the popup after adding the object
+                ImGui::CloseCurrentPopup();
             }
 
-            // "Cancel" Button
+            ImGui::Separator();
+
             if (ImGui::Button("Cancel")) {
-                ImGui::CloseCurrentPopup();  // Close the popup if the cancel button is pressed
+                ImGui::CloseCurrentPopup(); 
             }
 
             ImGui::EndPopup();
@@ -213,7 +263,6 @@ void Interface::displayObjectProperties(Object* object, int index) {
     ImGui::Text("Texture/Color");
     ImGui::PopFont();
 
-    // Show current texture or message
     if (object->texture) {
         ImGui::Text("Current Texture: %s", object->texture->getFilePath().c_str());
     }
@@ -235,30 +284,18 @@ void Interface::displayObjectProperties(Object* object, int index) {
 
     ImGui::SameLine();
 
-    // Add button to remove texture and apply color
     if (ImGui::Button("Remove Texture")) {
-        object->removeTexture();  // Remove texture
-        object->setColor(glm::vec3(1.0f, 1.0f, 1.0f));  // Example: Apply white color if texture is removed
+        object->removeTexture();
+        object->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
     }
 
-    if (!object->texture) {  // Only show color controls if there's no texture
+    if (!object->texture) {
         static glm::vec3 color = object->color;
         ImGui::ColorEdit3("Object Color", &color[0]);
         if (ImGui::Button("Apply Color")) {
-            object->setColor(color);  // Apply color if no texture
+            object->setColor(color);
         }
     }
-
-    if (ImGuiFileDialog::Instance()->Display("ChooseTex")) {
-        if (ImGuiFileDialog::Instance()->IsOk() && textureTargetObject) {
-            std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-            textureTargetObject->setTexture(new Texture(filePathName));  // Apply to correct object
-        }
-        ImGuiFileDialog::Instance()->Close();
-        textureTargetObject = nullptr;  // Reset
-    }
-
-
 
     ImGui::PopID();
 }

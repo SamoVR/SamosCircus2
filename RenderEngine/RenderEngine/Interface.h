@@ -25,12 +25,12 @@ public:
     Interface(GLFWwindow* window, Scene& scene);
     ~Interface();
 
-    void update();    // Update the ImGui frame and render it
+    void update();
 
 private:
     GLFWwindow* window;
     ImFont* headingFont;
-    Scene& scene;  // Reference to the current scene
+    Scene& scene;
     Texture* defaultTexture;
     Object* textureTargetObject = nullptr;
 
@@ -40,6 +40,9 @@ private:
     void sceneControlsUI();
     void objectListUI();
     void settingsUI();
+    void openSaveDialog();
+    void openLoadDialog();
+    void updateFileBrowsers();
     void showShapeSelectionPopup();
     std::string selectedTexturePath = "assets/textures/texture_08.png";
 };
