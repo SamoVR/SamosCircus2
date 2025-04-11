@@ -88,7 +88,7 @@ void Object::removeTexture() {
     texture = nullptr;
 }
 
-// known issues: when object name is changed it fails to save vertices for all objects; -- NOT FIXED
+// known issues: when object name is changed it fails to save vertices for all objects; -- FIXED (i think)
 // when a saved scene is loaded and then saved again, the objects that were originally in the 1st saved scene 
 // fail to load (after being saved twice); -- FIXED
 //

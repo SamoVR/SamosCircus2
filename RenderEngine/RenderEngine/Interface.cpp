@@ -230,7 +230,7 @@ void Interface::showShapeSelectionPopup() {
 void Interface::displayObjectProperties(Object* object, int index) {
     ImGui::PushID(index);
 
-    /*ImGui::PushFont(headingFont);
+    ImGui::PushFont(headingFont);
     ImGui::Text("General");
     ImGui::PopFont();
 
@@ -246,7 +246,7 @@ void Interface::displayObjectProperties(Object* object, int index) {
     if (ImGui::Button("Apply##"))
         object->setName(std::string(tempName));
 
-    ImGui::Separator();*/
+    ImGui::Separator();
 
     ImGui::PushFont(headingFont);
     ImGui::Text("Transform");
