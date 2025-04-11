@@ -88,9 +88,9 @@ void Object::removeTexture() {
     texture = nullptr;
 }
 
-// known issues: when object name is changed it fails to save vertices for all objects;
+// known issues: when object name is changed it fails to save vertices for all objects; -- NOT FIXED
 // when a saved scene is loaded and then saved again, the objects that were originally in the 1st saved scene 
-// fail to load (after being saved twice);
+// fail to load (after being saved twice); -- FIXED
 //
 //
 
@@ -153,28 +153,27 @@ std::vector<Vertex> Object::fromJSONToVertices(const nlohmann::json& jsonVertice
 
 
 void Object::setVertices(const std::vector<Vertex>& newVertices) {
+    vertices = newVertices;
     vertexCount = newVertices.size();
 
-    // Delete the old buffers
+    // Delete the old buffer
     glDeleteBuffers(1, &VBO);
 
-    // Generate a new buffer and upload the new vertex data
+    // Upload to GPU
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), newVertices.data(), GL_STATIC_DRAW);
 
-    // Re-setup the vertex attributes
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    // Position attribute
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 
-    // TexCoord attribute
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
 
     glBindVertexArray(0);
 }
+
 
