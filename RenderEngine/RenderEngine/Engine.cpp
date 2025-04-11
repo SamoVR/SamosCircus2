@@ -128,35 +128,60 @@ void Engine::processInput()
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    static bool rightMousePressedLastFrame = false;
+    static double lastX = 0.0, lastY = 0.0;
+
+    int rightMouseState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
+    if (rightMouseState == GLFW_PRESS) {
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
 
-        static double lastX = xpos, lastY = ypos;
+        if (!rightMousePressedLastFrame) {
+            // First frame of press — initialize lastX and lastY
+            lastX = xpos;
+            lastY = ypos;
+        }
+
         float deltaX = xpos - lastX;
         float deltaY = ypos - lastY;
-        camera->handleMouseInput(deltaX, -deltaY, true, false); // Invert Y if needed
+
+        camera->handleMouseInput(deltaX, -deltaY, true, false);
+
         lastX = xpos;
         lastY = ypos;
     }
 
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+    rightMousePressedLastFrame = (rightMouseState == GLFW_PRESS);
 
+
+    static bool middleMousePressedLastFrame = false;
+    static double lastXMid = 0.0, lastYMid = 0.0;
+
+    int middleMouseState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE);
+    if (middleMouseState == GLFW_PRESS) {
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
 
-        static double lastX = xpos, lastY = ypos;
-        float deltaX = xpos - lastX;
-        float deltaY = ypos - lastY;
+        if (!middleMousePressedLastFrame) {
+            // First frame of press — set starting position
+            lastXMid = xpos;
+            lastYMid = ypos;
+        }
+
+        float deltaX = xpos - lastXMid;
+        float deltaY = ypos - lastYMid;
 
         bool rotating = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
-        bool panning = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+        bool panning = (middleMouseState == GLFW_PRESS);
 
         camera->handleMouseInput(deltaX, -deltaY, rotating, panning);
 
-        lastX = xpos;
-        lastY = ypos;
+        lastXMid = xpos;
+        lastYMid = ypos;
     }
+
+    middleMousePressedLastFrame = (middleMouseState == GLFW_PRESS);
+
 }
 
 bool Engine::init()
