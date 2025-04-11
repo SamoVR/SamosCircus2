@@ -46,7 +46,6 @@ void Scene::saveToFile(const std::string& filename) {
     }
 }
 
-
 void Scene::loadFromFile(const std::string& filename) {
     std::ifstream inFile(filename);
     if (!inFile.is_open()) {
