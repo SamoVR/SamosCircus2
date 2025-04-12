@@ -11,6 +11,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include <unordered_set>
 #include <vector>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -26,6 +27,12 @@ public:
     ~Interface();
 
     void update();
+    const std::unordered_set<Object*>& getSelectedObjects() const {
+        return selectedObjects;
+    }
+    void clearSelection();
+    void selectObject(Object* object, bool appendSelection);
+
 
 private:
     GLFWwindow* window;
@@ -34,12 +41,15 @@ private:
     Texture* defaultTexture;
     Object* textureTargetObject = nullptr;
 
+    std::unordered_set<Object*> selectedObjects;
+    Object* lastSelectedObject = nullptr;
 
     bool showShapePopup = false;
     void displayObjectProperties(Object* object, int index);
     void sceneControlsUI();
     void objectListUI();
     void settingsUI();
+    void propertiesUI();
     void openSaveDialog();
     void openLoadDialog();
     void updateFileBrowsers();

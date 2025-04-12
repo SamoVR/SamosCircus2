@@ -63,6 +63,7 @@ private:
     void initFullScreenQuad();
     void renderGrid();
     void renderBackground();
+    void performObjectPicking(double mouseX, double mouseY);
     void processInput();
     void cleanup();
 };

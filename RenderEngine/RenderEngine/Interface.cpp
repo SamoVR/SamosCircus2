@@ -12,6 +12,7 @@ Interface::Interface(GLFWwindow* window, Scene& scene)
     ImGui_ImplOpenGL3_Init("#version 130");
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigDebugHighlightIdConflicts = false;
 
     // Get the monitor's DPI scaling factor
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -75,6 +76,8 @@ void Interface::update() {
     settingsUI();
     sceneControlsUI();
     objectListUI();
+    propertiesUI();
+
     updateFileBrowsers();
 
     ImGui::Render();
@@ -127,6 +130,25 @@ void Interface::settingsUI() {
     ImGui::End();
 }
 
+void Interface::propertiesUI() {
+    if (selectedObjects.empty()) return;
+
+    ImGui::Begin("Properties");
+
+    ImGui::PushFont(headingFont);
+    ImGui::Text("Object Properties");
+    ImGui::PopFont();
+
+    ImGui::Separator();
+
+    for (Object* object : selectedObjects) {
+        displayObjectProperties(object, 0);
+        ImGui::Separator();
+    }
+
+    ImGui::End();
+}
+
 
 void Interface::objectListUI() {
     ImGui::Begin("Object List");
@@ -136,19 +158,41 @@ void Interface::objectListUI() {
     ImGui::PopFont();
 
     int indexToRemove = -1;
+
     for (size_t i = 0; i < scene.getObjects().size(); ++i) {
         Object* object = scene.getObjects()[i];
-        std::string headerLabel = object->name;
 
         ImGui::PushID(static_cast<int>(i));
-        if (ImGui::CollapsingHeader(headerLabel.c_str())) {
-            displayObjectProperties(object, static_cast<int>(i));
-            if (ImGui::Button("Remove Object")) indexToRemove = static_cast<int>(i);
+
+        bool isSelected = selectedObjects.count(object) > 0;
+        if (isSelected) {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.3f, 0.5f, 0.9f, 0.5f));
         }
+
+        if (ImGui::Selectable(object->name.c_str(), isSelected)) {
+            if (ImGui::GetIO().KeyShift && lastSelectedObject != nullptr) {
+                // Shift toggles object in selection
+                if (selectedObjects.count(object)) {
+                    selectedObjects.erase(object);
+                }
+                else {
+                    selectedObjects.insert(object);
+                }
+            }
+            else {
+                // Normal single select
+                selectedObjects.clear();
+                selectedObjects.insert(object);
+                lastSelectedObject = object;
+            }
+        }
+
+        if (isSelected) {
+            ImGui::PopStyleColor();
+        }
+
         ImGui::PopID();
     }
-
-    if (indexToRemove >= 0) scene.removeObject(static_cast<size_t>(indexToRemove));
 
     ImGui::End();
 }
@@ -298,5 +342,19 @@ void Interface::displayObjectProperties(Object* object, int index) {
     }
 
     ImGui::PopID();
+}
+
+void Interface::clearSelection() {
+    selectedObjects.clear();
+    lastSelectedObject = nullptr;
+}
+
+void Interface::selectObject(Object* object, bool appendSelection) {
+    if (!appendSelection) {
+        selectedObjects.clear();
+    }
+
+    selectedObjects.insert(object);
+    lastSelectedObject = object;
 }
 

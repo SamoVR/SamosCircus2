@@ -182,6 +182,78 @@ void Engine::processInput()
 
     middleMousePressedLastFrame = (middleMouseState == GLFW_PRESS);
 
+    static bool leftMousePressedLastFrame = false;
+    int leftMouseState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+
+    if (leftMouseState == GLFW_PRESS && !leftMousePressedLastFrame) {
+        if (!ImGui::GetIO().WantCaptureMouse) {
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+            performObjectPicking(xpos, ypos);
+        }
+    }
+    leftMousePressedLastFrame = (leftMouseState == GLFW_PRESS);
+
+
+}
+
+void Engine::performObjectPicking(double mouseX, double mouseY)
+{
+    // Normalize mouse to [-1, 1]
+    float x = (2.0f * mouseX) / width - 1.0f;
+    float y = 1.0f - (2.0f * mouseY) / height;
+    glm::vec4 rayClip(x, y, -1.0f, 1.0f);
+
+    // Inverse Projection * Clip -> Eye space
+    glm::mat4 proj = camera->getProjectionMatrix();
+    glm::mat4 view = camera->getViewMatrix();
+    glm::mat4 invVP = glm::inverse(proj * view);
+
+    // Create ray start and end in NDC
+    glm::vec4 rayStartNDC(x, y, -1.0f, 1.0f);
+    glm::vec4 rayEndNDC(x, y, 0.0f, 1.0f);
+
+    // Unproject to world space
+    glm::vec4 rayStartWorld = invVP * rayStartNDC;
+    glm::vec4 rayEndWorld = invVP * rayEndNDC;
+    rayStartWorld /= rayStartWorld.w;
+    rayEndWorld /= rayEndWorld.w;
+
+    glm::vec3 rayOrigin = glm::vec3(rayStartWorld);
+    glm::vec3 rayDirection = glm::normalize(glm::vec3(rayEndWorld - rayStartWorld));
+
+    Object* closestObject = nullptr;
+    float closestDistance = std::numeric_limits<float>::max();
+
+    for (auto* obj : scene.getObjects()) {
+        float distance;
+
+        // Basic sphere bounds
+        float radius = glm::length(obj->scale) * 0.5f;
+        glm::vec3 center = obj->position;
+
+        glm::vec3 oc = rayOrigin - center;
+        float b = glm::dot(oc, rayDirection);
+        float c = glm::dot(oc, oc) - radius * radius;
+        float h = b * b - c;
+        if (h < 0.0f) continue;
+
+        h = sqrt(h);
+        distance = -b - h;
+
+        if (distance > 0.0f && distance < closestDistance) {
+            closestDistance = distance;
+            closestObject = obj;
+        }
+    }
+
+    if (closestObject) {
+        bool shiftPressed = ImGui::GetIO().KeyShift;
+        UI->selectObject(closestObject, shiftPressed);
+    }
+    else {
+        UI->clearSelection();
+    }
 }
 
 bool Engine::init()
