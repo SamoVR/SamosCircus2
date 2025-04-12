@@ -266,6 +266,7 @@ void Interface::openLoadDialog() {
     IGFD::FileDialogConfig config;
     config.path = "assets/scenes";
 
+    selectedObjects = {};
     ImGuiFileDialog::Instance()->OpenDialog("LoadSceneDialog", "Load Scene", ".json", config);
 }
 
