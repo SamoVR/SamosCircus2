@@ -448,8 +448,8 @@ void Interface::renderGizmo() {
             bool manipulated = ImGuizmo::Manipulate(
                 glm::value_ptr(view),               // View matrix
                 glm::value_ptr(projection),         // Projection matrix
-                gizmoOperation,                          // Operation (Translation, Rotation, Scale)
-                gizmoMode,                    // Using local space
+                gizmoOperation,                     // Operation (Translation, Rotation, Scale)
+                gizmoMode,                          // Using local space
                 glm::value_ptr(model),              // Model matrix
                 nullptr,                            // (Optional) matrix for the manipulated object
                 nullptr,                            // Snap value (optional)
