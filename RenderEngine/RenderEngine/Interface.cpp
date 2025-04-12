@@ -302,6 +302,14 @@ void Interface::showShapeSelectionPopup() {
 }
 
 void Interface::displayObjectProperties(Object* object, int index) {
+
+    //
+    // ISSUES:
+    // when multiple objects selected, 2nd, 3rd, etc.. objects properties cant be changed, 
+    // only 1st objects properties can.; -- NOT FIXED
+    // 
+    //
+
     ImGui::PushID(index);
 
     ImGui::PushFont(headingFont);
