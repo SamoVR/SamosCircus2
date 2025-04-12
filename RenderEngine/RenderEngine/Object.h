@@ -27,6 +27,9 @@ public:
     glm::vec3 color;
     Texture* texture;
 
+    Object* parent = nullptr;
+    std::vector<Object*> children;
+
     bool isSelected = false;
 
     void draw(Shader& shader,Camera& camera) const;
@@ -37,6 +40,13 @@ public:
     void setRotation(const glm::vec3& axis);
     void setColor(const glm::vec3& newColor);
     void setTexture(Texture* newTexture);
+    void setParent(Object* newParent);
+    void removeParent();
+    void addChild(Object* child);
+    void removeChild(Object* child);
+
+    bool isChildOf(Object* potentialParent);
+
     void removeTexture();
     void setVertices(const std::vector<Vertex>& newVertices);
     std::vector<Vertex> fromJSONToVertices(const nlohmann::json& jsonVertices);

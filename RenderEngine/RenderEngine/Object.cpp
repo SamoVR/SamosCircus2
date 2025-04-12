@@ -88,6 +88,43 @@ void Object::removeTexture() {
     texture = nullptr;
 }
 
+void Object::setParent(Object* newParent) {
+    if (parent) {
+        parent->children.erase(std::remove(parent->children.begin(), parent->children.end(), this), parent->children.end());
+    }
+    parent = newParent;
+    if (newParent) {
+        newParent->children.push_back(this);
+    }
+}
+
+void Object::removeParent() {
+    if (parent) {
+        parent->children.erase(std::remove(parent->children.begin(), parent->children.end(), this), parent->children.end());
+        parent = nullptr;
+    }
+}
+
+void Object::addChild(Object* child) {
+    child->parent = this;
+    children.push_back(child);
+}
+
+// Remove child (and clear its parent pointer)
+void Object::removeChild(Object* child) {
+    children.erase(std::remove(children.begin(), children.end(), child), children.end());
+    child->parent = nullptr;
+}
+
+bool Object::isChildOf(Object* potentialParent) {
+    Object* current = parent;
+    while (current) {
+        if (current == potentialParent) return true;
+        current = current->parent;
+    }
+    return false;
+}
+
 // known issues: when object name is changed it fails to save vertices for all objects; -- FIXED (i think)
 // when a saved scene is loaded and then saved again, the objects that were originally in the 1st saved scene 
 // fail to load (after being saved twice); -- FIXED

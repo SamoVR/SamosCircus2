@@ -10,7 +10,7 @@ public:
     Scene();
 
     void addObject(Object* object);  // store pointer
-    void removeObject(size_t index);
+    void removeObject(size_t index, Object* object = nullptr);
     std::vector<Object*>& getObjects();  // return list of pointers
     void addInternalObject(Object* object);
     const std::vector<Object*>& getInternalObjects() const;

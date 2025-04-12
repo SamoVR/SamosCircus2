@@ -7,10 +7,19 @@ void Scene::addObject(Object* object) {
     objects.push_back(object);
 }
 
-void Scene::removeObject(size_t index) {
-    if (index < objects.size()) {
-        delete objects[index]; // Optional: if Scene owns memory
-        objects.erase(objects.begin() + index);
+void Scene::removeObject(size_t index,Object* object) {
+    if (!object) {
+        if (index < objects.size()) {
+            delete objects[index]; // Optional: if Scene owns memory
+            objects.erase(objects.begin() + index);
+        }
+    }
+    else {
+        auto it = std::find(objects.begin(), objects.end(), object);
+        if (it != objects.end()) {
+            objects.erase(it);
+        }
+
     }
 }
 

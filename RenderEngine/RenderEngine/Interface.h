@@ -55,6 +55,7 @@ private:
     bool showShapePopup = false;
 
     void displayObjectProperties(Object* object, int index);
+    void renderObjectNode(Object* object);
     void sceneControlsUI();
     void objectListUI();
     void settingsUI();

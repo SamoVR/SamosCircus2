@@ -172,45 +172,75 @@ void Interface::objectListUI() {
     ImGui::Text("Objects:");
     ImGui::PopFont();
 
-    int indexToRemove = -1;
+    ImGui::Separator();
 
-    for (size_t i = 0; i < scene.getObjects().size(); ++i) {
-        Object* object = scene.getObjects()[i];
+    // Root "Scene" node
+    ImGuiTreeNodeFlags rootFlags = ImGuiTreeNodeFlags_DefaultOpen |
+        ImGuiTreeNodeFlags_OpenOnArrow |
+        ImGuiTreeNodeFlags_OpenOnDoubleClick |
+        ImGuiTreeNodeFlags_SpanAvailWidth;
 
-        ImGui::PushID(static_cast<int>(i));
+    bool open = ImGui::TreeNodeEx("Scene", rootFlags);
 
-        bool isSelected = selectedObjects.count(object) > 0;
-        if (isSelected) {
-            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.3f, 0.5f, 0.9f, 0.5f));
-        }
-
-        if (ImGui::Selectable(object->name.c_str(), isSelected)) {
-            if (ImGui::GetIO().KeyShift && lastSelectedObject != nullptr) {
-                // Shift toggles object in selection
-                if (selectedObjects.count(object)) {
-                    selectedObjects.erase(object);
-                }
-                else {
-                    selectedObjects.insert(object);
-                }
-            }
-            else {
-                // Normal single select
-                selectedObjects.clear();
-                selectedObjects.insert(object);
-                lastSelectedObject = object;
+    if (open) {
+        // Only render top-level objects (objects with no parent)
+        for (Object* object : scene.getObjects()) {
+            if (!object->parent) {
+                renderObjectNode(object);
             }
         }
-
-        if (isSelected) {
-            ImGui::PopStyleColor();
-        }
-
-        ImGui::PopID();
+        ImGui::TreePop();
     }
 
     ImGui::End();
 }
+
+
+
+void Interface::renderObjectNode(Object* object) {
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow |
+        ImGuiTreeNodeFlags_OpenOnDoubleClick |
+        ImGuiTreeNodeFlags_SpanAvailWidth;
+
+    if (selectedObjects.count(object))
+        flags |= ImGuiTreeNodeFlags_Selected;
+
+    bool open = ImGui::TreeNodeEx(object->name.c_str(), flags);
+
+    // Select on click with optional Shift for multi-select
+    if (ImGui::IsItemClicked()) {
+        bool shiftPressed = ImGui::GetIO().KeyShift;
+        selectObject(object, shiftPressed);
+    }
+
+    // Drag source
+    if (ImGui::BeginDragDropSource()) {
+        ImGui::SetDragDropPayload("OBJECT", &object, sizeof(Object*));
+        ImGui::Text("Move: %s", object->name.c_str());
+        ImGui::EndDragDropSource();
+    }
+
+    // Drop target
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("OBJECT")) {
+            Object* droppedObject = *(Object**)payload->Data;
+
+            if (droppedObject != object && !object->isChildOf(droppedObject)) {
+                droppedObject->setParent(object);
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    if (open) {
+        for (Object* child : object->children) {
+            renderObjectNode(child);
+        }
+        ImGui::TreePop();
+    }
+}
+
+
 
 void Interface::sceneControlsUI() {
     ImGui::Begin("Scene Controls");
