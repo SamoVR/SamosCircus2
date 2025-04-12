@@ -5,6 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include <iostream>
+
 class Camera {
 public:
     Camera(float aspectRatio);

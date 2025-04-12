@@ -75,8 +75,6 @@ void Scene::loadFromFile(const std::string& filename) {
     }
 }
 
-
-
 std::vector<Vertex> Scene::fromJSONToVertices(const nlohmann::json& jsonVertices) {
     std::vector<Vertex> vertices;
 

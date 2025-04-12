@@ -5,11 +5,14 @@
 #include "Vertex.h"
 #include "Geometry.h"
 #include "Texture.h"
+#include "Camera.h"
 
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "ImGuiFileDialog-master/ImGuiFileDialog.h"
+#include "ImGuizmo-master/ImGuizmo.h"
 
 #include <unordered_set>
 #include <vector>
@@ -19,11 +22,10 @@
 #include <sstream>
 #include <string>
 #include <glm/gtc/type_ptr.hpp>
-#include "ImGuiFileDialog-master/ImGuiFileDialog.h"
 
 class Interface {
 public:
-    Interface(GLFWwindow* window, Scene& scene);
+    Interface(GLFWwindow* window, Scene& scene, Camera* camera);
     ~Interface();
 
     void update();
@@ -38,13 +40,20 @@ private:
     GLFWwindow* window;
     ImFont* headingFont;
     Scene& scene;
+    Camera* camera;
     Texture* defaultTexture;
     Object* textureTargetObject = nullptr;
 
     std::unordered_set<Object*> selectedObjects;
     Object* lastSelectedObject = nullptr;
 
+    void renderGizmo();
+
+    ImGuizmo::OPERATION gizmoOperation = ImGuizmo::TRANSLATE;
+    ImGuizmo::MODE gizmoMode = ImGuizmo::WORLD;
+
     bool showShapePopup = false;
+
     void displayObjectProperties(Object* object, int index);
     void sceneControlsUI();
     void objectListUI();

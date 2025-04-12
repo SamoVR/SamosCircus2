@@ -297,7 +297,7 @@ bool Engine::init()
     backgroundShader = new Shader("background_vertex.glsl", "background_fragment.glsl");
     gridShader = new Shader("grid_vertex.glsl", "grid_fragment.glsl");
 
-    camera = new Camera(width / (float)height);
+    camera = new Camera(width / static_cast<float>(height));  // Properly pass aspect ratio
 
     Texture* cubeTexture = new Texture("assets/images/icon.png");
     cube = new Object("Starting Cube", createCubeVertices(), cubeTexture);
@@ -307,7 +307,7 @@ bool Engine::init()
     targetVisualizer->setScale(glm::vec3(0.1f)); // Make it small
     scene.addInternalObject(targetVisualizer);
 
-    UI = new Interface(window, scene);
+    UI = new Interface(window, scene, camera);
 
     initGrid();
     initFullScreenQuad();

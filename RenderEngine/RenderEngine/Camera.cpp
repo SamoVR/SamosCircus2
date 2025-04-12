@@ -21,11 +21,15 @@ void Camera::handleMouseInput(float deltaX, float deltaY, bool rotating, bool pa
         target -= right * deltaX * panSpeed;
         target += up * deltaY * panSpeed;
     }
+
+    position = getPosition();
 }
 
 void Camera::handleScrollInput(float yOffset) {
     distance -= yOffset * zoomSpeed;
     distance = std::max(1.0f, distance);
+
+    position = getPosition();
 }
 
 glm::vec3 Camera::getPosition() const {
@@ -35,8 +39,9 @@ glm::vec3 Camera::getPosition() const {
     return glm::vec3(x, y, z) + target;
 }
 
+
 glm::mat4 Camera::getViewMatrix() const {
-    return glm::lookAt(getPosition(), target, glm::vec3(0, 1, 0));
+    return glm::lookAt(position, target, glm::vec3(0, 1, 0));
 }
 
 glm::mat4 Camera::getProjectionMatrix() const {

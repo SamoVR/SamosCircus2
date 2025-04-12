@@ -1,7 +1,7 @@
 #include "Interface.h"
 
-Interface::Interface(GLFWwindow* window, Scene& scene)
-    : window(window), scene(scene), defaultTexture(new Texture("assets/textures/texture_08.png")) {
+Interface::Interface(GLFWwindow* window, Scene& scene, Camera* camera)
+    : window(window), scene(scene), camera(camera), defaultTexture(new Texture("assets/textures/texture_08.png")) {
 
     // ImGui Setup
     IMGUI_CHECKVERSION();
@@ -31,7 +31,6 @@ Interface::Interface(GLFWwindow* window, Scene& scene)
 
     ImGui_ImplOpenGL3_CreateFontsTexture();
 }
-
 
 Interface::~Interface() {
     ImGui_ImplOpenGL3_Shutdown();
@@ -79,6 +78,8 @@ void Interface::update() {
     propertiesUI();
 
     updateFileBrowsers();
+
+    renderGizmo();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -141,9 +142,23 @@ void Interface::propertiesUI() {
 
     ImGui::Separator();
 
-    for (Object* object : selectedObjects) {
+    // We use a temporary list of objects to prevent modifying the selectedObjects set
+    // while iterating over it.
+    std::vector<Object*> objectsToDisplay(selectedObjects.begin(), selectedObjects.end());
+
+    for (Object* object : objectsToDisplay) {
+        if (object == nullptr) {
+            // Skip the object if it's nullptr (safety check)
+            continue;
+        }
+
+        // Make sure the object is still in the scene
+        if (std::find(scene.getObjects().begin(), scene.getObjects().end(), object) == scene.getObjects().end()) {
+            // If the object has been removed from the scene, we should not attempt to display it.
+            continue;
+        }
+
         displayObjectProperties(object, 0);
-        ImGui::Separator();
     }
 
     ImGui::End();
@@ -197,7 +212,6 @@ void Interface::objectListUI() {
     ImGui::End();
 }
 
-
 void Interface::sceneControlsUI() {
     ImGui::Begin("Scene Controls");
 
@@ -222,6 +236,22 @@ void Interface::sceneControlsUI() {
         openLoadDialog();  // Open the file load dialog
     }
 
+    if (ImGui::Button("Translate Gizmo")) {
+        gizmoOperation = ImGuizmo::TRANSLATE;
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Rotate Gizmo")) {
+        gizmoOperation = ImGuizmo::ROTATE;
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Scale Gizmo")) {
+        gizmoOperation = ImGuizmo::SCALE;
+    }
+
     ImGui::End();
 }
 
@@ -238,7 +268,6 @@ void Interface::openLoadDialog() {
 
     ImGuiFileDialog::Instance()->OpenDialog("LoadSceneDialog", "Load Scene", ".json", config);
 }
-
 
 void Interface::showShapeSelectionPopup() {
     if (showShapePopup) {
@@ -341,6 +370,31 @@ void Interface::displayObjectProperties(Object* object, int index) {
         }
     }
 
+    ImGui::Separator();
+
+    if (ImGui::Button("Remove Object")) {
+        // First, find the index of the object in the scene's object list.
+        auto it = std::find(scene.getObjects().begin(), scene.getObjects().end(), object);
+
+        if (it != scene.getObjects().end()) {
+            size_t index = std::distance(scene.getObjects().begin(), it);
+
+            selectedObjects.erase(object);
+
+            // Remove the object from the scene using its index
+            scene.removeObject(index);
+
+            // Remove the object from the selection list as 
+
+            // Clear the textureTargetObject if it was pointing to this object
+            if (textureTargetObject == object) {
+                textureTargetObject = nullptr;
+            }
+        }
+    }
+
+
+
     ImGui::PopID();
 }
 
@@ -357,4 +411,61 @@ void Interface::selectObject(Object* object, bool appendSelection) {
     selectedObjects.insert(object);
     lastSelectedObject = object;
 }
+
+void Interface::renderGizmo() {
+    if (selectedObjects.empty()) return;
+
+    Object* object = *selectedObjects.begin();
+
+    if (camera == nullptr) {
+        std::cerr << "Camera is nullptr!" << std::endl;
+        return;
+    }
+
+    glm::mat4 view = camera->getViewMatrix();
+    glm::mat4 projection = camera->getProjectionMatrix();
+
+    // Start ImGuizmo frame
+    ImGuizmo::BeginFrame();
+
+    ImGuizmo::SetRect(0, 0, ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y);
+
+    // Loop through all selected objects
+    for (Object* object : selectedObjects) {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, object->position);
+        model = glm::rotate(model, glm::radians(object->rotation.x), glm::vec3(1, 0, 0));  // X-axis
+        model = glm::rotate(model, glm::radians(object->rotation.y), glm::vec3(0, 1, 0));  // Y-axis
+        model = glm::rotate(model, glm::radians(object->rotation.z), glm::vec3(0, 0, 1));  // Z-axis
+        model = glm::scale(model, object->scale);  // Scale
+
+        // Draw the gizmo
+       
+
+        // Get ImGui mouse state
+        ImGuiIO& io = ImGui::GetIO();
+
+            bool manipulated = ImGuizmo::Manipulate(
+                glm::value_ptr(view),               // View matrix
+                glm::value_ptr(projection),         // Projection matrix
+                gizmoOperation,                          // Operation (Translation, Rotation, Scale)
+                gizmoMode,                    // Using local space
+                glm::value_ptr(model),              // Model matrix
+                nullptr,                            // (Optional) matrix for the manipulated object
+                nullptr,                            // Snap value (optional)
+                nullptr,                            // Local bounds (optional)
+                nullptr                             // Bounds snap (optional)
+            );
+
+            // If the object was manipulated, update its transformation
+            if (manipulated) {
+                object->position = glm::vec3(model[3][0], model[3][1], model[3][2]);
+                object->rotation.x = glm::degrees(atan2(model[1][2], model[1][1]));
+                object->rotation.y = glm::degrees(atan2(model[2][0], model[0][0]));
+                object->rotation.z = glm::degrees(atan2(model[1][0], model[0][0]));
+                object->scale = glm::vec3(glm::length(model[0]), glm::length(model[1]), glm::length(model[2]));
+        }
+    }
+}
+
 
