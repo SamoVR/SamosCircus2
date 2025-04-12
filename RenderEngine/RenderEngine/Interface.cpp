@@ -458,6 +458,11 @@ void Interface::renderGizmo() {
             );
 
             // If the object was manipulated, update its transformation
+
+            // ISSUES: 
+            // there are some issues with rotation (a lot); -- NOT FIXED
+            //
+
             if (manipulated) {
                 object->position = glm::vec3(model[3][0], model[3][1], model[3][2]);
                 object->rotation.x = glm::degrees(atan2(model[1][2], model[1][1]));
