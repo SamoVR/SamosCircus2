@@ -107,6 +107,7 @@ void Interface::updateFileBrowsers()
     if (ImGuiFileDialog::Instance()->Display("LoadSceneDialog")) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
             std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+            selectedObjects = {};
             scene.loadFromFile(filePath);
         }
         ImGuiFileDialog::Instance()->Close();
@@ -126,6 +127,12 @@ void Interface::settingsUI() {
 
     ImGui::PushFont(headingFont);
     ImGui::Text("UI");
+    ImGui::PopFont();
+
+    ImGui::Separator();
+
+    ImGui::PushFont(headingFont);
+    ImGui::Text("Keybinds");
     ImGui::PopFont();
 
     ImGui::End();
@@ -195,8 +202,6 @@ void Interface::objectListUI() {
     ImGui::End();
 }
 
-
-
 void Interface::renderObjectNode(Object* object) {
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow |
         ImGuiTreeNodeFlags_OpenOnDoubleClick |
@@ -228,6 +233,10 @@ void Interface::renderObjectNode(Object* object) {
             if (droppedObject != object && !object->isChildOf(droppedObject)) {
                 droppedObject->setParent(object);
             }
+            else
+            {
+                droppedObject->removeParent();
+            }
         }
         ImGui::EndDragDropTarget();
     }
@@ -239,8 +248,6 @@ void Interface::renderObjectNode(Object* object) {
         ImGui::TreePop();
     }
 }
-
-
 
 void Interface::sceneControlsUI() {
     ImGui::Begin("Scene Controls");
@@ -296,7 +303,6 @@ void Interface::openLoadDialog() {
     IGFD::FileDialogConfig config;
     config.path = "assets/scenes";
 
-    selectedObjects = {};
     ImGuiFileDialog::Instance()->OpenDialog("LoadSceneDialog", "Load Scene", ".json", config);
 }
 
@@ -358,6 +364,8 @@ void Interface::displayObjectProperties(Object* object, int index) {
     if (ImGui::Button("Apply##"))
         object->setName(std::string(tempName));
 
+    ImGui::Text("Object's Parent: %s", object->parent);
+
     ImGui::Separator();
 
     ImGui::PushFont(headingFont);
@@ -410,6 +418,29 @@ void Interface::displayObjectProperties(Object* object, int index) {
     }
 
     ImGui::Separator();
+
+    if (ImGui::Button("Duplicate Object")) {
+        if (!selectedObjects.empty()) {
+            // We'll just duplicate the first selected object for now
+            Object* original = *selectedObjects.begin();
+            if (original) {
+                // Clone the object (make sure you have a proper copy/clone constructor or method)
+                Object* duplicate = new Object(*original);  // Assuming copy constructor
+
+                // Rename it to avoid name conflicts
+                duplicate->name += " (Copy)";
+
+                // Ensure it's not parented (or keep the same parent if that's intended)
+                duplicate->parent = nullptr;
+                duplicate->children.clear(); // Clear children if you're only duplicating the base
+
+                // Add to scene
+                scene.addObject(duplicate);
+            }
+        }
+    }
+
+    ImGui::SameLine();
 
     if (ImGui::Button("Remove Object")) {
         // First, find the index of the object in the scene's object list.
