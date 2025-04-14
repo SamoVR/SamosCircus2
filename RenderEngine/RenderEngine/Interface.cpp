@@ -436,6 +436,7 @@ void Interface::displayObjectProperties(Object* object, int index) {
 
                 // Add to scene
                 scene.addObject(duplicate);
+                selectedObjects = { duplicate };
             }
         }
     }
