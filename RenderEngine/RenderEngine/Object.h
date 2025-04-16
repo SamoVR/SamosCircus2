@@ -44,6 +44,8 @@ public:
     void removeParent();
     void addChild(Object* child);
     void removeChild(Object* child);
+    glm::mat4 getLocalTransform() const;
+    glm::mat4 getGlobalTransform() const;
 
     bool isChildOf(Object* potentialParent);
 

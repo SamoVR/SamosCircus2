@@ -22,6 +22,7 @@
 #include <sstream>
 #include <string>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 class Interface {
 public:
@@ -34,6 +35,7 @@ public:
     }
     void clearSelection();
     void selectObject(Object* object, bool appendSelection);
+    void propagateTransform(Object* parent, const glm::mat4& delta);
 
 
 private:

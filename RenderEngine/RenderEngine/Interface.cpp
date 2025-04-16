@@ -189,6 +189,17 @@ void Interface::objectListUI() {
 
     bool open = ImGui::TreeNodeEx("Scene", rootFlags);
 
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("OBJECT")) {
+            Object* droppedObject = *(Object**)payload->Data;
+
+            if (droppedObject && droppedObject->parent) {
+                droppedObject->removeParent(); // unparent it = move to root
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+
     if (open) {
         // Only render top-level objects (objects with no parent)
         for (Object* object : scene.getObjects()) {
@@ -344,7 +355,6 @@ void Interface::displayObjectProperties(Object* object, int index) {
     // when multiple objects selected, 2nd, 3rd, etc.. objects properties cant be changed, 
     // only 1st objects properties can.; -- NOT FIXED
     // 
-    //
 
     ImGui::PushID(index);
 
@@ -452,8 +462,14 @@ void Interface::displayObjectProperties(Object* object, int index) {
 
             selectedObjects.erase(object);
 
-            // Remove the object from the scene using its index
-            scene.removeObject(index);
+            if (!object->children.empty()) // if object has children, remove children
+            {
+                for (int i = 0; i < object->children.size(); i++)
+                {
+                    scene.removeObject(0,object->children[i]);
+                }
+            }
+            scene.removeObject(index); // remove object
 
             // Remove the object from the selection list as 
 
@@ -483,65 +499,76 @@ void Interface::selectObject(Object* object, bool appendSelection) {
     lastSelectedObject = object;
 }
 
+void Interface::propagateTransform(Object* parent, const glm::mat4& delta) {
+    for (Object* child : parent->children) {
+        glm::mat4 childModel = glm::mat4(1.0f);
+        childModel = glm::translate(childModel, child->position);
+        childModel = glm::rotate(childModel, glm::radians(child->rotation.x), glm::vec3(1, 0, 0));
+        childModel = glm::rotate(childModel, glm::radians(child->rotation.y), glm::vec3(0, 1, 0));
+        childModel = glm::rotate(childModel, glm::radians(child->rotation.z), glm::vec3(0, 0, 1));
+        childModel = glm::scale(childModel, child->scale);
+
+        glm::mat4 newChildModel = delta * childModel;
+
+        // Decompose the new transform matrix
+        glm::vec3 skew;
+        glm::vec4 perspective;
+        glm::quat rotationQuat;
+        glm::vec3 translation, scale;
+
+        glm::decompose(newChildModel, scale, rotationQuat, translation, skew, perspective);
+        glm::vec3 eulerAngles = glm::eulerAngles(rotationQuat);
+
+        child->position = translation;
+        child->rotation = glm::degrees(eulerAngles);
+        child->scale = scale;
+    }
+}
+
 void Interface::renderGizmo() {
     if (selectedObjects.empty()) return;
-
-    Object* object = *selectedObjects.begin();
-
-    if (camera == nullptr) {
+    if (!camera) {
         std::cerr << "Camera is nullptr!" << std::endl;
         return;
     }
 
+    ImGuizmo::BeginFrame();
+    ImGuizmo::SetRect(0, 0, ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y);
+
     glm::mat4 view = camera->getViewMatrix();
     glm::mat4 projection = camera->getProjectionMatrix();
 
-    // Start ImGuizmo frame
-    ImGuizmo::BeginFrame();
-
-    ImGuizmo::SetRect(0, 0, ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y);
-
-    // Loop through all selected objects
     for (Object* object : selectedObjects) {
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, object->position);
-        model = glm::rotate(model, glm::radians(object->rotation.x), glm::vec3(1, 0, 0));  // X-axis
-        model = glm::rotate(model, glm::radians(object->rotation.y), glm::vec3(0, 1, 0));  // Y-axis
-        model = glm::rotate(model, glm::radians(object->rotation.z), glm::vec3(0, 0, 1));  // Z-axis
-        model = glm::scale(model, object->scale);  // Scale
+        glm::mat4 originalGlobal = object->getGlobalTransform();
+        glm::mat4 model = object->getLocalTransform();
 
-        // Draw the gizmo
-       
+        bool manipulated = ImGuizmo::Manipulate(
+            glm::value_ptr(view),
+            glm::value_ptr(projection),
+            gizmoOperation,
+            gizmoMode,
+            glm::value_ptr(model)
+        );
 
-        // Get ImGui mouse state
-        ImGuiIO& io = ImGui::GetIO();
+        if (manipulated) {
+            // Calculate delta matrix between original and new
+            glm::mat4 deltaMatrix = glm::inverse(originalGlobal) * model;
 
-            bool manipulated = ImGuizmo::Manipulate(
-                glm::value_ptr(view),               // View matrix
-                glm::value_ptr(projection),         // Projection matrix
-                gizmoOperation,                     // Operation (Translation, Rotation, Scale)
-                gizmoMode,                          // Using local space
-                glm::value_ptr(model),              // Model matrix
-                nullptr,                            // (Optional) matrix for the manipulated object
-                nullptr,                            // Snap value (optional)
-                nullptr,                            // Local bounds (optional)
-                nullptr                             // Bounds snap (optional)
-            );
+            // Update parent object transform
+            object->position = glm::vec3(model[3][0], model[3][1], model[3][2]);
+            object->rotation.x = glm::degrees(atan2(model[1][2], model[1][1]));
+            object->rotation.y = glm::degrees(atan2(model[2][0], model[0][0]));
+            object->rotation.z = glm::degrees(atan2(model[1][0], model[0][0]));
+            object->scale = glm::vec3(glm::length(model[0]), glm::length(model[1]), glm::length(model[2]));
 
-            // If the object was manipulated, update its transformation
-
-            // ISSUES: 
-            // there are some issues with rotation (a lot); -- NOT FIXED
             //
+            // ISSUES:
+            // If object has a children and that children does have another 
+            // children it fucks everything up; -- NOT FIXED
+            //
+            
+            propagateTransform(object, deltaMatrix);
 
-            if (manipulated) {
-                object->position = glm::vec3(model[3][0], model[3][1], model[3][2]);
-                object->rotation.x = glm::degrees(atan2(model[1][2], model[1][1]));
-                object->rotation.y = glm::degrees(atan2(model[2][0], model[0][0]));
-                object->rotation.z = glm::degrees(atan2(model[1][0], model[0][0]));
-                object->scale = glm::vec3(glm::length(model[0]), glm::length(model[1]), glm::length(model[2]));
         }
     }
 }
-
-

@@ -69,18 +69,34 @@ void Scene::loadFromFile(const std::string& filename) {
     objects.clear();
 
     // Deserialize objects and add them to the scene
-    for (const auto& objJson : j["objects"]) {
-        Object* obj = new Object(objJson["name"], std::vector<Vertex>(), nullptr);  // Pass an empty vertex list and nullptr for texture
+    // Deserialize all objects first
+    std::unordered_map<std::string, Object*> nameToObject;
 
-        // Check if the "vertices" key exists, and if so, deserialize it
+    for (const auto& objJson : j["objects"]) {
+        Object* obj = new Object(objJson["name"], std::vector<Vertex>(), nullptr);
+
         if (objJson.contains("vertices")) {
             std::vector<Vertex> vertices = fromJSONToVertices(objJson["vertices"]);
-            obj->setVertices(vertices); // Assuming Object has a `setVertices` method
+            obj->setVertices(vertices);
         }
 
-        // Deserialize other object properties
         obj->fromJSON(objJson);
+        nameToObject[obj->name] = obj;
         objects.push_back(obj);
+    }
+
+    // After all objects are created, set up parent-child relationships
+    for (const auto& objJson : j["objects"]) {
+        std::string objName = objJson["name"];
+        if (objJson.contains("parent")) {
+            std::string parentName = objJson["parent"];
+            Object* obj = nameToObject[objName];
+            Object* parentObj = nameToObject[parentName];
+
+            if (obj && parentObj) {
+                obj->setParent(parentObj);  // This should also add the child to the parent
+            }
+        }
     }
 }
 
