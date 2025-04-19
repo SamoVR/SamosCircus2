@@ -80,7 +80,7 @@ void Interface::update() {
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     ImGui::End();
 
-    debugUI();
+    //debugUI();
     settingsUI();
     sceneControlsUI();
     objectListUI();
