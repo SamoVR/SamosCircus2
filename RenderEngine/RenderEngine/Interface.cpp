@@ -29,6 +29,14 @@ Interface::Interface(GLFWwindow* window, Scene& scene, Camera* camera)
         std::cerr << "Failed to load heading font." << std::endl;
     }
 
+    static const ImWchar icons_ranges[] = { 0xf000, 0xf3ff, 0 };  // Adjust range if using newer FA sets
+    ImFontConfig icons_config;
+    icons_config.MergeMode = true;
+    icons_config.PixelSnapH = true;
+    icons_config.GlyphMinAdvanceX = 16.0f; // Optional
+
+    iconFont = io.Fonts->AddFontFromFileTTF("assets/fonts/fa-solid-900.ttf", 16.0f, &icons_config, icons_ranges);
+
     ImGui_ImplOpenGL3_CreateFontsTexture();
 }
 
@@ -72,6 +80,7 @@ void Interface::update() {
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     ImGui::End();
 
+    debugUI();
     settingsUI();
     sceneControlsUI();
     objectListUI();
@@ -171,7 +180,6 @@ void Interface::propertiesUI() {
     ImGui::End();
 }
 
-
 void Interface::objectListUI() {
     ImGui::Begin("Object List");
 
@@ -225,8 +233,8 @@ void Interface::renderObjectNode(Object* object) {
 
     // Select on click with optional Shift for multi-select
     if (ImGui::IsItemClicked()) {
-        bool shiftPressed = ImGui::GetIO().KeyShift;
-        selectObject(object, shiftPressed);
+        bool ctrlPressed = ImGui::GetIO().KeyCtrl;
+        selectObject(object, ctrlPressed);
     }
 
     // Drag source
@@ -272,33 +280,46 @@ void Interface::sceneControlsUI() {
 
     ImGui::SameLine();
 
-    // Save Scene Button with file dialog
     if (ImGui::Button("Save Scene")) {
-        openSaveDialog();  // Open the file save dialog
+        openSaveDialog();
     }
 
     ImGui::SameLine();
 
-    // Load Scene Button with file dialog
     if (ImGui::Button("Load Scene")) {
-        openLoadDialog();  // Open the file load dialog
+        openLoadDialog();
     }
 
-    if (ImGui::Button("Translate Gizmo")) {
-        gizmoOperation = ImGuizmo::TRANSLATE;
-    }
+    ImGui::Separator();
+    //ImGui::Text("Gizmo Mode:");
 
-    ImGui::SameLine();
+    float buttonSize = 40.0f;
+    ImVec4 activeColor = ImVec4(0.2f, 0.6f, 0.95f, 1.0f);  // Highlight color
+    ImVec4 hoveredColor = ImVec4(0.3f, 0.7f, 1.0f, 1.0f);   // Hover color
+    ImVec4 normalColor = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 
-    if (ImGui::Button("Rotate Gizmo")) {
-        gizmoOperation = ImGuizmo::ROTATE;
-    }
+    auto squareIconButton = [&](const char* icon, ImGuizmo::OPERATION op) {
+        bool isActive = (gizmoOperation == op);
+        if (isActive) ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
+        else ImGui::PushStyleColor(ImGuiCol_Button, normalColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoveredColor);
 
-    ImGui::SameLine();
+        ImGui::PushFont(iconFont);  // Switch to icon font
 
-    if (ImGui::Button("Scale Gizmo")) {
-        gizmoOperation = ImGuizmo::SCALE;
-    }
+        if (ImGui::Button(icon, ImVec2(buttonSize, buttonSize))) {
+            gizmoOperation = op;
+        }
+
+        ImGui::PopFont();           // Back to previous font
+        ImGui::PopStyleColor(2);
+        ImGui::SameLine();
+    };
+
+
+    // Font Awesome icons: (Translate), (Rotate), (Scale)
+    squareIconButton(ICON_FA_ARROWS_ALT, ImGuizmo::TRANSLATE);  // Translate
+    squareIconButton(ICON_FA_SYNC_ALT, ImGuizmo::ROTATE);       // Rotate
+    squareIconButton(ICON_FA_EXPAND_ARROWS_ALT, ImGuizmo::SCALE); // Scale
 
     ImGui::End();
 }
@@ -522,6 +543,9 @@ void Interface::propagateTransform(Object* parent, const glm::mat4& delta) {
         child->position = translation;
         child->rotation = glm::degrees(eulerAngles);
         child->scale = scale;
+
+        if(!child->children.empty())
+            propagateTransform(child,delta);
     }
 }
 
@@ -567,8 +591,34 @@ void Interface::renderGizmo() {
             // children it fucks everything up; -- NOT FIXED
             //
             
-            propagateTransform(object, deltaMatrix);
+            if(!object->children.empty())
+                propagateTransform(object, deltaMatrix);
 
         }
     }
+}
+
+void Interface::debugUI() {
+    ImGui::Begin("Debug Controls");
+
+    ImGui::PushFont(headingFont);
+    ImGui::Text("Debug Controls");
+    ImGui::PopFont();
+
+    ImGui::Separator();
+
+    ImGui::Text("Objects in scene:");
+
+    for (Object* object : scene.getObjects())
+    {
+        ImGui::Text("[OBJECT]: %s", object->name.c_str());
+    }
+    for (Object* object : scene.getInternalObjects())
+    {
+        ImGui::Text("[INTERNAL OBJECT]: %s", object->name.c_str());
+    }
+
+    ImGui::Separator();
+
+    ImGui::End();
 }

@@ -97,6 +97,9 @@
     <ClCompile Include="imgui\ImGuizmo-master\ImSequencer.cpp">
       <Filter>dependancies\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="imgui\FontAwesome-main\font_awesome.cpp">
+      <Filter>dependancies\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vertex.h">
@@ -238,6 +241,9 @@
       <Filter>dependancies\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imgui\ImGuizmo-master\ImZoomSlider.h">
+      <Filter>dependancies\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\FontAwesome-main\font_awesome.h">
       <Filter>dependancies\imgui</Filter>
     </ClInclude>
   </ItemGroup>

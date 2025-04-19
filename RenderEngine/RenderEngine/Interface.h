@@ -13,6 +13,7 @@
 #include "imgui_impl_opengl3.h"
 #include "ImGuiFileDialog-master/ImGuiFileDialog.h"
 #include "ImGuizmo-master/ImGuizmo.h"
+#include "FontAwesome-main/font_awesome.h"
 
 #include <unordered_set>
 #include <vector>
@@ -41,6 +42,7 @@ public:
 private:
     GLFWwindow* window;
     ImFont* headingFont;
+    ImFont* iconFont;
     Scene& scene;
     Camera* camera;
     Texture* defaultTexture;
@@ -58,6 +60,7 @@ private:
 
     void displayObjectProperties(Object* object, int index);
     void renderObjectNode(Object* object);
+    void debugUI();
     void sceneControlsUI();
     void objectListUI();
     void settingsUI();
