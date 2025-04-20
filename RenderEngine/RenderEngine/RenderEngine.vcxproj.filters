@@ -26,6 +26,9 @@
     <Filter Include="scripts">
       <UniqueIdentifier>{18d10929-ebcb-4fe6-84eb-6d54342b7acf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="dependancies\discord">
+      <UniqueIdentifier>{4d04d367-ae30-4d0d-b311-4919c3a270ac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui\imgui.cpp">
@@ -105,6 +108,48 @@
     </ClCompile>
     <ClCompile Include="KeybindManager.cpp">
       <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\activity_manager.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\achievement_manager.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\application_manager.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\core.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\image_manager.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\lobby_manager.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\network_manager.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\overlay_manager.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\relationship_manager.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\storage_manager.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\store_manager.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\types.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\user_manager.cpp">
+      <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\discord-rpc\voice_manager.cpp">
+      <Filter>dependancies\discord</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -264,6 +309,57 @@
     <ClInclude Include="KeybindManager.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\activity_manager.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\achievement_manager.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\application_manager.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\core.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\discord.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\event.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\ffi.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\image_manager.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\lobby_manager.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\network_manager.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\overlay_manager.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\relationship_manager.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\storage_manager.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\store_manager.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\types.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\user_manager.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\discord-rpc\voice_manager.h">
+      <Filter>dependancies\discord</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.glsl">
@@ -287,12 +383,18 @@
     <None Include="grid_vertex.glsl">
       <Filter>shaders</Filter>
     </None>
+    <None Include="discord_game_sdk.dll">
+      <Filter>dependancies</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Library Include="glew32.lib">
       <Filter>dependancies</Filter>
     </Library>
     <Library Include="glfw3.lib">
+      <Filter>dependancies</Filter>
+    </Library>
+    <Library Include="discord_game_sdk.lib">
       <Filter>dependancies</Filter>
     </Library>
   </ItemGroup>

@@ -108,13 +108,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>libraries\glm;imgui;libraries\glfw\include;libraries\glew\include;libraries\stb;assets;libraries\json-develop\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>libraries\glm;imgui;libraries\glfw\include;libraries\glew\include;libraries\stb;assets;libraries\json-develop\include;libraries\discord-rpc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;glew32.lib;opengl32.lib;user32.lib;gdi32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;glew32.lib;opengl32.lib;user32.lib;gdi32.lib;shell32.lib;discord_game_sdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Users\Samuel\Documents\Visual Studio 2022\libraries\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -162,6 +162,20 @@
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Interface.cpp" />
     <ClCompile Include="KeybindManager.cpp" />
+    <ClCompile Include="libraries\discord-rpc\achievement_manager.cpp" />
+    <ClCompile Include="libraries\discord-rpc\activity_manager.cpp" />
+    <ClCompile Include="libraries\discord-rpc\application_manager.cpp" />
+    <ClCompile Include="libraries\discord-rpc\core.cpp" />
+    <ClCompile Include="libraries\discord-rpc\image_manager.cpp" />
+    <ClCompile Include="libraries\discord-rpc\lobby_manager.cpp" />
+    <ClCompile Include="libraries\discord-rpc\network_manager.cpp" />
+    <ClCompile Include="libraries\discord-rpc\overlay_manager.cpp" />
+    <ClCompile Include="libraries\discord-rpc\relationship_manager.cpp" />
+    <ClCompile Include="libraries\discord-rpc\storage_manager.cpp" />
+    <ClCompile Include="libraries\discord-rpc\store_manager.cpp" />
+    <ClCompile Include="libraries\discord-rpc\types.cpp" />
+    <ClCompile Include="libraries\discord-rpc\user_manager.cpp" />
+    <ClCompile Include="libraries\discord-rpc\voice_manager.cpp" />
     <ClCompile Include="libraries\stb\stb_vorbis.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />
@@ -195,6 +209,23 @@
     <ClInclude Include="KeybindManager.h" />
     <ClInclude Include="KeyCombo.h" />
     <ClInclude Include="KeyComboHash.h" />
+    <ClInclude Include="libraries\discord-rpc\achievement_manager.h" />
+    <ClInclude Include="libraries\discord-rpc\activity_manager.h" />
+    <ClInclude Include="libraries\discord-rpc\application_manager.h" />
+    <ClInclude Include="libraries\discord-rpc\core.h" />
+    <ClInclude Include="libraries\discord-rpc\discord.h" />
+    <ClInclude Include="libraries\discord-rpc\event.h" />
+    <ClInclude Include="libraries\discord-rpc\ffi.h" />
+    <ClInclude Include="libraries\discord-rpc\image_manager.h" />
+    <ClInclude Include="libraries\discord-rpc\lobby_manager.h" />
+    <ClInclude Include="libraries\discord-rpc\network_manager.h" />
+    <ClInclude Include="libraries\discord-rpc\overlay_manager.h" />
+    <ClInclude Include="libraries\discord-rpc\relationship_manager.h" />
+    <ClInclude Include="libraries\discord-rpc\storage_manager.h" />
+    <ClInclude Include="libraries\discord-rpc\store_manager.h" />
+    <ClInclude Include="libraries\discord-rpc\types.h" />
+    <ClInclude Include="libraries\discord-rpc\user_manager.h" />
+    <ClInclude Include="libraries\discord-rpc\voice_manager.h" />
     <ClInclude Include="libraries\stb\stb_connected_components.h" />
     <ClInclude Include="libraries\stb\stb_c_lexer.h" />
     <ClInclude Include="libraries\stb\stb_divide.h" />
@@ -226,6 +257,7 @@
   <ItemGroup>
     <None Include="background_fragment.glsl" />
     <None Include="background_vertex.glsl" />
+    <None Include="discord_game_sdk.dll" />
     <None Include="fragment.glsl" />
     <None Include="glew32.dll">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -236,6 +268,7 @@
     <None Include="vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="discord_game_sdk.lib" />
     <Library Include="glew32.lib">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
