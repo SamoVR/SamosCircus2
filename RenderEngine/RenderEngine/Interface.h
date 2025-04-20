@@ -38,6 +38,10 @@ public:
     void selectObject(Object* object, bool appendSelection);
     void propagateTransform(Object* parent, const glm::mat4& delta);
 
+    void duplicateObject();
+    void openSaveDialog();
+    void openLoadDialog();
+    void setGizmoOperation(ImGuizmo::OPERATION operation);
 
 private:
     GLFWwindow* window;
@@ -65,8 +69,7 @@ private:
     void objectListUI();
     void settingsUI();
     void propertiesUI();
-    void openSaveDialog();
-    void openLoadDialog();
+   
     void updateFileBrowsers();
     void showShapeSelectionPopup();
     std::string selectedTexturePath = "assets/textures/texture_08.png";

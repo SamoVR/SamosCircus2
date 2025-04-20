@@ -26,6 +26,7 @@ void Camera::handleMouseInput(float deltaX, float deltaY, bool rotating, bool pa
 }
 
 void Camera::handleScrollInput(float yOffset) {
+    std::cout << "e";
     distance -= yOffset * zoomSpeed;
     distance = std::max(1.0f, distance);
 

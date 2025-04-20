@@ -100,6 +100,12 @@
     <ClCompile Include="imgui\FontAwesome-main\font_awesome.cpp">
       <Filter>dependancies\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="KeybindManager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vertex.h">
@@ -245,6 +251,18 @@
     </ClInclude>
     <ClInclude Include="imgui\FontAwesome-main\font_awesome.h">
       <Filter>dependancies\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyCombo.h">
+      <Filter>scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyComboHash.h">
+      <Filter>scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="KeybindManager.h">
+      <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

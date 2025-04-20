@@ -11,13 +11,6 @@ Engine::~Engine()
     cleanup();
 }
 
-void Engine::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    // Get the engine instance back from the window's user pointer
-    Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    if (engine && engine->camera)
-        engine->camera->handleScrollInput((float)yoffset);
-}
-
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 
@@ -123,80 +116,6 @@ void Engine::renderGrid() {
 
 }
 
-void Engine::processInput()
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-
-    static bool rightMousePressedLastFrame = false;
-    static double lastX = 0.0, lastY = 0.0;
-
-    int rightMouseState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
-    if (rightMouseState == GLFW_PRESS) {
-        double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
-
-        if (!rightMousePressedLastFrame) {
-            // First frame of press — initialize lastX and lastY
-            lastX = xpos;
-            lastY = ypos;
-        }
-
-        float deltaX = xpos - lastX;
-        float deltaY = ypos - lastY;
-
-        camera->handleMouseInput(deltaX, -deltaY, true, false);
-
-        lastX = xpos;
-        lastY = ypos;
-    }
-
-    rightMousePressedLastFrame = (rightMouseState == GLFW_PRESS);
-
-
-    static bool middleMousePressedLastFrame = false;
-    static double lastXMid = 0.0, lastYMid = 0.0;
-
-    int middleMouseState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE);
-    if (middleMouseState == GLFW_PRESS) {
-        double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
-
-        if (!middleMousePressedLastFrame) {
-            // First frame of press — set starting position
-            lastXMid = xpos;
-            lastYMid = ypos;
-        }
-
-        float deltaX = xpos - lastXMid;
-        float deltaY = ypos - lastYMid;
-
-        bool rotating = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
-        bool panning = (middleMouseState == GLFW_PRESS);
-
-        camera->handleMouseInput(deltaX, -deltaY, rotating, panning);
-
-        lastXMid = xpos;
-        lastYMid = ypos;
-    }
-
-    middleMousePressedLastFrame = (middleMouseState == GLFW_PRESS);
-
-    static bool leftMousePressedLastFrame = false;
-    int leftMouseState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
-
-    if (leftMouseState == GLFW_PRESS && !leftMousePressedLastFrame) {
-        if (!ImGui::GetIO().WantCaptureMouse) {
-            double xpos, ypos;
-            glfwGetCursorPos(window, &xpos, &ypos);
-            performObjectPicking(xpos, ypos);
-        }
-    }
-    leftMousePressedLastFrame = (leftMouseState == GLFW_PRESS);
-
-
-}
-
 void Engine::performObjectPicking(double mouseX, double mouseY)
 {
     // Normalize mouse to [-1, 1]
@@ -277,7 +196,6 @@ bool Engine::init()
     }
 
     glfwSetWindowUserPointer(window, this);
-    glfwSetScrollCallback(window, scroll_callback);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     glfwMakeContextCurrent(window);
@@ -309,6 +227,12 @@ bool Engine::init()
 
     UI = new Interface(window, scene, camera);
 
+    keybindManager = new KeybindManager();
+
+    inputManager = new InputManager();
+
+    inputManager->setScrollCallback(window);
+
     initGrid();
     initFullScreenQuad();
 
@@ -335,9 +259,59 @@ void Engine::run()
     cleanup();
 }
 
+void Engine::processInput() {
+    if (inputManager->isKeyPressed(GLFW_KEY_ESCAPE)) {
+        glfwSetWindowShouldClose(window, true);
+    }
+
+    if (inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+        glm::vec2 delta = inputManager->getMouseDelta();
+        camera->handleMouseInput(delta.x, -delta.y, true, false);
+    }
+
+    if (inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {
+        glm::vec2 delta = inputManager->getMouseDelta();
+        camera->handleMouseInput(delta.x, -delta.y, false, true);
+    }
+
+    if (inputManager->isMouseButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT) && !ImGui::GetIO().WantCaptureMouse) {
+        glm::vec2 mousePos = inputManager->getMousePosition();
+        performObjectPicking(mousePos.x, mousePos.y);
+    }
+
+    float scroll = inputManager->getScrollOffset();
+    if (scroll != 0.0f) {
+        camera->handleScrollInput(scroll);
+    }
+
+    keybindManager->registerKeybind({ GLFW_KEY_S, true, false, false }, [this]() {
+        UI->openSaveDialog();
+        });
+
+    keybindManager->registerKeybind({GLFW_KEY_D, true, false, false}, [this]() {
+        UI->duplicateObject();
+        });
+
+    keybindManager->registerKeybind({ GLFW_KEY_T, false, false, false }, [this]() {
+        UI->setGizmoOperation(ImGuizmo::OPERATION::TRANSLATE);
+        });
+
+    keybindManager->registerKeybind({ GLFW_KEY_R, false, false, false }, [this]() {
+        UI->setGizmoOperation(ImGuizmo::OPERATION::ROTATE);
+        });
+
+    keybindManager->registerKeybind({ GLFW_KEY_F, false, false, false }, [this]() {
+        UI->setGizmoOperation(ImGuizmo::OPERATION::SCALE);
+        });
+
+}
+
 void Engine::update(float deltaTime)
 {
+    inputManager->update(window);
+    keybindManager->update(inputManager);
     processInput();
+
     if (targetVisualizer && camera) {
         targetVisualizer->position = camera->target;
     }

@@ -307,7 +307,7 @@ void Interface::sceneControlsUI() {
         ImGui::PushFont(iconFont);  // Switch to icon font
 
         if (ImGui::Button(icon, ImVec2(buttonSize, buttonSize))) {
-            gizmoOperation = op;
+            setGizmoOperation(op);
         }
 
         ImGui::PopFont();           // Back to previous font
@@ -451,25 +451,7 @@ void Interface::displayObjectProperties(Object* object, int index) {
     ImGui::Separator();
 
     if (ImGui::Button("Duplicate Object")) {
-        if (!selectedObjects.empty()) {
-            // We'll just duplicate the first selected object for now
-            Object* original = *selectedObjects.begin();
-            if (original) {
-                // Clone the object (make sure you have a proper copy/clone constructor or method)
-                Object* duplicate = new Object(*original);  // Assuming copy constructor
-
-                // Rename it to avoid name conflicts
-                duplicate->name += " (Copy)";
-
-                // Ensure it's not parented (or keep the same parent if that's intended)
-                duplicate->parent = nullptr;
-                duplicate->children.clear(); // Clear children if you're only duplicating the base
-
-                // Add to scene
-                scene.addObject(duplicate);
-                selectedObjects = { duplicate };
-            }
-        }
+        duplicateObject();
     }
 
     ImGui::SameLine();
@@ -504,6 +486,28 @@ void Interface::displayObjectProperties(Object* object, int index) {
 
 
     ImGui::PopID();
+}
+
+void Interface::duplicateObject() {
+    if (!selectedObjects.empty()) {
+        // We'll just duplicate the first selected object for now
+        Object* original = *selectedObjects.begin();
+        if (original) {
+            // Clone the object (make sure you have a proper copy/clone constructor or method)
+            Object* duplicate = new Object(*original);  // Assuming copy constructor
+
+            // Rename it to avoid name conflicts
+            duplicate->name += " (Copy)";
+
+            // Ensure it's not parented (or keep the same parent if that's intended)
+            duplicate->parent = nullptr;
+            duplicate->children.clear(); // Clear children if you're only duplicating the base
+
+            // Add to scene
+            scene.addObject(duplicate);
+            selectedObjects = { duplicate };
+        }
+    }
 }
 
 void Interface::clearSelection() {
@@ -621,4 +625,9 @@ void Interface::debugUI() {
     ImGui::Separator();
 
     ImGui::End();
+}
+
+void Interface::setGizmoOperation(ImGuizmo::OPERATION operation)
+{
+    gizmoOperation = operation;
 }

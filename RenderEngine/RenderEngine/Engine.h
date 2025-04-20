@@ -8,6 +8,8 @@
 #include "Shader.h"
 #include "Interface.h"
 #include "Geometry.h"
+#include "InputManager.h"
+#include "KeybindManager.h"
 
 #include "stb_image.h"
 #include <imgui.h>
@@ -31,6 +33,8 @@ public:
     Camera* camera;
     Object* cube;
     Scene scene;
+    InputManager* inputManager;
+    KeybindManager* keybindManager;
 
     int width;
     int height;
