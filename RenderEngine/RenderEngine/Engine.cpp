@@ -307,6 +307,7 @@ void Engine::processInput() {
 void Engine::update(float deltaTime)
 {
     processInput();
+
     inputManager->update(window);
     keybindManager->update(inputManager);
 
