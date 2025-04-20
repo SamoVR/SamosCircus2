@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <unordered_map>
 #include <glm/glm.hpp>
+#include <iostream>
 
 class InputManager {
 public:
@@ -18,9 +19,6 @@ public:
     glm::vec2 getMouseDelta() const;
     glm::vec2 getMousePosition() const;
 
-    float getScrollOffset() const;
-    void setScrollCallback(GLFWwindow* window);
-
 private:
     std::unordered_map<int, bool> currentKeys;
     std::unordered_map<int, bool> previousKeys;
@@ -31,7 +29,4 @@ private:
     glm::vec2 lastMousePos = glm::vec2(0.0f);
     glm::vec2 currentMousePos = glm::vec2(0.0f);
 
-    float scrollOffset = 0.0f;
-
-    static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 };

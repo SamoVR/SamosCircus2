@@ -1,8 +1,6 @@
 #include "InputManager.h"
 
 void InputManager::update(GLFWwindow* window) {
-    // Reset scroll offset
-    scrollOffset = 0.0f;
 
     // Store previous input state
     previousKeys = currentKeys;
@@ -53,20 +51,4 @@ glm::vec2 InputManager::getMouseDelta() const {
 
 glm::vec2 InputManager::getMousePosition() const {
     return currentMousePos;
-}
-
-float InputManager::getScrollOffset() const {
-    return scrollOffset;
-}
-
-void InputManager::setScrollCallback(GLFWwindow* window) {
-    glfwSetWindowUserPointer(window, this);
-    glfwSetScrollCallback(window, scrollCallback);
-}
-
-void InputManager::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-    auto* input = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
-    if (input) {
-        input->scrollOffset = static_cast<float>(yoffset);
-    }
 }

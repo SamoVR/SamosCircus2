@@ -23,6 +23,13 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     }
 }
 
+void Engine::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    // Get the engine instance back from the window's user pointer
+    Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    if (engine && engine->camera)
+        engine->camera->handleScrollInput((float)yoffset);
+}
+
 void setAppIcon(GLFWwindow* window)
 {
     GLFWimage icon;
@@ -195,8 +202,9 @@ bool Engine::init()
         return false;
     }
 
-    glfwSetWindowUserPointer(window, this);
+    glfwSetWindowUserPointer(window, this); //
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     glfwMakeContextCurrent(window);
     glewExperimental = GL_TRUE;
@@ -215,8 +223,6 @@ bool Engine::init()
     backgroundShader = new Shader("background_vertex.glsl", "background_fragment.glsl");
     gridShader = new Shader("grid_vertex.glsl", "grid_fragment.glsl");
 
-    camera = new Camera(width / static_cast<float>(height));  // Properly pass aspect ratio
-
     Texture* cubeTexture = new Texture("assets/images/icon.png");
     cube = new Object("Starting Cube", createCubeVertices(), cubeTexture);
     scene.addObject(cube);
@@ -225,13 +231,10 @@ bool Engine::init()
     targetVisualizer->setScale(glm::vec3(0.1f)); // Make it small
     scene.addInternalObject(targetVisualizer);
 
+    camera = new Camera(width / static_cast<float>(height));
     UI = new Interface(window, scene, camera);
-
     keybindManager = new KeybindManager();
-
     inputManager = new InputManager();
-
-    inputManager->setScrollCallback(window);
 
     initGrid();
     initFullScreenQuad();
@@ -279,11 +282,6 @@ void Engine::processInput() {
         performObjectPicking(mousePos.x, mousePos.y);
     }
 
-    float scroll = inputManager->getScrollOffset();
-    if (scroll != 0.0f) {
-        camera->handleScrollInput(scroll);
-    }
-
     keybindManager->registerKeybind({ GLFW_KEY_S, true, false, false }, [this]() {
         UI->openSaveDialog();
         });
@@ -308,9 +306,9 @@ void Engine::processInput() {
 
 void Engine::update(float deltaTime)
 {
+    processInput();
     inputManager->update(window);
     keybindManager->update(inputManager);
-    processInput();
 
     if (targetVisualizer && camera) {
         targetVisualizer->position = camera->target;
