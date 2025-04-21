@@ -1,7 +1,7 @@
 #include "Interface.h"
 
-Interface::Interface(GLFWwindow* window, Scene& scene, Camera* camera)
-    : window(window), scene(scene), camera(camera), defaultTexture(new Texture("assets/textures/texture_08.png")) {
+Interface::Interface(GLFWwindow* window, Scene& scene, Camera* camera, KeybindManager* keybindManager, InputManager* inputManager)
+    : window(window), scene(scene), camera(camera), keybindManager(keybindManager), inputManager(inputManager), defaultTexture(new Texture("assets/textures/texture_08.png")) {
 
     // ImGui Setup
     IMGUI_CHECKVERSION();
@@ -80,7 +80,7 @@ void Interface::update() {
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     ImGui::End();
 
-    //debugUI();
+    debugUI();
     settingsUI();
     sceneControlsUI();
     objectListUI();
@@ -125,7 +125,6 @@ void Interface::updateFileBrowsers()
 }
 
 void Interface::settingsUI() {
-
     ImGui::Begin("Settings");
 
     ImGui::PushFont(headingFont);
@@ -144,8 +143,71 @@ void Interface::settingsUI() {
     ImGui::Text("Keybinds");
     ImGui::PopFont();
 
+    static std::string waitingForRebind = "";
+    ImGui::Separator();
+
+    for (auto& keybind : keybindManager->getKeybinds()) {
+        ImGui::Text("%s", keybind.name.c_str());
+        ImGui::SameLine();
+
+        std::string comboStr = "";
+        if (keybind.combo.ctrl) comboStr += "Ctrl + ";
+        if (keybind.combo.shift) comboStr += "Shift + ";
+        if (keybind.combo.alt) comboStr += "Alt + ";
+        const char* keyName = glfwGetKeyName(keybind.combo.key, 0);
+        if (keyName)
+            comboStr += keyName;
+        else
+            comboStr += "Key " + std::to_string(keybind.combo.key); // fallback
+
+
+        if (ImGui::Button((comboStr + "##" + keybind.name).c_str())) {
+            waitingForRebind = keybind.name;
+        }
+    }
+
+    if (!waitingForRebind.empty()) {
+        ImGui::OpenPopup("RebindKeyPopup");
+    }
+
+    if (ImGui::BeginPopup("RebindKeyPopup")) {
+        ImGui::Text("Press new key for: %s", waitingForRebind.c_str());
+        ImGui::Text("Hold modifiers (Ctrl, Shift, Alt)");
+
+        for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; ++key) {
+            if (inputManager->isKeyJustPressed(key)) {
+                // Skip modifier-only keys
+                if (key == GLFW_KEY_LEFT_CONTROL || key == GLFW_KEY_RIGHT_CONTROL ||
+                    key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT ||
+                    key == GLFW_KEY_LEFT_ALT || key == GLFW_KEY_RIGHT_ALT)
+                    continue;
+
+                // Now we process a "real" key while modifiers are held
+                KeyCombo newCombo;
+                newCombo.key = key;
+                newCombo.ctrl = ImGui::GetIO().KeyCtrl;
+                newCombo.shift = ImGui::GetIO().KeyShift;
+                newCombo.alt = ImGui::GetIO().KeyAlt;
+
+                keybindManager->rebindKey(waitingForRebind, newCombo);
+                waitingForRebind = "";
+                ImGui::CloseCurrentPopup();
+                break;
+            }
+        }
+
+
+        if (ImGui::Button("Cancel")) {
+            waitingForRebind = "";
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+
     ImGui::End();
 }
+
 
 void Interface::propertiesUI() {
     if (selectedObjects.empty()) return;

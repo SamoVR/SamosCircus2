@@ -182,6 +182,28 @@ void Engine::performObjectPicking(double mouseX, double mouseY)
     }
 }
 
+void Engine::setupDefaultKeybinds() {
+    keybindManager->registerKeybind("Open Save Dialog", { GLFW_KEY_S, true, false, false }, [this]() {
+        UI->openSaveDialog();
+        });
+
+    keybindManager->registerKeybind("Duplicate Object", { GLFW_KEY_D, true, false, false }, [this]() {
+        UI->duplicateObject();
+        });
+
+    keybindManager->registerKeybind("Translate Gizmo", { GLFW_KEY_T, false, false, false }, [this]() {
+        UI->setGizmoOperation(ImGuizmo::OPERATION::TRANSLATE);
+        });
+
+    keybindManager->registerKeybind("Rotate Gizmo", { GLFW_KEY_R, false, false, false }, [this]() {
+        UI->setGizmoOperation(ImGuizmo::OPERATION::ROTATE);
+        });
+
+    keybindManager->registerKeybind("Scale Gizmo", { GLFW_KEY_F, false, false, false }, [this]() {
+        UI->setGizmoOperation(ImGuizmo::OPERATION::SCALE);
+        });
+}
+
 bool Engine::init()
 {
     if (!glfwInit()) {
@@ -232,9 +254,11 @@ bool Engine::init()
     scene.addInternalObject(targetVisualizer);
 
     camera = new Camera(width / static_cast<float>(height));
-    UI = new Interface(window, scene, camera);
     keybindManager = new KeybindManager();
     inputManager = new InputManager();
+    setupDefaultKeybinds();
+
+    UI = new Interface(window, scene, camera, keybindManager, inputManager);
 
     initGrid();
     initFullScreenQuad();
@@ -281,26 +305,6 @@ void Engine::processInput() {
         glm::vec2 mousePos = inputManager->getMousePosition();
         performObjectPicking(mousePos.x, mousePos.y);
     }
-
-    keybindManager->registerKeybind({ GLFW_KEY_S, true, false, false }, [this]() {
-        UI->openSaveDialog();
-        });
-
-    keybindManager->registerKeybind({GLFW_KEY_D, true, false, false}, [this]() {
-        UI->duplicateObject();
-        });
-
-    keybindManager->registerKeybind({ GLFW_KEY_T, false, false, false }, [this]() {
-        UI->setGizmoOperation(ImGuizmo::OPERATION::TRANSLATE);
-        });
-
-    keybindManager->registerKeybind({ GLFW_KEY_R, false, false, false }, [this]() {
-        UI->setGizmoOperation(ImGuizmo::OPERATION::ROTATE);
-        });
-
-    keybindManager->registerKeybind({ GLFW_KEY_F, false, false, false }, [this]() {
-        UI->setGizmoOperation(ImGuizmo::OPERATION::SCALE);
-        });
 
 }
 

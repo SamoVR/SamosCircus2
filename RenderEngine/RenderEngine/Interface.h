@@ -6,6 +6,8 @@
 #include "Geometry.h"
 #include "Texture.h"
 #include "Camera.h"
+#include "KeybindManager.h"
+#include "InputManager.h"
 
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -27,7 +29,7 @@
 
 class Interface {
 public:
-    Interface(GLFWwindow* window, Scene& scene, Camera* camera);
+    Interface(GLFWwindow* window, Scene& scene, Camera* camera, KeybindManager* keybindManager, InputManager* inputManager);
     ~Interface();
 
     void update();
@@ -49,6 +51,8 @@ private:
     ImFont* iconFont;
     Scene& scene;
     Camera* camera;
+    KeybindManager* keybindManager;
+    InputManager* inputManager;
     Texture* defaultTexture;
     Object* textureTargetObject = nullptr;
 

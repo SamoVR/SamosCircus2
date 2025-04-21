@@ -61,6 +61,7 @@ private:
     static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
     bool init();
+    void setupDefaultKeybinds();
     void update(float deltaTime);
     void render();
     void initGrid();
