@@ -664,7 +664,7 @@ void Interface::renderGizmo() {
     }
 }
 
-void Interface::debugUI() {
+void Interface::debugUI() {    
     ImGui::Begin("Debug Controls");
 
     ImGui::PushFont(headingFont);
@@ -673,16 +673,30 @@ void Interface::debugUI() {
 
     ImGui::Separator();
 
-    ImGui::Text("Objects in scene:");
+    ImGui::PushFont(headingFont);
+    ImGui::Text("Objects");
+    ImGui::PopFont();
+    
+    std::unordered_set<Object*> uniqueObjects;
 
-    for (Object* object : scene.getObjects())
-    {
+    for (Object* object : scene.getObjects()) {
+        uniqueObjects.insert(object);
+    }
+    for (Object* object : scene.getInternalObjects()) {
+        uniqueObjects.insert(object);
+    }
+
+    int c = static_cast<int>(uniqueObjects.size());
+    ImGui::Text("Total Objects: %i", c);
+
+    for (Object* object : scene.getObjects()) {
         ImGui::Text("[OBJECT]: %s", object->name.c_str());
     }
-    for (Object* object : scene.getInternalObjects())
-    {
+    for (Object* object : scene.getInternalObjects()) {
         ImGui::Text("[INTERNAL OBJECT]: %s", object->name.c_str());
     }
+
+    
 
     ImGui::Separator();
 

@@ -1,7 +1,9 @@
 #include "Engine.h"
 
 Engine::Engine()
-    : window(nullptr), width(1600), height(800), windowTitle("RIFT Engine"), UI(nullptr)
+    : window(nullptr), width(1600), height(800), windowTitle("RIFT Engine"), UI(nullptr), camera(nullptr), cube(nullptr), 
+    backgroundShader(nullptr), fullScreenQuadVAO(0), fullScreenQuadVBO(0), gridShader(nullptr), gridVAO(0),
+    gridVBO(0), inputManager(nullptr), keybindManager(nullptr), lastFrame(0), shader(nullptr), targetVisualizer(nullptr)
 {
 
 }
@@ -71,7 +73,6 @@ void Engine::initGrid() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
     glBindVertexArray(0);
 }
-
 
 void Engine::initFullScreenQuad() {
     std::vector<Vertex> quadVertices = createFullScreenQuadVertices();

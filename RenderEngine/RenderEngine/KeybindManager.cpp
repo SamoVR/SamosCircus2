@@ -30,7 +30,7 @@ void KeybindManager::rebindKey(const std::string& name, const KeyCombo& newCombo
     for (auto& keybind : namedKeybinds) {
         if (keybind.name == name) {
             keybind.combo = newCombo;
-            std::cout << "Rebound " << name << " to key " << newCombo.key << std::endl;
+            //std::cout << "Rebound " << name << " to key " << newCombo.key << std::endl;
             break;
         }
     }
