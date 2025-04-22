@@ -329,61 +329,62 @@ void Interface::renderObjectNode(Object* object) {
     }
 }
 
-void Interface::sceneControlsUI() {
-    ImGui::Begin("Scene Controls");
+    void Interface::sceneControlsUI() {
+        ImGui::Begin("Scene Controls");
 
-    if (ImGui::Button("Add Object")) {
-        showShapePopup = true;
-        ImGui::OpenPopup("Select Object Shape");
-    }
-
-    showShapeSelectionPopup();
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Save Scene")) {
-        openSaveDialog();
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Load Scene")) {
-        openLoadDialog();
-    }
-
-    ImGui::Separator();
-    //ImGui::Text("Gizmo Mode:");
-
-    float buttonSize = 40.0f;
-    ImVec4 activeColor = ImVec4(0.2f, 0.6f, 0.95f, 1.0f);  // Highlight color
-    ImVec4 hoveredColor = ImVec4(0.3f, 0.7f, 1.0f, 1.0f);   // Hover color
-    ImVec4 normalColor = ImGui::GetStyleColorVec4(ImGuiCol_Button);
-
-    auto squareIconButton = [&](const char* icon, ImGuizmo::OPERATION op) {
-        bool isActive = (gizmoOperation == op);
-        if (isActive) ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
-        else ImGui::PushStyleColor(ImGuiCol_Button, normalColor);
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoveredColor);
-
-        ImGui::PushFont(iconFont);  // Switch to icon font
-
-        if (ImGui::Button(icon, ImVec2(buttonSize, buttonSize))) {
-            setGizmoOperation(op);
+        if (ImGui::Button("Add Object")) {
+            showShapePopup = true;
+            ImGui::OpenPopup("Select Object Shape");
         }
 
-        ImGui::PopFont();           // Back to previous font
-        ImGui::PopStyleColor(2);
+        showShapeSelectionPopup();
+
         ImGui::SameLine();
-    };
+
+        if (ImGui::Button("Save Scene")) {
+            openSaveDialog();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Load Scene")) {
+            openLoadDialog();
+        }
+
+        ImGui::Separator();
+        //ImGui::Text("Gizmo Mode:");
+
+        float buttonSize = 40.0f;
+        ImVec4 activeColor = ImVec4(0.2f, 0.6f, 0.95f, 1.0f);  // Highlight color
+        ImVec4 hoveredColor = ImVec4(0.3f, 0.7f, 1.0f, 1.0f);   // Hover color
+        ImVec4 normalColor = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+
+        auto squareIconButton = [&](const char* icon, ImGuizmo::OPERATION op) {
+            bool isActive = (gizmoOperation == op);
+            if (isActive) ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
+            else ImGui::PushStyleColor(ImGuiCol_Button, normalColor);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoveredColor);
+
+            ImGui::PushFont(iconFont);  // Switch to icon font
+
+            if (ImGui::Button(icon, ImVec2(buttonSize, buttonSize))) {
+                setGizmoOperation(op);
+            }
+
+            ImGui::PopFont();           // Back to previous font
+            ImGui::PopStyleColor(2);
+            ImGui::SameLine();
+        };
 
 
-    // Font Awesome icons: (Translate), (Rotate), (Scale)
-    squareIconButton(ICON_FA_ARROWS_ALT, ImGuizmo::TRANSLATE);  // Translate
-    squareIconButton(ICON_FA_SYNC_ALT, ImGuizmo::ROTATE);       // Rotate
-    squareIconButton(ICON_FA_EXPAND_ARROWS_ALT, ImGuizmo::SCALE); // Scale
+        // Font Awesome icons: (Translate), (Rotate), (Scale)
+        squareIconButton(ICON_FA_ARROWS_ALT, ImGuizmo::TRANSLATE);  // Translate
+        squareIconButton(ICON_FA_SYNC_ALT, ImGuizmo::ROTATE);       // Rotate
+        squareIconButton(ICON_FA_EXPAND_ARROWS_ALT, ImGuizmo::SCALE); // Scale
+        squareIconButton(ICON_FA_PLUS,)
 
-    ImGui::End();
-}
+        ImGui::End();
+    }
 
 void Interface::openSaveDialog() {
     IGFD::FileDialogConfig config;
@@ -663,7 +664,7 @@ void Interface::renderGizmo() {
     }
 }
 
-void Interface::debugUI() {    
+void Interface::debugUI() {
     ImGui::Begin("Debug Controls");
 
     ImGui::PushFont(headingFont);
@@ -671,11 +672,11 @@ void Interface::debugUI() {
     ImGui::PopFont();
 
     ImGui::Separator();
-
+{
     ImGui::PushFont(headingFont);
     ImGui::Text("Objects");
     ImGui::PopFont();
-    
+
     std::unordered_set<Object*> uniqueObjects;
 
     for (Object* object : scene.getObjects()) {
@@ -695,7 +696,14 @@ void Interface::debugUI() {
         ImGui::Text("[INTERNAL OBJECT]: %s", object->name.c_str());
     }
 
-    
+}
+    ImGui::Separator();
+
+    ImGui::PushFont(headingFont);
+    ImGui::Text("Camera");
+    ImGui::PopFont();
+
+    ImGui::DragFloat3("Position",glm::value_ptr(camera->position),0.1f);
 
     ImGui::Separator();
 
