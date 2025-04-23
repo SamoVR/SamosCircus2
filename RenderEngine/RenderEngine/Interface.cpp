@@ -80,7 +80,7 @@ void Interface::update() {
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     ImGui::End();
 
-    //debugUI();
+    debugUI();
     mainMenuBarUI();
     settingsUI();
     sceneControlsUI();
@@ -168,6 +168,12 @@ void Interface::mainMenuBarUI() {
 
 void Interface::settingsUI() {
     ImGui::Begin("Settings");
+
+    ImGui::PushFont(headingFont);
+    ImGui::Text("Scene");
+    ImGui::PopFont();
+
+    // grid on off
 
     ImGui::PushFont(headingFont);
     ImGui::Text("Camera");
