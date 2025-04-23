@@ -81,10 +81,12 @@ void Interface::update() {
     ImGui::End();
 
     //debugUI();
+    mainMenuBarUI();
     settingsUI();
     sceneControlsUI();
     objectListUI();
     propertiesUI();
+    //ImGui::ShowDemoWindow();
 
     updateFileBrowsers();
 
@@ -123,6 +125,46 @@ void Interface::updateFileBrowsers()
     }
 
 }
+
+void Interface::mainMenuBarUI() {
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("New")) {
+                // your logic here
+            }
+            if (ImGui::MenuItem("Open")) {
+                openLoadDialog();
+            }
+            if (ImGui::MenuItem("Save")) {
+                //saveScene();
+            }
+            if (ImGui::MenuItem("Save As...")) {
+                openSaveDialog();
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Edit")) {
+            if (ImGui::MenuItem("Undo", "Ctrl+Z")) {
+                // your undo logic
+            }
+            if (ImGui::MenuItem("Redo", "Ctrl+Y")) {
+                // redo logic
+            }
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Help")) {
+            if (ImGui::MenuItem("About")) {
+                // maybe open a popup or show info
+            }
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMainMenuBar();
+    }
+}
+
 
 void Interface::settingsUI() {
     ImGui::Begin("Settings");
@@ -381,7 +423,6 @@ void Interface::renderObjectNode(Object* object) {
         squareIconButton(ICON_FA_ARROWS_ALT, ImGuizmo::TRANSLATE);  // Translate
         squareIconButton(ICON_FA_SYNC_ALT, ImGuizmo::ROTATE);       // Rotate
         squareIconButton(ICON_FA_EXPAND_ARROWS_ALT, ImGuizmo::SCALE); // Scale
-        squareIconButton(ICON_FA_PLUS,)
 
         ImGui::End();
     }

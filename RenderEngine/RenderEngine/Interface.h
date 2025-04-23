@@ -68,7 +68,9 @@ private:
 
     void displayObjectProperties(Object* object, int index);
     void renderObjectNode(Object* object);
+
     void debugUI();
+    void mainMenuBarUI();
     void sceneControlsUI();
     void objectListUI();
     void settingsUI();
