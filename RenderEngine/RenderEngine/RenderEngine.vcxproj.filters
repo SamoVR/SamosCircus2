@@ -29,6 +29,9 @@
     <Filter Include="dependancies\discord">
       <UniqueIdentifier>{4d04d367-ae30-4d0d-b311-4919c3a270ac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\interface">
+      <UniqueIdentifier>{6751e388-9c4c-42fc-82f2-1df9100986aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui\imgui.cpp">
@@ -59,9 +62,6 @@
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="Engine.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="Interface.cpp">
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
@@ -150,6 +150,12 @@
     </ClCompile>
     <ClCompile Include="libraries\discord-rpc\voice_manager.cpp">
       <Filter>dependancies\discord</Filter>
+    </ClCompile>
+    <ClCompile Include="Interface.cpp">
+      <Filter>core\interface</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationSequencer.cpp">
+      <Filter>core\interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -244,9 +250,6 @@
       <Filter>dependancies\stb</Filter>
     </ClInclude>
     <ClInclude Include="Engine.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="Interface.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
@@ -359,6 +362,12 @@
     </ClInclude>
     <ClInclude Include="libraries\discord-rpc\voice_manager.h">
       <Filter>dependancies\discord</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface.h">
+      <Filter>core\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationSequencer.h">
+      <Filter>core\interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

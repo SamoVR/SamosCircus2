@@ -1,7 +1,8 @@
 #include "Interface.h"
 
 Interface::Interface(GLFWwindow* window, Scene& scene, Camera* camera, KeybindManager* keybindManager, InputManager* inputManager)
-    : window(window), scene(scene), camera(camera), keybindManager(keybindManager), inputManager(inputManager), defaultTexture(new Texture("assets/textures/texture_08.png")) {
+    : window(window), scene(scene), camera(camera), keybindManager(keybindManager), inputManager(inputManager), 
+    defaultTexture(new Texture("assets/textures/texture_08.png")) {
 
     // ImGui Setup
     IMGUI_CHECKVERSION();
@@ -13,6 +14,8 @@ Interface::Interface(GLFWwindow* window, Scene& scene, Camera* camera, KeybindMa
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigDebugHighlightIdConflicts = false;
+
+    animationSequencer = new AnimationSequencer();
 
     // Get the monitor's DPI scaling factor
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -80,12 +83,13 @@ void Interface::update() {
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     ImGui::End();
 
-    debugUI();
+    //debugUI();
     mainMenuBarUI();
     settingsUI();
     sceneControlsUI();
     objectListUI();
     propertiesUI();
+    timelineUI();
     //ImGui::ShowDemoWindow();
 
     updateFileBrowsers();
@@ -377,7 +381,7 @@ void Interface::renderObjectNode(Object* object) {
     }
 }
 
-    void Interface::sceneControlsUI() {
+void Interface::sceneControlsUI() {
         ImGui::Begin("Scene Controls");
 
         if (ImGui::Button("Add Object")) {
@@ -753,6 +757,28 @@ void Interface::debugUI() {
     ImGui::DragFloat3("Position",glm::value_ptr(camera->position),0.1f);
 
     ImGui::Separator();
+
+    ImGui::End();
+}
+
+void Interface::timelineUI() {
+    ImGui::Begin("Timeline");
+
+    if (ImGui::Button("Add Camera Item")) {
+        animationSequencer->items.push_back({ 0, 0, 10 }); // Adds a new Camera item with start and end frames
+    }
+
+    // Now draw the sequencer
+    static bool expanded = true;
+    static int selected = -1;
+    int firstFrame = 0;
+
+    ImSequencer::Sequencer(&animationSequencer->sequencer, &animationSequencer->currentFrame, &expanded, &selected, &firstFrame,
+        ImSequencer::SEQUENCER_EDIT_STARTEND |
+        ImSequencer::SEQUENCER_ADD |
+        ImSequencer::SEQUENCER_DEL |
+        ImSequencer::SEQUENCER_COPYPASTE |
+        ImSequencer::SEQUENCER_CHANGE_FRAME);
 
     ImGui::End();
 }

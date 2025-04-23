@@ -8,13 +8,17 @@
 #include "Camera.h"
 #include "KeybindManager.h"
 #include "InputManager.h"
+#include "AnimationSequencer.h"
 
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+
 #include "ImGuiFileDialog-master/ImGuiFileDialog.h"
 #include "ImGuizmo-master/ImGuizmo.h"
+#include "ImGuizmo-master/ImSequencer.h"
+#include "ImGuizmo-master/ImCurveEdit.h"
 #include "FontAwesome-main/font_awesome.h"
 
 #include <unordered_set>
@@ -55,6 +59,7 @@ private:
     InputManager* inputManager;
     Texture* defaultTexture;
     Object* textureTargetObject = nullptr;
+    AnimationSequencer* animationSequencer = nullptr;
 
     std::unordered_set<Object*> selectedObjects;
     Object* lastSelectedObject = nullptr;
@@ -75,8 +80,10 @@ private:
     void objectListUI();
     void settingsUI();
     void propertiesUI();
+    void timelineUI();
    
     void updateFileBrowsers();
     void showShapeSelectionPopup();
     std::string selectedTexturePath = "assets/textures/texture_08.png";
+
 };
