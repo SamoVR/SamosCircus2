@@ -4,20 +4,14 @@
 #include "ImGuizmo-master/ImCurveEdit.h"
 #include "imgui.h"
 #include "imgui_internal.h"
-
 #include "Object.h"
-//
 
+#include <iostream>
 #include <vector>
 
 struct AnimationSequencer {
-    struct Item {
-        int type;
-        int startFrame;
-        int endFrame;
-        bool expanded = false;
-        Object* animatedObject = nullptr;
-    };
+
+    enum class TransformMode { Position, Rotation, Scale };
 
     struct RampEdit : public ImCurveEdit::Delegate {
         RampEdit();
@@ -40,6 +34,16 @@ struct AnimationSequencer {
         size_t mPointCount[3];
         bool mbVisible[3];
         ImVec2 mMin, mMax;
+    };
+
+    struct Item {
+        int type;
+        int startFrame;
+        int endFrame;
+        bool expanded = false;
+        Object* animatedObject = nullptr;
+        RampEdit rampEdit;
+        TransformMode mode = TransformMode::Position;
     };
 
     struct SequenceImpl : public ImSequencer::SequenceInterface {
@@ -67,6 +71,5 @@ struct AnimationSequencer {
     int currentFrame = 0;
     int frameMin = 0, frameMax = 200;
     std::vector<Item> items;
-    RampEdit rampEdit;
     SequenceImpl sequencer;
 };

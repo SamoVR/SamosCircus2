@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cstdio>
 
-static const char* typeNames[] = { "Camera", "Music", "ScreenEffect", "FadeIn", "Animation" };
+static const char* typeNames[] = { "Object", "Placeholder"};
 
 // --- RampEdit implementation (same as you already had) ---
 AnimationSequencer::RampEdit::RampEdit() {
@@ -34,7 +34,9 @@ void AnimationSequencer::RampEdit::SortValues(size_t i) {
 // --- SequenceImpl implementation ---
 const char* AnimationSequencer::SequenceImpl::GetItemTypeName(int typeIndex) const { return typeNames[typeIndex]; }
 const char* AnimationSequencer::SequenceImpl::GetItemLabel(int i) const {
-    static char buf[64]; sprintf_s(buf, "[%02d] %s", i, GetItemTypeName(parent->items[i].type)); return buf;
+    static char buf[64];
+    sprintf_s(buf, "[%02d] %s", i, GetItemTypeName(parent->items[i].type));
+    return buf;
 }
 void AnimationSequencer::SequenceImpl::Get(int i, int** s, int** e, int* t, unsigned int* c) {
     if (s) *s = &parent->items[i].startFrame;
@@ -50,24 +52,40 @@ void AnimationSequencer::SequenceImpl::DoubleClick(int i) {
     for (auto& item : parent->items) item.expanded = false;
     parent->items[i].expanded = !parent->items[i].expanded;
 }
-void AnimationSequencer::SequenceImpl::CustomDraw(int i, ImDrawList* draw, const ImRect& rc, const ImRect& legend, const ImRect& clip, const ImRect& legendClip) {
+inline ImVec2 operator-(const ImVec2& a, const ImVec2& b) { return ImVec2(a.x - b.x, a.y - b.y); }
+
+void AnimationSequencer::SequenceImpl::CustomDraw(int i, ImDrawList* draw, const ImRect& rc, const ImRect&, const ImRect& clip, const ImRect&) {
     Item& item = parent->items[i];
     Object* obj = item.animatedObject;
     if (!obj) return;
 
-    parent->rampEdit.mMin.x = float(parent->frameMin);
-    parent->rampEdit.mMax.x = float(parent->frameMax);
-
     ImGui::SetCursorScreenPos(rc.Min);
-    ImCurveEdit::Edit(parent->rampEdit, rc.GetSize(), 1337 + i, &clip);
+    ImGui::PushID(i);
 
-    // Apply transformation based on current frame & curves
+    // Transform mode selector
+    const char* modes[] = { "Position", "Rotation", "Scale" };
+    int currentMode = static_cast<int>(item.mode);
+    ImGui::Combo("Transform", &currentMode, modes, IM_ARRAYSIZE(modes));
+    item.mode = static_cast<TransformMode>(currentMode);
+
+    // Curve labels
+    ImGui::Text("Curves: X (Red), Y (Green), Z (Blue)");
+
+    // Set curve bounds to match timeline
+    item.rampEdit.mMin.x = float(parent->frameMin);
+    item.rampEdit.mMax.x = float(parent->frameMax);
+
+    ImGui::SetCursorScreenPos(ImVec2(rc.Min.x, rc.Min.y + 40)); // leave space for labels
+    ImCurveEdit::Edit(item.rampEdit, rc.GetSize() - ImVec2(0, 40), 1337 + i, &clip);
+
+    // Apply the animation to object
     int current = parent->currentFrame;
     float time = float(current);
+    glm::vec3 result(0.0f);
 
     for (int curveIndex = 0; curveIndex < 3; ++curveIndex) {
-        ImVec2* pts = parent->rampEdit.GetPoints(curveIndex);
-        size_t count = parent->rampEdit.GetPointCount(curveIndex);
+        ImVec2* pts = item.rampEdit.GetPoints(curveIndex);
+        size_t count = item.rampEdit.GetPointCount(curveIndex);
         float value = 0.0f;
 
         for (size_t p = 0; p < count - 1; ++p) {
@@ -78,13 +96,16 @@ void AnimationSequencer::SequenceImpl::CustomDraw(int i, ImDrawList* draw, const
             }
         }
 
-        // Apply animation to object
-        switch (curveIndex) {
-        case 0: obj->position.x = value; break;
-        case 1: obj->position.y = value; break;
-        case 2: obj->position.z = value; break;
-        }
+        result[curveIndex] = value;
     }
+
+    switch (item.mode) {
+    case TransformMode::Position: obj->position = result; break;
+    case TransformMode::Rotation: obj->rotation = result; break;
+    case TransformMode::Scale: obj->scale = result; break;
+    }
+
+    ImGui::PopID();
 }
 
 void AnimationSequencer::SequenceImpl::CustomDrawCompact(int, ImDrawList*, const ImRect&, const ImRect&) {}

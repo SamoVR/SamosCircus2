@@ -49,7 +49,7 @@ Interface::~Interface() {
     ImGui::DestroyContext();
 }
 
-void Interface::update() {
+void Interface::update(float deltaTime) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -89,7 +89,7 @@ void Interface::update() {
     sceneControlsUI();
     objectListUI();
     propertiesUI();
-    timelineUI();
+    timelineUI(deltaTime);
     //ImGui::ShowDemoWindow();
 
     updateFileBrowsers();
@@ -765,27 +765,51 @@ void Interface::debugUI() {
     ImGui::End();
 }
 
-void Interface::timelineUI() {
+void Interface::timelineUI(float deltaTime) {
+    static bool playing = false;
+
     ImGui::Begin("Timeline");
 
-    if (ImGui::Button("Add Camera Item")) {
-        animationSequencer->items.push_back({ 0, 0, 10 }); // Adds a new Camera item with start and end frames
+    // Play/Pause Controls
+    if (ImGui::Button(playing ? "Pause" : "Play")) {
+        playing = !playing;
     }
 
-    // Now draw the sequencer
+    ImGui::SameLine();
+    ImGui::Text("Frame: %d", animationSequencer->currentFrame);
+    // Timeline (this might overwrite currentFrame!)
     static bool expanded = true;
     static int selected = -1;
     int firstFrame = 0;
+    static float frameAccumulator = 0.f;
 
-    ImSequencer::Sequencer(&animationSequencer->sequencer, &animationSequencer->currentFrame, &expanded, &selected, &firstFrame,
+    ImSequencer::Sequencer(
+        &animationSequencer->sequencer,
+        &animationSequencer->currentFrame,
+        &expanded, &selected, &firstFrame,
         ImSequencer::SEQUENCER_EDIT_STARTEND |
-        ImSequencer::SEQUENCER_ADD |
-        ImSequencer::SEQUENCER_DEL |
-        ImSequencer::SEQUENCER_COPYPASTE |
-        ImSequencer::SEQUENCER_CHANGE_FRAME);
+        ImSequencer::SEQUENCER_CHANGE_FRAME
+    );
+
+    // Advance animation AFTER sequencer to avoid it being overwritten
+    if (playing) {
+
+        frameAccumulator += deltaTime * 30.0f; // Accumulate "partial frames"
+
+        int framesToAdvance = (int)frameAccumulator;
+        if (framesToAdvance > 0) {
+            animationSequencer->currentFrame += framesToAdvance;
+            frameAccumulator -= framesToAdvance;
+
+            if (animationSequencer->currentFrame > animationSequencer->frameMax)
+                animationSequencer->currentFrame = animationSequencer->frameMin;
+        }
+    }
+
 
     ImGui::End();
 }
+
 
 void Interface::setGizmoOperation(ImGuizmo::OPERATION operation)
 {

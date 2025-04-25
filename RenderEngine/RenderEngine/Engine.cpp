@@ -278,7 +278,7 @@ void Engine::run()
         lastFrame = currentFrame;
 
         update(deltaTime);
-        render();
+        render(deltaTime);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -322,7 +322,7 @@ void Engine::update(float deltaTime)
 
 }
 
-void Engine::render()
+void Engine::render(float deltaTime)
 {
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -357,7 +357,7 @@ void Engine::render()
         obj->draw(*shader, *camera);
     }
     
-    UI->update();
+    UI->update(deltaTime);
 
 }
 
