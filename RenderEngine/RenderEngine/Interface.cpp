@@ -49,7 +49,7 @@ Interface::~Interface() {
     ImGui::DestroyContext();
 }
 
-void Interface::update() {
+void Interface::update(float deltaTime) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -89,7 +89,7 @@ void Interface::update() {
     sceneControlsUI();
     objectListUI();
     propertiesUI();
-    timelineUI();
+    timelineUI(deltaTime);
     //ImGui::ShowDemoWindow();
 
     updateFileBrowsers();
@@ -574,7 +574,6 @@ void Interface::displayObjectProperties(Object* object, int index) {
     ImGui::SameLine();
 
     if (ImGui::Button("Remove Object")) {
-        // First, find the index of the object in the scene's object list.
         auto it = std::find(scene.getObjects().begin(), scene.getObjects().end(), object);
 
         if (it != scene.getObjects().end()) {
@@ -582,18 +581,24 @@ void Interface::displayObjectProperties(Object* object, int index) {
 
             selectedObjects.erase(object);
 
-            if (!object->children.empty()) // if object has children, remove children
-            {
-                for (int i = 0; i < object->children.size(); i++)
-                {
-                    scene.removeObject(0,object->children[i]);
+            if (!object->children.empty()) {
+                for (int i = 0; i < object->children.size(); i++) {
+                    scene.removeObject(0, object->children[i]);
                 }
             }
-            scene.removeObject(index); // remove object
 
-            // Remove the object from the selection list as 
+            // Remove animations first
+            auto& items = animationSequencer->items;
+            items.erase(
+                std::remove_if(items.begin(), items.end(),
+                    [object](const AnimationSequencer::Item& item) {
+                        return item.animatedObject == object;
+                    }),
+                items.end()
+            );
 
-            // Clear the textureTargetObject if it was pointing to this object
+            scene.removeObject(index);
+
             if (textureTargetObject == object) {
                 textureTargetObject = nullptr;
             }
@@ -604,6 +609,12 @@ void Interface::displayObjectProperties(Object* object, int index) {
 
     ImGui::PopID();
 }
+
+//
+// ISSUES:
+// When a duplicate of an object is deleted, the duplicate + original object gets removed; -- NOT FIXED
+// 
+//
 
 void Interface::duplicateObject() {
     if (!selectedObjects.empty()) {
@@ -765,27 +776,52 @@ void Interface::debugUI() {
     ImGui::End();
 }
 
-void Interface::timelineUI() {
+void Interface::timelineUI(float deltaTime) {
+    static bool playing = false;
+
     ImGui::Begin("Timeline");
 
-    if (ImGui::Button("Add Camera Item")) {
-        animationSequencer->items.push_back({ 0, 0, 10 }); // Adds a new Camera item with start and end frames
+    // Play/Pause Controls
+    if (ImGui::Button(playing ? "Pause" : "Play")) {
+        playing = !playing;
     }
 
-    // Now draw the sequencer
+    ImGui::SameLine();
+    ImGui::Text("Frame: %d", animationSequencer->currentFrame);
+    // Timeline (this might overwrite currentFrame!)
     static bool expanded = true;
     static int selected = -1;
     int firstFrame = 0;
+    float fps = 30.0f;
+    static float frameAccumulator = 0.f;
 
-    ImSequencer::Sequencer(&animationSequencer->sequencer, &animationSequencer->currentFrame, &expanded, &selected, &firstFrame,
+    ImSequencer::Sequencer(
+        &animationSequencer->sequencer,
+        &animationSequencer->currentFrame,
+        &expanded, &selected, &firstFrame,
         ImSequencer::SEQUENCER_EDIT_STARTEND |
-        ImSequencer::SEQUENCER_ADD |
-        ImSequencer::SEQUENCER_DEL |
-        ImSequencer::SEQUENCER_COPYPASTE |
-        ImSequencer::SEQUENCER_CHANGE_FRAME);
+        ImSequencer::SEQUENCER_CHANGE_FRAME
+    );
+
+    // Advance animation AFTER sequencer to avoid it being overwritten
+    if (playing) {
+
+        frameAccumulator += deltaTime * fps; // Accumulate "partial frames"
+
+        int framesToAdvance = (int)frameAccumulator;
+        if (framesToAdvance > 0) {
+            animationSequencer->currentFrame += framesToAdvance;
+            frameAccumulator -= framesToAdvance;
+
+            if (animationSequencer->currentFrame > animationSequencer->frameMax)
+                animationSequencer->currentFrame = animationSequencer->frameMin;
+        }
+    }
+
 
     ImGui::End();
 }
+
 
 void Interface::setGizmoOperation(ImGuizmo::OPERATION operation)
 {

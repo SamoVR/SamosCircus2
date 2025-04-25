@@ -36,7 +36,7 @@ public:
     Interface(GLFWwindow* window, Scene& scene, Camera* camera, KeybindManager* keybindManager, InputManager* inputManager);
     ~Interface();
 
-    void update();
+    void update(float deltaTime);
     const std::unordered_set<Object*>& getSelectedObjects() const {
         return selectedObjects;
     }
@@ -80,7 +80,7 @@ private:
     void objectListUI();
     void settingsUI();
     void propertiesUI();
-    void timelineUI();
+    void timelineUI(float deltaTime);
    
     void updateFileBrowsers();
     void showShapeSelectionPopup();

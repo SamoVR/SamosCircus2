@@ -63,7 +63,7 @@ private:
     bool init();
     void setupDefaultKeybinds();
     void update(float deltaTime);
-    void render();
+    void render(float deltaTime);
     void initGrid();
     void initFullScreenQuad();
     void renderGrid();
