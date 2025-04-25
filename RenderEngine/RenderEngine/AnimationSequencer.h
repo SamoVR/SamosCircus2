@@ -4,6 +4,10 @@
 #include "ImGuizmo-master/ImCurveEdit.h"
 #include "imgui.h"
 #include "imgui_internal.h"
+
+#include "Object.h"
+//
+
 #include <vector>
 
 struct AnimationSequencer {
@@ -12,6 +16,7 @@ struct AnimationSequencer {
         int startFrame;
         int endFrame;
         bool expanded = false;
+        Object* animatedObject = nullptr;
     };
 
     struct RampEdit : public ImCurveEdit::Delegate {

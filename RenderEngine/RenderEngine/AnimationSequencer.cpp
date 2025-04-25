@@ -51,11 +51,42 @@ void AnimationSequencer::SequenceImpl::DoubleClick(int i) {
     parent->items[i].expanded = !parent->items[i].expanded;
 }
 void AnimationSequencer::SequenceImpl::CustomDraw(int i, ImDrawList* draw, const ImRect& rc, const ImRect& legend, const ImRect& clip, const ImRect& legendClip) {
+    Item& item = parent->items[i];
+    Object* obj = item.animatedObject;
+    if (!obj) return;
+
     parent->rampEdit.mMin.x = float(parent->frameMin);
     parent->rampEdit.mMax.x = float(parent->frameMax);
+
     ImGui::SetCursorScreenPos(rc.Min);
     ImCurveEdit::Edit(parent->rampEdit, rc.GetSize(), 1337 + i, &clip);
+
+    // Apply transformation based on current frame & curves
+    int current = parent->currentFrame;
+    float time = float(current);
+
+    for (int curveIndex = 0; curveIndex < 3; ++curveIndex) {
+        ImVec2* pts = parent->rampEdit.GetPoints(curveIndex);
+        size_t count = parent->rampEdit.GetPointCount(curveIndex);
+        float value = 0.0f;
+
+        for (size_t p = 0; p < count - 1; ++p) {
+            if (pts[p].x <= time && pts[p + 1].x >= time) {
+                float t = (time - pts[p].x) / (pts[p + 1].x - pts[p].x);
+                value = ImLerp(pts[p].y, pts[p + 1].y, t);
+                break;
+            }
+        }
+
+        // Apply animation to object
+        switch (curveIndex) {
+        case 0: obj->position.x = value; break;
+        case 1: obj->position.y = value; break;
+        case 2: obj->position.z = value; break;
+        }
+    }
 }
+
 void AnimationSequencer::SequenceImpl::CustomDrawCompact(int, ImDrawList*, const ImRect&, const ImRect&) {}
 
 AnimationSequencer::AnimationSequencer() : sequencer(this) {

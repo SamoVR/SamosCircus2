@@ -563,6 +563,10 @@ void Interface::displayObjectProperties(Object* object, int index) {
 
     ImGui::Separator();
 
+    if (ImGui::Button("Animate Object")) {
+        animationSequencer->items.push_back({0,0,30,false,object});
+    }
+
     if (ImGui::Button("Duplicate Object")) {
         duplicateObject();
     }
