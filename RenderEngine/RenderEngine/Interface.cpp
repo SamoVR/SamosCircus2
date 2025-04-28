@@ -574,7 +574,6 @@ void Interface::displayObjectProperties(Object* object, int index) {
     ImGui::SameLine();
 
     if (ImGui::Button("Remove Object")) {
-        // First, find the index of the object in the scene's object list.
         auto it = std::find(scene.getObjects().begin(), scene.getObjects().end(), object);
 
         if (it != scene.getObjects().end()) {
@@ -582,18 +581,24 @@ void Interface::displayObjectProperties(Object* object, int index) {
 
             selectedObjects.erase(object);
 
-            if (!object->children.empty()) // if object has children, remove children
-            {
-                for (int i = 0; i < object->children.size(); i++)
-                {
-                    scene.removeObject(0,object->children[i]);
+            if (!object->children.empty()) {
+                for (int i = 0; i < object->children.size(); i++) {
+                    scene.removeObject(0, object->children[i]);
                 }
             }
-            scene.removeObject(index); // remove object
 
-            // Remove the object from the selection list as 
+            // Remove animations first
+            auto& items = animationSequencer->items;
+            items.erase(
+                std::remove_if(items.begin(), items.end(),
+                    [object](const AnimationSequencer::Item& item) {
+                        return item.animatedObject == object;
+                    }),
+                items.end()
+            );
 
-            // Clear the textureTargetObject if it was pointing to this object
+            scene.removeObject(index);
+
             if (textureTargetObject == object) {
                 textureTargetObject = nullptr;
             }
