@@ -31,6 +31,9 @@ public:
     std::vector<Object*> children;
 
     bool isSelected = false;
+    bool showMeasureX = false;
+    bool showMeasureY = false;
+    bool showMeasureZ = false;
 
     void draw(Shader& shader,Camera& camera) const;
 
