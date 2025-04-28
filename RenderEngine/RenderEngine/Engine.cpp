@@ -355,6 +355,7 @@ void Engine::render(float deltaTime)
         if (!obj->texture)
             shader->setVec3("color", obj->color);
         obj->draw(*shader, *camera);
+        UI->renderMeasurementLines(obj);
     }
     
     UI->update(deltaTime);
