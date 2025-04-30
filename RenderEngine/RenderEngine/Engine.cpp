@@ -46,6 +46,18 @@ void setAppIcon(GLFWwindow* window)
     }
 }
 
+void Engine::initLines() {
+    glGenVertexArrays(1, &lineVAO);
+    glGenBuffers(1, &lineVBO);
+
+    glBindVertexArray(lineVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 2, nullptr, GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    glBindVertexArray(0);
+}
+
 void Engine::initGrid() {
     const int gridSize = 10;
     std::vector<glm::vec3> gridVertices;
@@ -123,6 +135,75 @@ void Engine::renderGrid() {
     glBindVertexArray(0);
 
 }
+
+void Engine::renderMeasurementLines(Object* object) {
+    glm::vec3 pos = object->position;
+    glm::vec3 scale = object->scale;
+
+    // Colors for measurement lines (different color for each axis for clarity)
+    ImVec4 colorX = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red for X
+    ImVec4 colorY = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green for Y
+    ImVec4 colorZ = ImVec4(0.0f, 0.0f, 1.0f, 1.0f); // Blue for Z
+
+    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), pos);  // Position transformation
+    modelMatrix = glm::scale(modelMatrix, scale);  // Scale transformation
+
+    // If object rotation is involved, apply it like this:
+    // modelMatrix = glm::rotate(modelMatrix, object->rotation.x, glm::vec3(1, 0, 0)); // Example for X rotation
+
+    if (object->showMeasureX) {
+        float length = scale.x;
+        glm::vec3 start = glm::vec3(0.0f, scale.y * 0.5f, 0.0f);
+        glm::vec3 end = glm::vec3(length, scale.y * 0.5f, 0.0f);
+        start = glm::vec3(modelMatrix * glm::vec4(start, 1.0f));
+        end = glm::vec3(modelMatrix * glm::vec4(end, 1.0f));
+        glDisable(GL_DEPTH_TEST);
+        drawLine(start, end, colorX);
+        glEnable(GL_DEPTH_TEST);
+        UI->debugTexts.push_back({ (start + end) * 0.5f, std::to_string(length) + "m", colorX, ImVec2(0,-15) });
+    }
+    if (object->showMeasureY) {
+        float length = scale.y;
+        glm::vec3 start = glm::vec3(0.0f, 0.0f, scale.z * 0.5f);
+        glm::vec3 end = glm::vec3(0.0f, length, scale.z * 0.5f);
+        start = glm::vec3(modelMatrix * glm::vec4(start, 1.0f));
+        end = glm::vec3(modelMatrix * glm::vec4(end, 1.0f));
+        glDisable(GL_DEPTH_TEST);
+        drawLine(start, end, colorY);
+        glEnable(GL_DEPTH_TEST);
+        UI->debugTexts.push_back({ (start + end) * 0.5f, std::to_string(length) + "m", colorY, ImVec2(0,20) });
+
+    }
+    if (object->showMeasureZ) {
+        float length = scale.z;
+        glm::vec3 start = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 end = glm::vec3(0.0f, 0.0f, length);
+        start = glm::vec3(modelMatrix * glm::vec4(start, 1.0f));
+        end = glm::vec3(modelMatrix * glm::vec4(end, 1.0f));
+        glDisable(GL_DEPTH_TEST);
+        drawLine(start, end, colorZ);
+        glEnable(GL_DEPTH_TEST);
+        UI->debugTexts.push_back({ (start + end) * 0.5f, std::to_string(length) + "m", colorZ, ImVec2(0,15) });
+    }
+}
+
+void Engine::drawLine(const glm::vec3& start, const glm::vec3& end, const ImVec4& color) {
+    glm::vec3 vertices[2] = { start, end };
+
+    lineShader->use();
+    lineShader->setMat4("view", camera->getViewMatrix());
+    lineShader->setMat4("projection", camera->getProjectionMatrix());
+    lineShader->setMat4("model", glm::mat4(1.0f));
+
+    glBindVertexArray(lineVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
+    glDrawArrays(GL_LINES, 0, 2);
+    glBindVertexArray(0);
+}
+
+
 
 void Engine::performObjectPicking(double mouseX, double mouseY)
 {
@@ -245,6 +326,7 @@ bool Engine::init()
     shader = new Shader("vertex.glsl", "fragment.glsl");
     backgroundShader = new Shader("background_vertex.glsl", "background_fragment.glsl");
     gridShader = new Shader("grid_vertex.glsl", "grid_fragment.glsl");
+    lineShader = new Shader("line_vertex.glsl", "line_fragment.glsl");
 
     Texture* cubeTexture = new Texture("assets/images/icon.png");
     cube = new Object("Starting Cube", createCubeVertices(), cubeTexture);
@@ -261,6 +343,7 @@ bool Engine::init()
 
     UI = new Interface(window, scene, camera, keybindManager, inputManager);
 
+    initLines();
     initGrid();
     initFullScreenQuad();
 
@@ -345,7 +428,6 @@ void Engine::render(float deltaTime)
             shader->setVec3("color", obj->color);
             
         obj->draw(*shader, *camera);  // Use the color instead
-
         glDisable(GL_BLEND);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
@@ -355,7 +437,7 @@ void Engine::render(float deltaTime)
         if (!obj->texture)
             shader->setVec3("color", obj->color);
         obj->draw(*shader, *camera);
-        UI->renderMeasurementLines(obj);
+        renderMeasurementLines(obj);   
     }
     
     UI->update(deltaTime);

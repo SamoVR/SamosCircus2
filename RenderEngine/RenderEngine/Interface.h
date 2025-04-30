@@ -44,12 +44,20 @@ public:
     void selectObject(Object* object, bool appendSelection);
     void propagateTransform(Object* parent, const glm::mat4& delta);
 
-    void renderMeasurementLines(Object* object);
-
     void duplicateObject();
     void openSaveDialog();
     void openLoadDialog();
     void setGizmoOperation(ImGuizmo::OPERATION operation);
+
+    struct DebugText {
+        glm::vec3 worldPosition;
+        std::string text;
+        ImVec4 color;
+        ImVec2 screenOffset;
+    };
+
+    std::vector<DebugText> debugTexts;
+
 
 private:
     GLFWwindow* window;
@@ -76,8 +84,7 @@ private:
     void displayObjectProperties(Object* object, int index);
     void renderObjectNode(Object* object);
 
-    void renderLine(const glm::vec3& start, const glm::vec3& end, const ImVec4& color);
-    void renderText(const glm::vec3& position, const std::string& text, const ImVec4& color);
+    void renderText();
 
     void debugUI();
     void mainMenuBarUI();

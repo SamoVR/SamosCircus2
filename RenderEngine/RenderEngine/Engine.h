@@ -45,6 +45,7 @@ private:
     Shader* shader;
     Shader* backgroundShader;
     Shader* gridShader;
+    Shader* lineShader;
     Object* targetVisualizer;
 
     GLFWwindow* window;
@@ -55,6 +56,7 @@ private:
     int gridLineCount = 0;
     float lastFrame;
 
+    GLuint lineVAO, lineVBO;
     GLuint gridVAO, gridVBO;
     GLuint fullScreenQuadVAO, fullScreenQuadVBO;
 
@@ -64,10 +66,13 @@ private:
     void setupDefaultKeybinds();
     void update(float deltaTime);
     void render(float deltaTime);
+    void initLines();
     void initGrid();
     void initFullScreenQuad();
+    void drawLine(const glm::vec3& start, const glm::vec3& end, const ImVec4& color);
     void renderGrid();
     void renderBackground();
+    void renderMeasurementLines(Object* object);
     void performObjectPicking(double mouseX, double mouseY);
     void processInput();
     void cleanup();

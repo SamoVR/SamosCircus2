@@ -94,6 +94,8 @@ void Interface::update(float deltaTime) {
 
     updateFileBrowsers();
 
+    renderText();
+
     renderGizmo();
 
     ImGui::Render();
@@ -625,77 +627,27 @@ void Interface::displayObjectProperties(Object* object, int index) {
     ImGui::PopID();
 }
 
-void Interface::renderMeasurementLines(Object* object) {
-    glm::vec3 pos = object->position;
-    glm::vec3 scale = object->scale;
+void Interface::renderText() {
+    for (const auto& dbg : debugTexts) {
+        glm::vec4 clipSpace = camera->getProjectionMatrix() * camera->getViewMatrix() * glm::vec4(dbg.worldPosition, 1.0f);
+        if (clipSpace.w == 0.0f) continue;
 
-    // Colors for measurement lines (different color for each axis for clarity)
-    ImVec4 colorX = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red for X
-    ImVec4 colorY = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green for Y
-    ImVec4 colorZ = ImVec4(0.0f, 0.0f, 1.0f, 1.0f); // Blue for Z
+        clipSpace /= clipSpace.w;
+        if (clipSpace.x < -1.0f || clipSpace.x > 1.0f || clipSpace.y < -1.0f || clipSpace.y > 1.0f || clipSpace.z < 0.0f || clipSpace.z > 1.0f)
+            continue;
 
-    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), pos);  // Position transformation
-    modelMatrix = glm::scale(modelMatrix, scale);  // Scale transformation
+        ImVec2 displaySize = ImGui::GetIO().DisplaySize;
+        ImVec2 offset;
 
-    // If object rotation is involved, apply it like this:
-    // modelMatrix = glm::rotate(modelMatrix, object->rotation.x, glm::vec3(1, 0, 0)); // Example for X rotation
+        float x = (clipSpace.x + 1.0f) * 0.5f * displaySize.x + offset.x;
+        float y = (1.0f - clipSpace.y) * 0.5f * displaySize.y + offset.y;
 
-    if (object->showMeasureX) {
-        float length = scale.x;
-        glm::vec3 start = glm::vec3(0.0f, scale.y * 0.5f, 0.0f);
-        glm::vec3 end = glm::vec3(length, scale.y * 0.5f, 0.0f);
-        start = glm::vec3(modelMatrix * glm::vec4(start, 1.0f));
-        end = glm::vec3(modelMatrix * glm::vec4(end, 1.0f));
-        glDisable(GL_DEPTH_TEST);
-        renderLine(start, end, colorX);
-        glEnable(GL_DEPTH_TEST);
-        //renderText((start + end) * 0.5f, std::to_string(length) + "m", colorX);
+        ImGui::GetBackgroundDrawList()->AddText(ImVec2(x, y), ImColor(dbg.color), dbg.text.c_str());
     }
-    if (object->showMeasureY) {
-        float length = scale.y;
-        glm::vec3 start = glm::vec3(0.0f, 0.0f, scale.z * 0.5f);
-        glm::vec3 end = glm::vec3(0.0f, length, scale.z * 0.5f);
-        start = glm::vec3(modelMatrix * glm::vec4(start, 1.0f));
-        end = glm::vec3(modelMatrix * glm::vec4(end, 1.0f));
-        glDisable(GL_DEPTH_TEST);
-        renderLine(start, end, colorY);
-        glEnable(GL_DEPTH_TEST);
-        //renderText((start + end) * 0.5f, std::to_string(length) + "m", colorY);
-    }
-    if (object->showMeasureZ) {
-        float length = scale.z;
-        glm::vec3 start = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3 end = glm::vec3(0.0f, 0.0f, length);
-        start = glm::vec3(modelMatrix * glm::vec4(start, 1.0f));
-        end = glm::vec3(modelMatrix * glm::vec4(end, 1.0f));
-        glDisable(GL_DEPTH_TEST);
-        renderLine(start, end, colorZ);
-        glEnable(GL_DEPTH_TEST);
-        //renderText((start + end) * 0.5f, std::to_string(length) + "m", colorZ);
-    }
+
+    debugTexts.clear(); // Clear after rendering
 }
 
-
-void Interface::renderLine(const glm::vec3& start, const glm::vec3& end, const ImVec4& color) {
-    // Use OpenGL to render a line between start and end points with a specified color
-    glBegin(GL_LINES);
-    glColor4f(color.x, color.y, color.z, color.w);
-    glVertex3f(start.x, start.y, start.z);
-    glVertex3f(end.x, end.y, end.z);
-    glEnd();
-}
-
-void Interface::renderText(const glm::vec3& position, const std::string& text, const ImVec4& color) {
-    glm::vec4 screenPos = camera->getProjectionMatrix() * camera->getViewMatrix() * glm::vec4(position, 1.0f);
-    screenPos /= screenPos.w;  // Perspective divide
-
-    // Convert to 2D coordinates
-    float x = (screenPos.x + 1.0f) * 0.5f * 1920;
-    float y = (1.0f - screenPos.y) * 0.5f * 1080;
-
-    ImGui::GetWindowDrawList()->AddText(ImVec2(x, y), ImColor(color), text.c_str());
-
-}
 
 
 void Interface::duplicateObject() {

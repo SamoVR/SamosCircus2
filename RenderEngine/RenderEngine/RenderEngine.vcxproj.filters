@@ -395,6 +395,12 @@
     <None Include="discord_game_sdk.dll">
       <Filter>dependancies</Filter>
     </None>
+    <None Include="line_vertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="line_fragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Library Include="glew32.lib">
