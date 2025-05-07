@@ -452,6 +452,18 @@
     <Image Include="assets\images\Mona_Lisa.png">
       <Filter>assets</Filter>
     </Image>
+    <Image Include="assets\textures\stone.jpg">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\textures\weird.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\textures\wood_floor.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\textures\wood_wall.jpg">
+      <Filter>assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RenderEngine.rc">
