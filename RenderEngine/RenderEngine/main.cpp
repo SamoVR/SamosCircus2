@@ -3,9 +3,9 @@
 #include "resource.h"
 #include <iostream>
 
-int main() {
-//int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) { // !! THIS IS TO BE UNCOMMENTED IN RELEASE VERSION !!
-   HINSTANCE hInstance = GetModuleHandle(nullptr);  // Get current instance handle !! THIS IS TO BE COMMENTED IN RELEASE VERSION !!
+//int main() {
+int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) { // !! THIS IS TO BE UNCOMMENTED IN RELEASE VERSION !!
+   //HINSTANCE hInstance = GetModuleHandle(nullptr);  // Get current instance handle !! THIS IS TO BE COMMENTED IN RELEASE VERSION !!
    
     WNDCLASS wc = { 0 };
     wc.lpfnWndProc = DefWindowProc;
