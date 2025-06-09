@@ -4,11 +4,14 @@
 #include <thread>
 
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 //* GLOBALS *//
 
 int cubeAmount = 100;
-
+bool randomizeCoords = false;
+bool rotateGradually = true;
+bool loop = false;
 
 //**********//
 
@@ -16,9 +19,11 @@ struct Cube {
 	float x, y;
 	float size;
 	float rotation;
+	glm::vec3 color;
+	bool gravity;
 
-	Cube(float x, float y, float size = 1.0f, float rotation = 0.0f)
-		: x(x), y(y), size(size), rotation(rotation) {}
+	Cube(float x, float y, float size = 1.0f, float rotation = 0.0f, glm::vec3 color = glm::vec3(0.0f,0.0f,0.0f), bool gravity = true)
+		: x(x), y(y), size(size), rotation(rotation), color(color), gravity(gravity) {}
 
 	void draw() const {
 		glPushMatrix(); // save current transform
@@ -28,7 +33,7 @@ struct Cube {
 		glScalef(size, size, 1.0f);
 
 		glBegin(GL_QUADS);
-		glColor3f(1.0f, 0.0f, 0.0f);
+		glColor3f(color.x,color.y,color.z);
 		glVertex2f(-0.5f, -0.5f);
 		glVertex2f(0.5f, -0.5f);
 		glVertex2f(0.5f, 0.5f);
@@ -46,12 +51,26 @@ std::vector<Cube> cubes = {};
 void generateCubes() {
 	float r = 0.0f;
 	for (int i = 0; i < cubeAmount; i++) {
-		Cube cube(0.0f, 0.0f, 0.5f, r);
+		Cube cube(0.0f, 0.0f, 1.5f, r, glm::vec3(1.0f, 0.0f, 0.0f),false);
+
+		if (randomizeCoords) {
+			cube.x = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
+			cube.y = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
+		}
+
 		cubes.push_back(cube);
-		r += 1.0f;
+
+		if (rotateGradually)
+			r += 1.0f;
+
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 	std::cout << "finished generating" << std::endl;
+	if(loop){
+		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+		cubes = {};
+		generateCubes();
+	}
 }
 
 int main() {
@@ -75,17 +94,39 @@ int main() {
 	std::thread cubeGenThread(generateCubes);
 	cubeGenThread.detach();
 
+	/*Cube cube(0.0f, 0.0f, 0.25f, 0.0f);
+	cubes.push_back(cube);*/
+
+	Cube floor(0.0f,-2.0f,2.1425f, 0.0f, glm::vec3(0.3, 0.3, 0.3), false);
+
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glLoadIdentity();
 
 		// RENDERING //
 
+		floor.draw();
+
 		for (int i = 0; i < cubes.size(); i++) {
 			cubes[i].draw();
 		}
 
 		// END RENDERING //
+
+		// GRAVITY TEST //
+
+		for (int i = 0; i < cubes.size(); i++) {
+			if(cubes[i].gravity) {
+
+				if (cubes[i].y > cubes[i].size - 1.0f)
+					cubes[i].y -= 0.01f;
+				else
+					cubes[i].y = cubes[i].size - 1.0f;
+
+			}
+		}
+
+		//
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
