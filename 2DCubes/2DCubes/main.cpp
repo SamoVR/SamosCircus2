@@ -8,7 +8,7 @@
 
 //* GLOBALS *//
 
-int cubeAmount = 100;
+int cubeAmount = 20;
 bool randomizeCoords = false;
 bool rotateGradually = true;
 bool loop = false;
@@ -21,9 +21,10 @@ struct Cube {
 	float rotation;
 	glm::vec3 color;
 	bool gravity;
+	bool bounce;
 
-	Cube(float x, float y, float size = 1.0f, float rotation = 0.0f, glm::vec3 color = glm::vec3(0.0f,0.0f,0.0f), bool gravity = true)
-		: x(x), y(y), size(size), rotation(rotation), color(color), gravity(gravity) {}
+	Cube(float x, float y, float size = 1.0f, float rotation = 0.0f, glm::vec3 color = glm::vec3(0.0f,0.0f,0.0f), bool gravity = true, bool bounce = false)
+		: x(x), y(y), size(size), rotation(rotation), color(color), gravity(gravity), bounce(bounce) {}
 
 	void draw() const {
 		glPushMatrix(); // save current transform
@@ -51,7 +52,7 @@ std::vector<Cube> cubes = {};
 void generateCubes() {
 	float r = 0.0f;
 	for (int i = 0; i < cubeAmount; i++) {
-		Cube cube(0.0f, 0.0f, 1.5f, r, glm::vec3(1.0f, 0.0f, 0.0f),false);
+		Cube cube(0.0f, 0.0f, 0.5f, r, glm::vec3(1.0f, 0.0f, 0.0f),false);
 
 		if (randomizeCoords) {
 			cube.x = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
@@ -61,9 +62,9 @@ void generateCubes() {
 		cubes.push_back(cube);
 
 		if (rotateGradually)
-			r += 1.0f;
+			r += 10.0f;
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 	std::cout << "finished generating" << std::endl;
 	if(loop){
@@ -91,13 +92,15 @@ int main() {
 
 	srand(std::time(NULL));
 
-	std::thread cubeGenThread(generateCubes);
-	cubeGenThread.detach();
+	/*std::thread cubeGenThread(generateCubes);
+	cubeGenThread.detach();*/
 
-	/*Cube cube(0.0f, 0.0f, 0.25f, 0.0f);
-	cubes.push_back(cube);*/
+	Cube cube(0.0f, 0.0f, 0.25f, 0.0f,glm::vec3(1.0f,0.0f,0.0f),false,true);
+	cubes.push_back(cube);
 
 	Cube floor(0.0f,-2.0f,2.1425f, 0.0f, glm::vec3(0.3, 0.3, 0.3), false);
+
+	bool upsidedown = false;
 
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -117,12 +120,33 @@ int main() {
 
 		for (int i = 0; i < cubes.size(); i++) {
 			if(cubes[i].gravity) {
-
 				if (cubes[i].y > cubes[i].size - 1.0f)
 					cubes[i].y -= 0.01f;
 				else
 					cubes[i].y = cubes[i].size - 1.0f;
+			}
+		}
 
+		//
+
+		// BOUNCE TEST //
+
+		for (int i = 0; i < cubes.size(); i++) {
+			if (cubes[i].bounce && !cubes[i].gravity) {
+				if (cubes[i].y > cubes[i].size - 1.0f && !upsidedown) {
+					cubes[i].y -= 0.001f;
+				}
+				else {
+					upsidedown = true;
+					cubes[i].y += 0.001f;
+				}
+				if (cubes[i].y < cubes[i].size + 1.0f && upsidedown) {
+					cubes[i].y += 0.001f;
+				}
+				else if(upsidedown) {
+					upsidedown = false;
+					cubes[i].y -= 0.001f;
+				}
 			}
 		}
 
