@@ -100,12 +100,21 @@ int main() {
 
 	Cube floor(0.0f,-2.0f,2.1425f, 0.0f, glm::vec3(0.3, 0.3, 0.3), false);
 
-	bool upsidedown = false;
+	bool invertx = false;
+	bool inverty = false;
+	float speedy = 1.0f;
+	float speedx = 1.0f;
+	float lastFrame = 0.0f;
 
 	while (!glfwWindowShouldClose(window)) {
-		glClear(GL_COLOR_BUFFER_BIT);
-		glLoadIdentity();
+		float currentFrame = glfwGetTime();
+		float deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 
+		glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(0.1f,0.1f,0.1f,0.0f);
+		glLoadIdentity();
+		
 		// RENDERING //
 
 		floor.draw();
@@ -133,22 +142,34 @@ int main() {
 
 		for (int i = 0; i < cubes.size(); i++) {
 			if (cubes[i].bounce && !cubes[i].gravity) {
-				if (cubes[i].y > cubes[i].size - 1.0f && !upsidedown) {
-					cubes[i].y -= 0.001f;
+				if (cubes[i].y > cubes[i].size - 1.0f && !inverty) {
+					cubes[i].y -= speedy*deltaTime;
 				}
 				else {
-					upsidedown = true;
-					cubes[i].y += 0.001f;
+					inverty = true;
+					cubes[i].y += speedy*deltaTime;
 				}
-				if (cubes[i].y < cubes[i].size + 1.0f && upsidedown) {
-					cubes[i].y += 0.001f;
+				if (cubes[i].y < cubes[i].size + 0.75f && inverty) {
+					cubes[i].y += speedy*deltaTime;
 				}
-				else if(upsidedown) {
-					upsidedown = false;
-					cubes[i].y -= 0.001f;
+				else if(inverty) {
+					inverty = false;
+					cubes[i].y -= speedy*deltaTime;
 				}
-				if (cubes[i].x < cubes[i].size + 1.0f) {
-					cubes[i].x += 0.001f;
+
+				if (cubes[i].x > cubes[i].size - 1.2f && !invertx) {
+					cubes[i].x -= speedx*deltaTime;
+				}
+				else {
+					invertx = true;
+					cubes[i].x += speedx * deltaTime;
+				}
+				if (cubes[i].x < cubes[i].size + 0.75f && invertx) {
+					cubes[i].x += speedx * deltaTime;
+				}
+				else if (invertx) {
+					invertx = false;
+					cubes[i].x -= speedx * deltaTime;
 				}
 			}
 		}
