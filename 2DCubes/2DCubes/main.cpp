@@ -147,6 +147,9 @@ int main() {
 					upsidedown = false;
 					cubes[i].y -= 0.001f;
 				}
+				if (cubes[i].x < cubes[i].size + 1.0f) {
+					cubes[i].x += 0.001f;
+				}
 			}
 		}
 
