@@ -47,7 +47,7 @@ bool Game::init()
 
 	// Init ImGui for GLFW + OpenGL
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 130");
+	ImGui_ImplOpenGL3_Init("#version 130"); // or "#version 150" depending on your system
 
 	return true;
 }
