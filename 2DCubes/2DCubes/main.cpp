@@ -3,6 +3,10 @@
 #include <chrono>
 #include <thread>
 
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_glfw.h>
+
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
@@ -92,13 +96,20 @@ int main() {
 
 	srand(std::time(NULL));
 
-	/*std::thread cubeGenThread(generateCubes);
-	cubeGenThread.detach();*/
+	std::thread cubeGenThread(generateCubes);
+	cubeGenThread.detach();
 
-	Cube cube(0.0f, 0.0f, 0.25f, 0.0f,glm::vec3(1.0f,0.0f,0.0f),false,true);
-	cubes.push_back(cube);
+	/*Cube cube(0.0f, 0.0f, 0.25f, 0.0f,glm::vec3(1.0f,0.0f,0.0f),false,true);
+	cubes.push_back(cube);*/
 
 	Cube floor(0.0f,-2.0f,2.1425f, 0.0f, glm::vec3(0.3, 0.3, 0.3), false);
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window,true);
+	ImGui_ImplOpenGL3_Init("#version 330");
 
 	bool invertx = false;
 	bool inverty = false;
@@ -111,10 +122,14 @@ int main() {
 		float deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
+		glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glClearColor(0.1f,0.1f,0.1f,0.0f);
 		glLoadIdentity();
-		
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		// RENDERING //
 
 		floor.draw();
@@ -176,9 +191,24 @@ int main() {
 
 		//
 
+		// UI //
+
+		ImGui::Begin("Controls");
+		ImGui::Text("Hi");
+		ImGui::End();
+
+		// END UI //
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	glfwTerminate();
 	return 0;

@@ -6,7 +6,7 @@ Core::Core(float x = 0.0f, float y = 0.0f, float size = 1.0f, glm::vec3 color = 
 }
 
 void Core::update() {
-
+    temperature = 100.0f;
 }
 
 void Core::render() {

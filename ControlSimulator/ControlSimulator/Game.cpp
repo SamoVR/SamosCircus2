@@ -29,25 +29,15 @@ bool Game::init()
 	glfwSetWindowUserPointer(window, this);
 	//
 	//
-
-	core = new Core(0.0f,0.0f,0.1f,glm::vec3(0.1f,0.1f,0.1f));
-
+	
 	glfwMakeContextCurrent(window);
 	if (glewInit() != GLEW_OK) {
 		std::cerr << "Failed to init glew!\n";
 		return false;
 	}
 
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-	// Optional style
-	ImGui::StyleColorsDark();
-
-	// Init ImGui for GLFW + OpenGL
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 130"); // or "#version 150" depending on your system
+	core = new Core(0.0f, 0.0f, 0.1f, glm::vec3(0.1f, 0.1f, 0.1f));
+	UI = new Interface(window,core);
 
 	return true;
 }
@@ -57,25 +47,13 @@ void Game::run() {
 		return;
 
 	while (!glfwWindowShouldClose(window)) {
-		glfwPollEvents();
+		UI->update();
 
 		core->update();
 		core->render();
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
-		ImGui::Begin("Controls");
-
-		ImGui::Text("Temperature: %.2f C",core->temperature);
-
-		ImGui::End();
-
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
 		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
 	cleanup();
 }
