@@ -5,10 +5,7 @@ int main()
 {
 	try{
 		Game game;
-		while (true)
-		{
-			game.Update();
-		}
+		game.run();
 	}
 	catch (const std::exception& ex)
 	{

@@ -7,9 +7,11 @@ class Game
 	public:
 		Game();
 		~Game();
-		void Update();
+		void run();
 		GLFWwindow* window;
 	private:
 		bool init();
+		void update();
+		void cleanup();
 };
 

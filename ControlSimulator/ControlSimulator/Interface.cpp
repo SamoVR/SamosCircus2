@@ -29,7 +29,7 @@ void Interface::update() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    controlUI();
+    //controlUI();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
