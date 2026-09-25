@@ -19,6 +19,8 @@ class Game
 
 		const int wallHeight = 200;
 
+		int bumpCount = 0;
+
 		Vector2 ballPosition = Vector2{ 500, 300 };
 		Vector2 ballVelocity = Vector2{ 5, 5 };
 		const int ballSize = 20;

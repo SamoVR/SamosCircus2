@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="BallvsBall/BallvsBall.vcxproj" Id="58afffc7-55d1-4d1f-90b4-41712c72d06b" />
+</Solution>
