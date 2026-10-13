@@ -141,6 +141,10 @@
       <AdditionalLibraryDirectories>C:\Users\Samuel\Documents\Visual Studio 2022\libraries\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;glew32.lib;opengl32.lib;user32.lib;gdi32.lib;shell32.lib;discord_game_sdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /D /I "$(ProjectDir)*.glsl" "$(OutDir)" &amp;&amp; xcopy /Y /D /I "$(ProjectDir)*.dll" "$(OutDir)" &amp;&amp; xcopy /Y /D /I "$(ProjectDir)imgui.ini" "$(OutDir)" &amp;&amp; xcopy /E /Y /D /I "$(ProjectDir)assets" "$(OutDir)assets"</Command>
+      <Message>Staging shaders, DLLs, UI layout and assets next to the executable</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AnimationSequencer.cpp" />
@@ -189,6 +193,12 @@
     <ClInclude Include="AnimationSequencer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="Command.h" />
+    <ClInclude Include="CommandHistory.h" />
+    <ClInclude Include="Commands.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="Settings.h" />
+    <ClInclude Include="TransformUtil.h" />
     <ClInclude Include="imgui\FontAwesome-main\font_awesome.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />

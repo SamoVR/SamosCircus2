@@ -2,116 +2,241 @@
 #include <algorithm>
 #include <cstdio>
 
-static const char* typeNames[] = { "Object", "Placeholder"};
+namespace {
+    const char* const kTypeNames[] = { "Object" };
+    constexpr int kTypeNameCount = static_cast<int>(sizeof(kTypeNames) / sizeof(kTypeNames[0]));
 
-// --- RampEdit implementation (same as you already had) ---
-AnimationSequencer::RampEdit::RampEdit() {
-    mPts[0][0] = ImVec2(0, 0); mPts[0][1] = ImVec2(20, 0.6f); mPts[0][2] = ImVec2(25, 0.2f); mPts[0][3] = ImVec2(70, 0.4f); mPts[0][4] = ImVec2(120, 1.f);
-    mPointCount[0] = 5;
-    mPts[1][0] = ImVec2(0, 0.2f); mPts[1][1] = ImVec2(33, 0.7f); mPts[1][2] = ImVec2(80, 0.2f); mPts[1][3] = ImVec2(100, 0.8f);
-    mPointCount[1] = 4;
-    mPts[2][0] = ImVec2(40.f, 0); mPts[2][1] = ImVec2(60.f, 0.1f); mPts[2][2] = ImVec2(90.f, 0.82f); mPts[2][3] = ImVec2(150.f, 0.24f); mPts[2][4] = ImVec2(200.f, 0.34f); mPts[2][5] = ImVec2(250.f, 0.12f);
-    mPointCount[2] = 6;
-    mbVisible[0] = mbVisible[1] = mbVisible[2] = true;
-    mMin = ImVec2(0.f, 0.f); mMax = ImVec2(1.f, 1.f);
+    const char* const kModeNames[] = { "Position", "Rotation", "Scale" };
+    static_assert(sizeof(kModeNames) / sizeof(kModeNames[0]) == AnimationSequencer::kTransformModeCount,
+        "kModeNames must have one entry per TransformMode");
+}
+
+// ---------------------------------------------------------------- RampEdit
+AnimationSequencer::RampEdit::RampEdit(float yMin, float yMax) {
+    for (int c = 0; c < 3; ++c) {
+        mPts[c][0] = ImVec2(0.0f, 0.0f);
+        mPts[c][1] = ImVec2(200.0f, 0.0f);
+        mPointCount[c] = 2;
+        mbVisible[c] = true;
+    }
+    mMin = ImVec2(0.0f, yMin);
+    mMax = ImVec2(200.0f, yMax);
 }
 
 size_t AnimationSequencer::RampEdit::GetCurveCount() { return 3; }
 bool AnimationSequencer::RampEdit::IsVisible(size_t i) { return mbVisible[i]; }
 size_t AnimationSequencer::RampEdit::GetPointCount(size_t i) { return mPointCount[i]; }
-uint32_t AnimationSequencer::RampEdit::GetCurveColor(size_t i) { uint32_t c[] = { 0xFF0000FF, 0xFF00FF00, 0xFFFF0000 }; return c[i]; }
+uint32_t AnimationSequencer::RampEdit::GetCurveColor(size_t i) {
+    static const uint32_t colors[] = { 0xFF0000FF, 0xFF00FF00, 0xFFFF0000 }; // X red, Y green, Z blue
+    return colors[i];
+}
 ImVec2* AnimationSequencer::RampEdit::GetPoints(size_t i) { return mPts[i]; }
-ImCurveEdit::CurveType AnimationSequencer::RampEdit::GetCurveType(size_t) const { return ImCurveEdit::CurveSmooth; }
-int AnimationSequencer::RampEdit::EditPoint(size_t i, int idx, ImVec2 v) { mPts[i][idx] = v; SortValues(i); return idx; }
-void AnimationSequencer::RampEdit::AddPoint(size_t i, ImVec2 v) { if (mPointCount[i] < 8) mPts[i][mPointCount[i]++] = v; SortValues(i); }
+
+// Linear, because evaluate() interpolates linearly: the curve you see is now
+// the curve that drives the object (it was drawn as a smooth spline).
+ImCurveEdit::CurveType AnimationSequencer::RampEdit::GetCurveType(size_t) const { return ImCurveEdit::CurveLinear; }
+
+int AnimationSequencer::RampEdit::EditPoint(size_t i, int idx, ImVec2 v) {
+    mPts[i][idx] = v;
+    SortValues(i);
+    mDirty = true;
+    // Sorting can move the dragged point; return its new index so the editor
+    // keeps dragging the same point (as the upstream ImGuizmo example does).
+    for (size_t p = 0; p < mPointCount[i]; ++p) {
+        if (mPts[i][p].x == v.x) return static_cast<int>(p);
+    }
+    return idx;
+}
+
+void AnimationSequencer::RampEdit::AddPoint(size_t i, ImVec2 v) {
+    if (mPointCount[i] < 8) {
+        mPts[i][mPointCount[i]++] = v;
+        SortValues(i);
+        mDirty = true;
+    }
+}
+
 ImVec2& AnimationSequencer::RampEdit::GetMax() { return mMax; }
 ImVec2& AnimationSequencer::RampEdit::GetMin() { return mMin; }
 unsigned int AnimationSequencer::RampEdit::GetBackgroundColor() { return 0; }
+
 void AnimationSequencer::RampEdit::SortValues(size_t i) {
-    std::sort(mPts[i], mPts[i] + mPointCount[i], [](ImVec2 a, ImVec2 b) { return a.x < b.x; });
+    std::sort(mPts[i], mPts[i] + mPointCount[i], [](const ImVec2& a, const ImVec2& b) { return a.x < b.x; });
 }
 
-// --- SequenceImpl implementation ---
-const char* AnimationSequencer::SequenceImpl::GetItemTypeName(int typeIndex) const { return typeNames[typeIndex]; }
-const char* AnimationSequencer::SequenceImpl::GetItemLabel(int i) const {
-    static char buf[64];
-    sprintf_s(buf, "[%02d] %s", i, GetItemTypeName(parent->items[i].type));
-    return buf;
+void AnimationSequencer::RampEdit::seedFlat(const glm::vec3& value, int frameMin, int frameMax) {
+    const float x0 = static_cast<float>(frameMin);
+    const float x1 = static_cast<float>(std::max(frameMax, frameMin + 1));
+    for (int c = 0; c < 3; ++c) {
+        mPts[c][0] = ImVec2(x0, value[c]);
+        mPts[c][1] = ImVec2(x1, value[c]);
+        mPointCount[c] = 2;
+    }
+    mRest = value;
+
+    // Keep the seeded values (plus some headroom) inside the visible range.
+    const float lo = std::min({ value.x, value.y, value.z });
+    const float hi = std::max({ value.x, value.y, value.z });
+    const float pad = std::max(1.0f, (hi - lo) * 0.25f);
+    mMin.y = std::min(mMin.y, lo - pad);
+    mMax.y = std::max(mMax.y, hi + pad);
+    mDirty = true;
 }
+
+glm::vec3 AnimationSequencer::RampEdit::evaluate(float time) const {
+    glm::vec3 result = mRest;
+    for (int c = 0; c < 3; ++c) {
+        const size_t count = mPointCount[c];
+        if (count == 0) continue; // keep rest value
+        const ImVec2* pts = mPts[c];
+
+        if (count == 1 || time <= pts[0].x) { result[c] = pts[0].y; continue; }
+        if (time >= pts[count - 1].x)       { result[c] = pts[count - 1].y; continue; }
+
+        for (size_t p = 0; p + 1 < count; ++p) {
+            if (time >= pts[p].x && time <= pts[p + 1].x) {
+                const float dx = pts[p + 1].x - pts[p].x;
+                const float t = (dx > 0.0f) ? (time - pts[p].x) / dx : 0.0f; // two points at one frame: step
+                result[c] = ImLerp(pts[p].y, pts[p + 1].y, t);
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+// ------------------------------------------------------------ SequenceImpl
+int AnimationSequencer::SequenceImpl::GetItemTypeCount() const { return kTypeNameCount; }
+
+const char* AnimationSequencer::SequenceImpl::GetItemTypeName(int typeIndex) const {
+    if (typeIndex < 0 || typeIndex >= kTypeNameCount) return "Unknown";
+    return kTypeNames[typeIndex];
+}
+
+const char* AnimationSequencer::SequenceImpl::GetItemLabel(int i) const {
+    if (i < 0 || i >= static_cast<int>(parent->items.size())) return "";
+    const Item& item = parent->items[i];
+    const char* objectName = item.animatedObject ? item.animatedObject->name.c_str() : GetItemTypeName(item.type);
+    char buf[160];
+    std::snprintf(buf, sizeof(buf), "[%02d] %s (%s)", i, objectName, kModeNames[static_cast<int>(item.mode)]);
+    labelCache = buf;
+    return labelCache.c_str();
+}
+
 void AnimationSequencer::SequenceImpl::Get(int i, int** s, int** e, int* t, unsigned int* c) {
-    if (s) *s = &parent->items[i].startFrame;
-    if (e) *e = &parent->items[i].endFrame;
-    if (t) *t = parent->items[i].type;
+    Item& item = parent->items[i];
+    if (s) *s = &item.startFrame;
+    if (e) *e = &item.endFrame;
+    if (t) *t = item.type;
     if (c) *c = 0xFFAA8080;
 }
-void AnimationSequencer::SequenceImpl::Add(int type) { parent->items.push_back({ type, 0, 10 }); }
-void AnimationSequencer::SequenceImpl::Del(int i) { parent->items.erase(parent->items.begin() + i); }
-void AnimationSequencer::SequenceImpl::Duplicate(int i) { parent->items.push_back(parent->items[i]); }
-size_t AnimationSequencer::SequenceImpl::GetCustomHeight(int i) { return parent->items[i].expanded ? 300 : 0; }
-void AnimationSequencer::SequenceImpl::DoubleClick(int i) {
-    for (auto& item : parent->items) item.expanded = false;
-    parent->items[i].expanded = !parent->items[i].expanded;
-}
-inline ImVec2 operator-(const ImVec2& a, const ImVec2& b) { return ImVec2(a.x - b.x, a.y - b.y); }
 
-void AnimationSequencer::SequenceImpl::CustomDraw(int i, ImDrawList* draw, const ImRect& rc, const ImRect&, const ImRect& clip, const ImRect&) {
+void AnimationSequencer::SequenceImpl::Add(int type) {
+    Item item;
+    item.type = type;
+    item.startFrame = parent->frameMin;
+    item.endFrame = std::min(parent->frameMin + 30, parent->frameMax);
+    parent->items.push_back(item);
+}
+
+void AnimationSequencer::SequenceImpl::Del(int i) {
+    if (i < 0 || i >= static_cast<int>(parent->items.size())) return;
+    parent->items.erase(parent->items.begin() + i);
+}
+
+void AnimationSequencer::SequenceImpl::Duplicate(int i) {
+    if (i < 0 || i >= static_cast<int>(parent->items.size())) return;
+    Item copy = parent->items[i];
+    parent->items.push_back(copy);
+}
+
+size_t AnimationSequencer::SequenceImpl::GetCustomHeight(int i) { return parent->items[i].expanded ? 300 : 0; }
+
+void AnimationSequencer::SequenceImpl::DoubleClick(int i) {
+    const bool wasExpanded = parent->items[i].expanded;
+    for (auto& item : parent->items) item.expanded = false;
+    parent->items[i].expanded = !wasExpanded;
+}
+
+// Draws the editor UI only. It no longer applies the animation (see
+// AnimationSequencer::applyToObjects).
+void AnimationSequencer::SequenceImpl::CustomDraw(int i, ImDrawList*, const ImRect& rc, const ImRect&, const ImRect& clip, const ImRect&) {
     Item& item = parent->items[i];
-    Object* obj = item.animatedObject;
-    if (!obj) return;
 
     ImGui::SetCursorScreenPos(rc.Min);
     ImGui::PushID(i);
 
-    // Transform mode selector
-    const char* modes[] = { "Position", "Rotation", "Scale" };
     int currentMode = static_cast<int>(item.mode);
-    ImGui::Combo("Transform", &currentMode, modes, IM_ARRAYSIZE(modes));
-    item.mode = static_cast<TransformMode>(currentMode);
-
-    // Curve labels
-    ImGui::Text("Curves: X (Red), Y (Green), Z (Blue)");
-
-    // Set curve bounds to match timeline
-    item.rampEdit.mMin.x = float(parent->frameMin);
-    item.rampEdit.mMax.x = float(parent->frameMax);
-
-    ImGui::SetCursorScreenPos(ImVec2(rc.Min.x, rc.Min.y + 40)); // leave space for labels
-    ImCurveEdit::Edit(item.rampEdit, rc.GetSize() - ImVec2(0, 40), 1337 + i, &clip);
-
-    // Apply the animation to object
-    int current = parent->currentFrame;
-    float time = float(current);
-    glm::vec3 result(0.0f);
-
-    for (int curveIndex = 0; curveIndex < 3; ++curveIndex) {
-        ImVec2* pts = item.rampEdit.GetPoints(curveIndex);
-        size_t count = item.rampEdit.GetPointCount(curveIndex);
-        float value = 0.0f;
-
-        for (size_t p = 0; p < count - 1; ++p) {
-            if (pts[p].x <= time && pts[p + 1].x >= time) {
-                float t = (time - pts[p].x) / (pts[p + 1].x - pts[p].x);
-                value = ImLerp(pts[p].y, pts[p + 1].y, t);
-                break;
-            }
-        }
-
-        result[curveIndex] = value;
+    if (ImGui::Combo("Transform", &currentMode, kModeNames, kTransformModeCount)) {
+        item.mode = static_cast<TransformMode>(currentMode);
+        item.activeCurves().mDirty = true; // re-apply with the newly selected channel
     }
+    ImGui::SameLine();
+    ImGui::TextDisabled("X red  Y green  Z blue");
 
-    switch (item.mode) {
-    case TransformMode::Position: obj->position = result; break;
-    case TransformMode::Rotation: obj->rotation = result; break;
-    case TransformMode::Scale: obj->scale = result; break;
-    }
+    RampEdit& curves = item.activeCurves();
+    curves.mMin.x = static_cast<float>(parent->frameMin);
+    curves.mMax.x = static_cast<float>(parent->frameMax);
+
+    ImGui::SetCursorScreenPos(ImVec2(rc.Min.x, rc.Min.y + 40)); // leave room for the header row
+    const ImVec2 size(rc.GetWidth(), rc.GetHeight() - 40.0f);
+    ImCurveEdit::Edit(curves, size, 1337u + static_cast<unsigned>(i) * 4u + static_cast<unsigned>(item.mode), &clip);
 
     ImGui::PopID();
 }
 
 void AnimationSequencer::SequenceImpl::CustomDrawCompact(int, ImDrawList*, const ImRect&, const ImRect&) {}
 
-AnimationSequencer::AnimationSequencer() : sequencer(this) {
+// ------------------------------------------------------ AnimationSequencer
+AnimationSequencer::AnimationSequencer() : sequencer(this) {}
 
-    //items.push_back({ 0, 0, 10 });  // Camera, starts at frame 0, ends at frame 10
+int AnimationSequencer::addItemForObject(Object* object, int startFrame, int endFrame) {
+    Item item;
+    item.type = 0;
+    item.startFrame = startFrame;
+    item.endFrame = endFrame;
+    item.animatedObject = object;
+    if (object) {
+        item.curvesByMode[static_cast<int>(TransformMode::Position)].seedFlat(object->position, frameMin, frameMax);
+        item.curvesByMode[static_cast<int>(TransformMode::Rotation)].seedFlat(object->rotation, frameMin, frameMax);
+        item.curvesByMode[static_cast<int>(TransformMode::Scale)].seedFlat(object->scale, frameMin, frameMax);
+    }
+    items.push_back(item);
+    return static_cast<int>(items.size()) - 1;
+}
 
+void AnimationSequencer::removeItemsForObject(Object* object) {
+    items.erase(std::remove_if(items.begin(), items.end(),
+        [object](const Item& it) { return it.animatedObject == object; }), items.end());
+}
+
+void AnimationSequencer::clearItems() {
+    items.clear();
+    lastAppliedFrame_ = -1;
+}
+
+void AnimationSequencer::applyToObjects() {
+    bool curvesChanged = false;
+    for (const Item& item : items) {
+        for (const RampEdit& r : item.curvesByMode) curvesChanged = curvesChanged || r.mDirty;
+    }
+    if (currentFrame == lastAppliedFrame_ && !curvesChanged) return;
+
+    for (Item& item : items) {
+        Object* obj = item.animatedObject;
+        if (!obj) continue;
+        if (currentFrame < item.startFrame || currentFrame > item.endFrame) continue; // outside this item's range
+
+        const glm::vec3 value = item.activeCurves().evaluate(static_cast<float>(currentFrame));
+        switch (item.mode) {
+        case TransformMode::Position: obj->position = value; break;
+        case TransformMode::Rotation: obj->rotation = value; break;
+        case TransformMode::Scale:    obj->scale = value; break;
+        }
+    }
+
+    for (Item& item : items) {
+        for (RampEdit& r : item.curvesByMode) r.mDirty = false;
+    }
+    lastAppliedFrame_ = currentFrame;
 }

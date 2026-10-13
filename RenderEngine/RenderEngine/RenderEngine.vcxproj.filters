@@ -252,6 +252,24 @@
     <ClInclude Include="Engine.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="Command.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandHistory.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformUtil.h">
+      <Filter>core</Filter>
+    </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>core</Filter>
     </ClInclude>

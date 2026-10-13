@@ -1,50 +1,58 @@
 #include "Engine.h"
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <limits>
+#include <stdexcept>
 
-Engine::Engine()
-    : window(nullptr), width(1600), height(800), windowTitle("RIFT Engine"), UI(nullptr), camera(nullptr), cube(nullptr), 
-    backgroundShader(nullptr), fullScreenQuadVAO(0), fullScreenQuadVBO(0), gridShader(nullptr), gridVAO(0),
-    gridVBO(0), inputManager(nullptr), keybindManager(nullptr), lastFrame(0), shader(nullptr), targetVisualizer(nullptr)
-{
+Engine::Engine() {}
 
-}
-
-Engine::~Engine()
-{
+Engine::~Engine() {
     cleanup();
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+// ----------------------------------------------------------------------------
+//  GLFW callbacks
+// ----------------------------------------------------------------------------
+
+void Engine::framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    // A minimised window reports 0x0; calling glViewport/aspect with that
+    // divided by zero in the original.
+    if (width <= 0 || height <= 0) return;
     glViewport(0, 0, width, height);
 
-    // Update camera aspect ratio
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     if (engine && engine->camera) {
         engine->width = width;
         engine->height = height;
-        engine->camera->setAspectRatio(static_cast<float>(width) / height);
+        engine->camera->setAspectRatio(static_cast<float>(width) / static_cast<float>(height));
     }
 }
 
-void Engine::scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    // Get the engine instance back from the window's user pointer
+void Engine::scrollCallback(GLFWwindow* window, double /*xoffset*/, double yoffset) {
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    if (engine && engine->camera)
-        engine->camera->handleScrollInput((float)yoffset);
+    if (!engine || !engine->camera) return;
+    // Scrolling a panel (object list, timeline, ...) must not also zoom the camera.
+    if (ImGui::GetCurrentContext() && ImGui::GetIO().WantCaptureMouse) return;
+    engine->camera->handleScrollInput(static_cast<float>(yoffset));
 }
 
-void setAppIcon(GLFWwindow* window)
-{
+static void setAppIcon(GLFWwindow* window) {
     GLFWimage icon;
     int channels;
     icon.pixels = stbi_load("assets/images/icon.png", &icon.width, &icon.height, &channels, 4);
     if (icon.pixels) {
         glfwSetWindowIcon(window, 1, &icon);
         stbi_image_free(icon.pixels);
-    }
-    else {
-        std::cerr << "Failed to load window icon\n";
+    } else {
+        LOG_WARN("Engine", "Failed to load window icon assets/images/icon.png");
     }
 }
+
+// ----------------------------------------------------------------------------
+//  GL resources
+// ----------------------------------------------------------------------------
 
 void Engine::initLines() {
     glGenVertexArrays(1, &lineVAO);
@@ -61,69 +69,57 @@ void Engine::initLines() {
 void Engine::initGrid() {
     const int gridSize = 10;
     std::vector<glm::vec3> gridVertices;
-
     for (int i = -gridSize; i <= gridSize; ++i) {
-        // Lines parallel to X axis
-        gridVertices.emplace_back(-gridSize, 0.0f, i);
+        gridVertices.emplace_back(-gridSize, 0.0f, i); // parallel to X
         gridVertices.emplace_back(gridSize, 0.0f, i);
-
-        // Lines parallel to Z axis
-        gridVertices.emplace_back(i, 0.0f, -gridSize);
+        gridVertices.emplace_back(i, 0.0f, -gridSize); // parallel to Z
         gridVertices.emplace_back(i, 0.0f, gridSize);
     }
-
-    gridLineCount = gridVertices.size();
+    gridLineCount = static_cast<int>(gridVertices.size());
 
     glGenVertexArrays(1, &gridVAO);
     glGenBuffers(1, &gridVBO);
-
     glBindVertexArray(gridVAO);
     glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
     glBufferData(GL_ARRAY_BUFFER, gridVertices.size() * sizeof(glm::vec3), gridVertices.data(), GL_STATIC_DRAW);
-
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
     glBindVertexArray(0);
 }
 
 void Engine::initFullScreenQuad() {
-    std::vector<Vertex> quadVertices = createFullScreenQuadVertices();
+    const std::vector<Vertex> quadVertices = createFullScreenQuadVertices();
 
-    // Create the VAO and VBO for the full-screen quad
     glGenVertexArrays(1, &fullScreenQuadVAO);
     glGenBuffers(1, &fullScreenQuadVBO);
-
     glBindVertexArray(fullScreenQuadVAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, fullScreenQuadVBO);
-    glBufferData(GL_ARRAY_BUFFER, quadVertices.size() * sizeof(Vertex), &quadVertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, quadVertices.size() * sizeof(Vertex), quadVertices.data(), GL_STATIC_DRAW);
 
-    // Position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
     glEnableVertexAttribArray(0);
-
-    // Texture coordinate attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(glm::vec3)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
     glEnableVertexAttribArray(1);
-
-    glBindVertexArray(0);  // Unbind VAO
+    glBindVertexArray(0);
 }
 
 void Engine::renderBackground() {
-    glDisable(GL_DEPTH_TEST);  // Disable depth testing to render background behind other objects
+    if (!backgroundShader || !backgroundShader->isValid()) return;
+    glDisable(GL_DEPTH_TEST); // the gradient sits behind everything
 
-    backgroundShader->use();  // Use the shader for the background gradient
-    backgroundShader->setMat4("view", glm::mat4(1.0f));  // Identity view matrix (no camera)
-    backgroundShader->setMat4("projection", glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));  // 2D orthographic projection
+    backgroundShader->use();
+    backgroundShader->setMat4("view", glm::mat4(1.0f));
+    backgroundShader->setMat4("projection", glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
 
-    // Bind the full-screen quad VAO and draw it
     glBindVertexArray(fullScreenQuadVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);  // Draw the quad with the gradient
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
 
-    glEnable(GL_DEPTH_TEST);  // Re-enable depth testing for 3D rendering
+    glEnable(GL_DEPTH_TEST);
 }
 
 void Engine::renderGrid() {
+    if (!settings.showGrid || !gridShader || !gridShader->isValid()) return;
 
     gridShader->use();
     gridShader->setMat4("view", camera->getViewMatrix());
@@ -133,319 +129,394 @@ void Engine::renderGrid() {
     glBindVertexArray(gridVAO);
     glDrawArrays(GL_LINES, 0, gridLineCount);
     glBindVertexArray(0);
-
-}
-
-void Engine::renderMeasurementLines(Object* object) {
-    glm::vec3 pos = object->position;
-    glm::vec3 scale = object->scale;
-
-    // Colors for measurement lines (different color for each axis for clarity)
-    ImVec4 colorX = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // Red for X
-    ImVec4 colorY = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green for Y
-    ImVec4 colorZ = ImVec4(0.0f, 0.0f, 1.0f, 1.0f); // Blue for Z
-
-    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), pos);  // Position transformation
-    modelMatrix = glm::scale(modelMatrix, scale);  // Scale transformation
-
-    // If object rotation is involved, apply it like this:
-    // modelMatrix = glm::rotate(modelMatrix, object->rotation.x, glm::vec3(1, 0, 0)); // Example for X rotation
-
-    if (object->showMeasureX) {
-        float length = scale.x;
-        glm::vec3 start = glm::vec3(0.0f, scale.y * 0.5f, 0.0f);
-        glm::vec3 end = glm::vec3(length, scale.y * 0.5f, 0.0f);
-        start = glm::vec3(modelMatrix * glm::vec4(start, 1.0f));
-        end = glm::vec3(modelMatrix * glm::vec4(end, 1.0f));
-        glDisable(GL_DEPTH_TEST);
-        drawLine(start, end, colorX);
-        glEnable(GL_DEPTH_TEST);
-        UI->debugTexts.push_back({ (start + end) * 0.5f, std::to_string(length) + "m", colorX, ImVec2(0,-15) });
-    }
-    if (object->showMeasureY) {
-        float length = scale.y;
-        glm::vec3 start = glm::vec3(0.0f, 0.0f, scale.z * 0.5f);
-        glm::vec3 end = glm::vec3(0.0f, length, scale.z * 0.5f);
-        start = glm::vec3(modelMatrix * glm::vec4(start, 1.0f));
-        end = glm::vec3(modelMatrix * glm::vec4(end, 1.0f));
-        glDisable(GL_DEPTH_TEST);
-        drawLine(start, end, colorY);
-        glEnable(GL_DEPTH_TEST);
-        UI->debugTexts.push_back({ (start + end) * 0.5f, std::to_string(length) + "m", colorY, ImVec2(0,20) });
-
-    }
-    if (object->showMeasureZ) {
-        float length = scale.z;
-        glm::vec3 start = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3 end = glm::vec3(0.0f, 0.0f, length);
-        start = glm::vec3(modelMatrix * glm::vec4(start, 1.0f));
-        end = glm::vec3(modelMatrix * glm::vec4(end, 1.0f));
-        glDisable(GL_DEPTH_TEST);
-        drawLine(start, end, colorZ);
-        glEnable(GL_DEPTH_TEST);
-        UI->debugTexts.push_back({ (start + end) * 0.5f, std::to_string(length) + "m", colorZ, ImVec2(0,15) });
-    }
 }
 
 void Engine::drawLine(const glm::vec3& start, const glm::vec3& end, const ImVec4& color) {
-    glm::vec3 vertices[2] = { start, end };
+    if (!lineShader || !lineShader->isValid()) return;
+    const glm::vec3 vertices[2] = { start, end };
 
     lineShader->use();
     lineShader->setMat4("view", camera->getViewMatrix());
     lineShader->setMat4("projection", camera->getProjectionMatrix());
     lineShader->setMat4("model", glm::mat4(1.0f));
+    lineShader->setVec3("lineColor", glm::vec3(color.x, color.y, color.z)); // was ignored (shader was hardcoded white)
 
     glBindVertexArray(lineVAO);
     glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-
     glDrawArrays(GL_LINES, 0, 2);
     glBindVertexArray(0);
 }
 
+// Measurement lines now follow the object's real transform. The original built
+// the line from `position` and `scale` only, so (a) it ignored rotation and
+// parenting, and (b) the model matrix already contained the scale while the
+// line length was multiplied by it again -- a 3x object got a 9-unit line
+// labelled "3". The lines are now drawn along the mesh's own bounding-box
+// edges transformed by the global matrix, and the label is the true world length.
+void Engine::renderMeasurementLines(Object* object) {
+    if (!object->showMeasureX && !object->showMeasureY && !object->showMeasureZ) return;
 
+    const glm::mat4 world = object->getGlobalTransform();
+    const glm::vec3 lo = object->getBoundsMin();
+    const glm::vec3 hi = object->getBoundsMax();
+    auto toWorld = [&world](const glm::vec3& p) { return glm::vec3(world * glm::vec4(p, 1.0f)); };
 
-void Engine::performObjectPicking(double mouseX, double mouseY)
-{
-    // Normalize mouse to [-1, 1]
-    float x = (2.0f * mouseX) / width - 1.0f;
-    float y = 1.0f - (2.0f * mouseY) / height;
-    glm::vec4 rayClip(x, y, -1.0f, 1.0f);
+    const ImVec4 colorX(1.0f, 0.15f, 0.15f, 1.0f);
+    const ImVec4 colorY(0.2f, 1.0f, 0.2f, 1.0f);
+    const ImVec4 colorZ(0.3f, 0.5f, 1.0f, 1.0f);
 
-    // Inverse Projection * Clip -> Eye space
-    glm::mat4 proj = camera->getProjectionMatrix();
-    glm::mat4 view = camera->getViewMatrix();
-    glm::mat4 invVP = glm::inverse(proj * view);
+    auto measure = [&](const glm::vec3& a, const glm::vec3& b, const ImVec4& color, ImVec2 labelOffset) {
+        const glm::vec3 start = toWorld(a);
+        const glm::vec3 end = toWorld(b);
+        glDisable(GL_DEPTH_TEST); // visible through the object
+        drawLine(start, end, color);
+        glEnable(GL_DEPTH_TEST);
+        char text[48];
+        std::snprintf(text, sizeof(text), "%.2f m", glm::length(end - start));
+        UI->debugTexts.push_back({ (start + end) * 0.5f, text, color, labelOffset });
+    };
 
-    // Create ray start and end in NDC
-    glm::vec4 rayStartNDC(x, y, -1.0f, 1.0f);
-    glm::vec4 rayEndNDC(x, y, 0.0f, 1.0f);
+    if (object->showMeasureX) measure({ lo.x, lo.y, hi.z }, { hi.x, lo.y, hi.z }, colorX, ImVec2(0.0f, -15.0f));
+    if (object->showMeasureY) measure({ lo.x, lo.y, hi.z }, { lo.x, hi.y, hi.z }, colorY, ImVec2(-45.0f, 0.0f));
+    if (object->showMeasureZ) measure({ lo.x, lo.y, lo.z }, { lo.x, lo.y, hi.z }, colorZ, ImVec2(0.0f, 15.0f));
+}
 
-    // Unproject to world space
-    glm::vec4 rayStartWorld = invVP * rayStartNDC;
-    glm::vec4 rayEndWorld = invVP * rayEndNDC;
-    rayStartWorld /= rayStartWorld.w;
-    rayEndWorld /= rayEndWorld.w;
+// ----------------------------------------------------------------------------
+//  Picking
+// ----------------------------------------------------------------------------
 
-    glm::vec3 rayOrigin = glm::vec3(rayStartWorld);
-    glm::vec3 rayDirection = glm::normalize(glm::vec3(rayEndWorld - rayStartWorld));
+namespace {
+    // Ray vs. axis-aligned box (slab method). Returns the distance along the ray.
+    bool rayAabb(const glm::vec3& origin, const glm::vec3& dir, glm::vec3 lo, glm::vec3 hi, float& tHit) {
+        lo -= glm::vec3(1e-3f); // flat meshes (zero thickness) must still be hittable
+        hi += glm::vec3(1e-3f);
+        float tMin = 0.0f, tMax = std::numeric_limits<float>::max();
+        for (int axis = 0; axis < 3; ++axis) {
+            if (std::abs(dir[axis]) < 1e-8f) {
+                if (origin[axis] < lo[axis] || origin[axis] > hi[axis]) return false;
+            } else {
+                float t1 = (lo[axis] - origin[axis]) / dir[axis];
+                float t2 = (hi[axis] - origin[axis]) / dir[axis];
+                if (t1 > t2) std::swap(t1, t2);
+                tMin = std::max(tMin, t1);
+                tMax = std::min(tMax, t2);
+                if (tMin > tMax) return false;
+            }
+        }
+        tHit = tMin;
+        return true;
+    }
+}
 
-    Object* closestObject = nullptr;
+// Picking tests the ray against each object's real bounding box in its own
+// local space (so it follows rotation, non-uniform scale and parenting). The
+// original tested a sphere of radius |scale|/2 around `position`, which
+// misses the corners of stretched objects and hits empty space around them.
+void Engine::performObjectPicking(double mouseX, double mouseY) {
+    // Mouse coordinates are in WINDOW units; the framebuffer can be larger on
+    // scaled displays, so normalise by the window size, not the framebuffer's.
+    int windowW = 0, windowH = 0;
+    glfwGetWindowSize(window, &windowW, &windowH);
+    if (windowW <= 0 || windowH <= 0) return;
+
+    const float x = (2.0f * static_cast<float>(mouseX)) / static_cast<float>(windowW) - 1.0f;
+    const float y = 1.0f - (2.0f * static_cast<float>(mouseY)) / static_cast<float>(windowH);
+
+    const glm::mat4 invVP = glm::inverse(camera->getProjectionMatrix() * camera->getViewMatrix());
+    glm::vec4 nearPoint = invVP * glm::vec4(x, y, -1.0f, 1.0f);
+    glm::vec4 farPoint = invVP * glm::vec4(x, y, 1.0f, 1.0f);
+    nearPoint /= nearPoint.w;
+    farPoint /= farPoint.w;
+
+    const glm::vec3 rayOrigin(nearPoint);
+    const glm::vec3 rayDir = glm::normalize(glm::vec3(farPoint - nearPoint));
+
+    Object* closest = nullptr;
     float closestDistance = std::numeric_limits<float>::max();
 
-    for (auto* obj : scene.getObjects()) {
-        float distance;
+    for (Object* obj : scene.getObjects()) {
+        const glm::mat4 world = obj->getGlobalTransform();
+        if (std::abs(glm::determinant(world)) < 1e-12f) continue; // collapsed object: nothing to hit
+        const glm::mat4 inv = glm::inverse(world);
 
-        // Basic sphere bounds
-        float radius = glm::length(obj->scale) * 0.5f;
-        glm::vec3 center = obj->position;
+        // Not re-normalised: t then measures the same distance along the world ray.
+        const glm::vec3 localOrigin = glm::vec3(inv * glm::vec4(rayOrigin, 1.0f));
+        const glm::vec3 localDir = glm::vec3(inv * glm::vec4(rayDir, 0.0f));
 
-        glm::vec3 oc = rayOrigin - center;
-        float b = glm::dot(oc, rayDirection);
-        float c = glm::dot(oc, oc) - radius * radius;
-        float h = b * b - c;
-        if (h < 0.0f) continue;
-
-        h = sqrt(h);
-        distance = -b - h;
-
-        if (distance > 0.0f && distance < closestDistance) {
-            closestDistance = distance;
-            closestObject = obj;
+        float t;
+        if (rayAabb(localOrigin, localDir, obj->getBoundsMin(), obj->getBoundsMax(), t) && t < closestDistance) {
+            closestDistance = t;
+            closest = obj;
         }
     }
 
-    if (closestObject) {
-        bool shiftPressed = ImGui::GetIO().KeyShift;
-        UI->selectObject(closestObject, shiftPressed);
-    }
-    else {
-        UI->clearSelection();
-    }
+    const ImGuiIO& io = ImGui::GetIO();
+    const bool additive = io.KeyShift || io.KeyCtrl;
+    if (closest) UI->selectObject(closest, additive);
+    else if (!additive) UI->clearSelection(); // a missed shift-click no longer wipes the selection
 }
+
+// ----------------------------------------------------------------------------
+//  Keybinds
+// ----------------------------------------------------------------------------
 
 void Engine::setupDefaultKeybinds() {
-    keybindManager->registerKeybind("Open Save Dialog", { GLFW_KEY_S, true, false, false }, [this]() {
-        UI->openSaveDialog();
-        });
+    // The names are used by Interface to show shortcuts in its menus.
+    auto bind = [this](const char* name, int key, bool ctrl, bool shift, bool alt, std::function<void()> action) {
+        keybindManager->registerKeybind(name, { key, ctrl, shift, alt }, action);
+    };
 
-    keybindManager->registerKeybind("Duplicate Object", { GLFW_KEY_D, true, false, false }, [this]() {
-        UI->duplicateObject();
-        });
-
-    keybindManager->registerKeybind("Translate Gizmo", { GLFW_KEY_T, false, false, false }, [this]() {
-        UI->setGizmoOperation(ImGuizmo::OPERATION::TRANSLATE);
-        });
-
-    keybindManager->registerKeybind("Rotate Gizmo", { GLFW_KEY_R, false, false, false }, [this]() {
-        UI->setGizmoOperation(ImGuizmo::OPERATION::ROTATE);
-        });
-
-    keybindManager->registerKeybind("Scale Gizmo", { GLFW_KEY_F, false, false, false }, [this]() {
-        UI->setGizmoOperation(ImGuizmo::OPERATION::SCALE);
-        });
+    bind("New Scene",          GLFW_KEY_N, true,  false, false, [this]() { UI->newScene(); });
+    bind("Open Scene",         GLFW_KEY_O, true,  false, false, [this]() { UI->openLoadDialog(); });
+    bind("Save",               GLFW_KEY_S, true,  false, false, [this]() { UI->saveScene(); });
+    bind("Save As",            GLFW_KEY_S, true,  true,  false, [this]() { UI->openSaveDialog(); });
+    bind("Undo",               GLFW_KEY_Z, true,  false, false, [this]() { UI->undo(); });
+    bind("Redo",               GLFW_KEY_Y, true,  false, false, [this]() { UI->redo(); });
+    bind("Redo (Alt)",         GLFW_KEY_Z, true,  true,  false, [this]() { UI->redo(); });
+    bind("Duplicate Object",   GLFW_KEY_D, true,  false, false, [this]() { UI->duplicateObject(); });
+    bind("Delete Object",      GLFW_KEY_DELETE, false, false, false, [this]() { UI->deleteSelected(); });
+    bind("Select All",         GLFW_KEY_A, true,  false, false, [this]() { UI->selectAll(); });
+    bind("Focus Selected",     GLFW_KEY_PERIOD, false, false, false, [this]() { UI->focusSelection(); });
+    bind("Translate Gizmo",    GLFW_KEY_T, false, false, false, [this]() { UI->setGizmoOperation(ImGuizmo::OPERATION::TRANSLATE); });
+    bind("Rotate Gizmo",       GLFW_KEY_R, false, false, false, [this]() { UI->setGizmoOperation(ImGuizmo::OPERATION::ROTATE); });
+    bind("Scale Gizmo",        GLFW_KEY_F, false, false, false, [this]() { UI->setGizmoOperation(ImGuizmo::OPERATION::SCALE); });
+    bind("Toggle Gizmo Space", GLFW_KEY_X, false, false, false, [this]() { UI->toggleGizmoSpace(); });
 }
 
-bool Engine::init()
-{
-    if (!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW\n";
-        return false;
-    }
+// ----------------------------------------------------------------------------
+//  Init / loop / shutdown
+// ----------------------------------------------------------------------------
 
-    // Set OpenGL version and profile
+bool Engine::init() {
+    settings.load(); // first run: defaults
+
+    if (!glfwInit()) {
+        throw std::runtime_error("Failed to initialise GLFW.");
+    }
+    glfwStarted = true;
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4); // MSAA: smooth object edges and grid lines
 
-    // Create window
     window = glfwCreateWindow(width, height, windowTitle.c_str(), nullptr, nullptr);
     if (!window) {
-        std::cerr << "Failed to create GLFW window\n";
-        glfwTerminate();
-        return false;
+        throw std::runtime_error("Failed to create the OpenGL 3.3 window. Update your graphics driver, or check that the GPU supports OpenGL 3.3.");
     }
 
-    glfwSetWindowUserPointer(window, this); //
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetWindowUserPointer(window, this);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    glfwSetScrollCallback(window, scrollCallback); // ImGui's backend chains to this when it installs its own
 
     glfwMakeContextCurrent(window);
-    glewExperimental = GL_TRUE;
+    glfwSwapInterval(settings.vsync ? 1 : 0); // was never set, leaving the frame rate to driver defaults
 
+    glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
-        std::cerr << "Failed to initialize GLEW\n";
-        return false;
+        throw std::runtime_error("Failed to initialise GLEW.");
     }
 
     setAppIcon(window);
 
-    glViewport(0, 0, width, height);
+    int fbWidth = width, fbHeight = height;
+    glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+    glViewport(0, 0, fbWidth, fbHeight);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
 
-    shader = new Shader("vertex.glsl", "fragment.glsl");
-    backgroundShader = new Shader("background_vertex.glsl", "background_fragment.glsl");
-    gridShader = new Shader("grid_vertex.glsl", "grid_fragment.glsl");
-    lineShader = new Shader("line_vertex.glsl", "line_fragment.glsl");
+    shader = std::make_unique<Shader>("vertex.glsl", "fragment.glsl");
+    backgroundShader = std::make_unique<Shader>("background_vertex.glsl", "background_fragment.glsl");
+    gridShader = std::make_unique<Shader>("grid_vertex.glsl", "grid_fragment.glsl");
+    lineShader = std::make_unique<Shader>("line_vertex.glsl", "line_fragment.glsl");
 
-    Texture* cubeTexture = new Texture("assets/images/icon.png");
-    cube = new Object("Starting Cube", createCubeVertices(), cubeTexture);
-    scene.addObject(cube);
+    // Without the main shader nothing can be drawn. This used to fail
+    // silently, leaving an empty-looking window with no explanation.
+    if (!shader->isValid()) {
+        throw std::runtime_error("The main shader (vertex.glsl / fragment.glsl) failed to load or compile.\nSee RenderEngine_log.txt for the GLSL error. The shader files must sit next to the executable.");
+    }
+    if (!backgroundShader->isValid() || !gridShader->isValid() || !lineShader->isValid()) {
+        LOG_WARN("Engine", "One of the helper shaders (background / grid / line) failed to load; those elements will not be drawn.");
+    }
 
-    targetVisualizer = new Object("target_marker", createCubeVertices(), nullptr);
-    targetVisualizer->setScale(glm::vec3(0.1f)); // Make it small
-    scene.addInternalObject(targetVisualizer);
+    // Starting content. The cube owns its texture; with the scene being the
+    // sole owner of objects, nothing here can leak.
+    auto cubeTexture = std::make_unique<Texture>("assets/images/icon.png");
+    scene.addObject(std::make_unique<Object>("Starting Cube", createCubeVertices(), std::move(cubeTexture)));
 
-    camera = new Camera(width / static_cast<float>(height));
-    keybindManager = new KeybindManager();
-    inputManager = new InputManager();
+    auto marker = std::make_unique<Object>("target_marker", createCubeVertices(), static_cast<Texture*>(nullptr));
+    marker->setScale(glm::vec3(0.1f));
+    targetVisualizer = marker.get();
+    scene.addInternalObject(std::move(marker));
+
+    camera = std::make_unique<Camera>(static_cast<float>(fbWidth) / static_cast<float>(std::max(fbHeight, 1)));
+    keybindManager = std::make_unique<KeybindManager>();
+    inputManager = std::make_unique<InputManager>();
     setupDefaultKeybinds();
 
-    UI = new Interface(window, scene, camera, keybindManager, inputManager);
+    UI = std::make_unique<Interface>(window, scene, camera.get(), keybindManager.get(), inputManager.get(), settings);
+    UI->applySavedKeybinds(); // user rebinds from settings.json override the defaults
 
     initLines();
     initGrid();
     initFullScreenQuad();
 
+    lastFrame = glfwGetTime(); // the first dt was measured from GLFW start-up (a huge value) before
     return true;
 }
 
-void Engine::run()
-{
-    if (!init())
-        return;
+int Engine::run() {
+    init();
 
     while (!glfwWindowShouldClose(window)) {
-        float currentFrame = glfwGetTime();
-        float deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        glfwPollEvents(); // first, so this frame already sees the latest input and close request
+
+        // Close button / Alt+F4 / File > Exit: ask before discarding unsaved work.
+        if (glfwWindowShouldClose(window) && !UI->requestClose()) {
+            glfwSetWindowShouldClose(window, GLFW_FALSE);
+        }
+
+        int fbWidth = 0, fbHeight = 0;
+        glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+        if (fbWidth == 0 || fbHeight == 0) { // minimised: don't burn a core drawing nothing
+            glfwWaitEventsTimeout(0.1);
+            lastFrame = glfwGetTime();
+            continue;
+        }
+
+        const double now = glfwGetTime();
+        const float deltaTime = std::min(static_cast<float>(now - lastFrame), 0.1f); // clamp stalls (window drag, breakpoint)
+        lastFrame = now;
 
         update(deltaTime);
         render(deltaTime);
-
         glfwSwapBuffers(window);
-        glfwPollEvents();
     }
 
     cleanup();
+    return 0;
 }
 
 void Engine::processInput() {
-    if (inputManager->isKeyPressed(GLFW_KEY_ESCAPE)) {
-        glfwSetWindowShouldClose(window, true);
-    }
+    const ImGuiIO& io = ImGui::GetIO();
+    const bool overUI = io.WantCaptureMouse;
 
-    if (inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
-        glm::vec2 delta = inputManager->getMouseDelta();
+    // Esc no longer quits the application: it also cancels dialogs and key
+    // rebinding, and closing is handled (with an unsaved-changes prompt) via
+    // the window close button, Alt+F4 or File > Exit.
+
+    // Orbit / pan only start in the 3D view, and continue until release.
+    if (inputManager->isMouseButtonJustPressed(GLFW_MOUSE_BUTTON_RIGHT) && !overUI) orbiting = true;
+    if (!inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) orbiting = false;
+    if (inputManager->isMouseButtonJustPressed(GLFW_MOUSE_BUTTON_MIDDLE) && !overUI) panning = true;
+    if (!inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) panning = false;
+
+    if (orbiting) {
+        const glm::vec2 delta = inputManager->getMouseDelta();
         camera->handleMouseInput(delta.x, -delta.y, true, false);
     }
-
-    if (inputManager->isMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {
-        glm::vec2 delta = inputManager->getMouseDelta();
+    if (panning) {
+        const glm::vec2 delta = inputManager->getMouseDelta();
         camera->handleMouseInput(delta.x, -delta.y, false, true);
     }
 
-    if (inputManager->isMouseButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT) && !ImGui::GetIO().WantCaptureMouse) {
-        glm::vec2 mousePos = inputManager->getMousePosition();
+    // Clicking a gizmo handle must not also pick (and deselect) what is behind it.
+    if (inputManager->isMouseButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT) && !overUI && !UI->isGizmoActive()) {
+        const glm::vec2 mousePos = inputManager->getMousePosition();
         performObjectPicking(mousePos.x, mousePos.y);
     }
-
 }
 
-void Engine::update(float deltaTime)
-{
+void Engine::update(float deltaTime) {
+    // Input is sampled BEFORE it is used. The original processed input first, so
+    // everything ran one frame late, and on frame 1 it queried "previous"
+    // button state that did not exist yet (the first-frame crash).
+    inputManager->update(window);
     processInput();
 
-    inputManager->update(window);
-    keybindManager->update(inputManager);
-
-    if (targetVisualizer && camera) {
-        targetVisualizer->position = camera->target;
+    // Shortcuts must not fire while typing in a text field, rebinding a key,
+    // or with a dialog open (typing "R" in the name box switched the gizmo).
+    if (!UI->wantsTextInput() && !UI->isCapturingKey() && !UI->isModalUiOpen()) {
+        keybindManager->update(inputManager.get());
     }
 
+    UI->tickAnimation(deltaTime);
+    camera->update(deltaTime);
+
+    if (targetVisualizer) targetVisualizer->position = camera->target;
 }
 
-void Engine::render(float deltaTime)
-{
+void Engine::render(float deltaTime) {
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    renderBackground();
 
+    renderBackground();
     renderGrid();
 
     shader->use();
     shader->setMat4("view", camera->getViewMatrix());
     shader->setMat4("projection", camera->getProjectionMatrix());
 
-    for (auto* obj : scene.getInternalObjects()) {
+    for (Object* obj : scene.getInternalObjects()) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        // Same handling for internal objects (checking texture or color)
-        if (!obj->texture)
-            shader->setVec3("color", obj->color);
-            
-        obj->draw(*shader, *camera);  // Use the color instead
+        obj->draw(*shader, *camera);
         glDisable(GL_BLEND);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
-    for (auto* obj : scene.getObjects()) {
-        // Check if the object has a texture
-        if (!obj->texture)
-            shader->setVec3("color", obj->color);
+    glPolygonMode(GL_FRONT_AND_BACK, settings.wireframe ? GL_LINE : GL_FILL);
+    for (Object* obj : scene.getObjects()) {
         obj->draw(*shader, *camera);
-        renderMeasurementLines(obj);   
     }
-    
-    UI->update(deltaTime);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+    // Measurement lines last, in a separate pass: they switch shader programs,
+    // which used to leave the line program bound for the next object's draw.
+    for (Object* obj : scene.getObjects()) {
+        renderMeasurementLines(obj);
+    }
+
+    UI->update(deltaTime);
 }
 
-void Engine::cleanup()
-{
-    glfwDestroyWindow(window);
-    glfwTerminate();
+void Engine::cleanup() {
+    if (cleanedUp) return; // run() and ~Engine() both used to call this; the second window destroy was UB
+    cleanedUp = true;
+
+    // Order matters: everything that owns GL objects goes while the context is alive.
+    if (window) glfwMakeContextCurrent(window);
+
+    UI.reset();                 // ImGui backends + the UI's textures
+    targetVisualizer = nullptr; // about to be destroyed with the scene
+    scene.clearAll();           // every Object's VAO/VBO (user and internal)
+    shader.reset();
+    backgroundShader.reset();
+    gridShader.reset();
+    lineShader.reset();
+
+    if (window) { // only valid with a live context (e.g. not if init() failed early)
+        if (lineVAO) glDeleteVertexArrays(1, &lineVAO);
+        if (lineVBO) glDeleteBuffers(1, &lineVBO);
+        if (gridVAO) glDeleteVertexArrays(1, &gridVAO);
+        if (gridVBO) glDeleteBuffers(1, &gridVBO);
+        if (fullScreenQuadVAO) glDeleteVertexArrays(1, &fullScreenQuadVAO);
+        if (fullScreenQuadVBO) glDeleteBuffers(1, &fullScreenQuadVBO);
+    }
+    lineVAO = lineVBO = gridVAO = gridVBO = fullScreenQuadVAO = fullScreenQuadVBO = 0;
+
+    camera.reset();
+    keybindManager.reset();
+    inputManager.reset();
+
+    if (window) {
+        glfwDestroyWindow(window);
+        window = nullptr;
+    }
+    if (glfwStarted) {
+        glfwTerminate();
+        glfwStarted = false;
+    }
 }
