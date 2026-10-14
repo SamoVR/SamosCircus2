@@ -28,6 +28,12 @@ public:
     void focusOn(const glm::vec3& point);
     // Back to the startup view.
     void reset();
+
+    // Input-driven orbit state (what update() eases toward). Play mode saves
+    // the editor view with it and restores it on Stop.
+    struct Orbit { float distance, yaw, pitch; glm::vec3 pivot; };
+    Orbit getOrbit() const;
+    void setOrbit(const Orbit& orbit);
     glm::vec2 worldToScreen(const glm::vec3& worldPos) const;
 
     // Smooth (eased) orbit/pan/zoom vs. instant response. Toggle in the UI.
@@ -36,6 +42,9 @@ public:
     float smoothingSpeed = 12.0f;
 
 private:
+    // Startup view: a bit above the ground, so a new scene shows its floor.
+    static constexpr float kStartDistance = 12.0f, kStartYaw = 30.0f, kStartPitch = 20.0f;
+
     // Rendered state.
     float distance;
     float yaw;

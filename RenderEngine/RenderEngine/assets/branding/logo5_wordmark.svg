@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 210" width="640" height="210">
+  <!-- 5 · Wordmark: vlastne geometricke pismena (nie font), naklonene; "I" je ziariaca trhlina -->
+  <defs>
+    <linearGradient id="w-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient>
+    <linearGradient id="w-t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#67E8F9"/></linearGradient>
+    <filter id="w-glow" x="-200%" y="-30%" width="500%" height="160%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <g transform="translate(40,0) skewX(-12)" fill="url(#w-g)">
+    <path fill-rule="evenodd" d="M40 30 H122 C160 30 178 54 178 84 C178 108 166 124 146 131 L182 170 H138 L108 136 H82 V170 H40 Z M82 66 V102 H118 C130 102 136 94 136 84 C136 74 130 66 118 66 Z"/>
+    <path d="M290 30 H390 V66 H332 V86 H382 V120 H332 V170 H290 Z"/>
+    <path d="M410 30 H530 V66 H491 V170 H449 V66 H410 Z"/>
+  </g>
+  <polygon points="250,22 266,22 254,80 274,80 238,182 246,106 226,106" fill="url(#w-t)" filter="url(#w-glow)"/>
+  <text x="96" y="204" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" letter-spacing="34">ENGINE</text>
+</svg>

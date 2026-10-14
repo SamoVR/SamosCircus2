@@ -55,6 +55,18 @@ public:
     bool showMeasureY = false;
     bool showMeasureZ = false;
 
+    // Game-engine properties (Roblox-style "Part" properties). Saved with the
+    // scene; `velocity` and `visible` are also driven at runtime by physics
+    // and scripts in play mode (GameRuntime restores them on Stop).
+    struct GameProps {
+        bool anchored = true;      // false: affected by gravity / pushed out of other parts
+        bool canCollide = true;    // false: other parts pass through it (touch events still fire)
+        bool visible = true;
+        float bounciness = 0.0f;   // 0 = no bounce, 1 = perfectly elastic
+        std::string script;        // RiftScript source, empty = no script
+        glm::vec3 velocity{ 0.0f };
+    } game;
+
     // Draws with the GLOBAL transform (own transform composed with every
     // ancestor's). The original used the local-only getModelMatrix(), so
     // parenting never had any visible effect.

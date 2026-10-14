@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "objects": [
+    {"color":[1.0,0.73942,0.73942],"mesh":"sphere","name":"Head","position":[0.0,2.49847,-4e-05],"rotation":[180.0,-90.0,0.0],"scale":[0.51568,0.53227,0.54336],"texture":"assets/images/images.jpg","textureOwned":true},
+    {"mesh":"sphere","name":"Eye","parent":"Head","position":[-0.32062,-0.23426,0.19072],"rotation":[56.44081,-59.87835,-116.05098],"scale":[0.25213,0.29079,0.1364]},
+    {"mesh":"sphere","name":"Eye","parent":"Head","position":[-0.31565,-0.23715,-0.19378],"rotation":[131.81879,-57.92189,-57.16914],"scale":[0.25068,0.29106,0.13698]},
+    {"color":[0.0,0.0,0.0],"mesh":"sphere","name":"Pupil","parent":"Eye","position":[0.01603,0.03593,0.19001],"scale":[0.65,0.65,0.65]},
+    {"color":[0.0,0.0,0.0],"mesh":"sphere","name":"Pupil","parent":"Eye","position":[-0.0178,0.03593,0.19001],"scale":[0.65,0.65,0.65]},
+    {"color":[0.63495,1.0,0.08968],"mesh":"cube","name":"Torso","position":[0.00256,1.66128,-4e-05],"rotation":[0.0,0.0,0.15949],"scale":[0.75472,1.21599,0.25879]},
+    {"color":[0.0,0.21019,0.73942],"mesh":"cube","name":"Cube","position":[-0.24119,0.5448,-0.00223],"scale":[0.20385,1.08481,0.19334]},
+    {"color":[0.0,0.21019,0.73942],"mesh":"cube","name":"Cube (Copy)","position":[0.21166,0.5448,-0.00223],"scale":[0.20385,1.08481,0.19334]}
+  ]
+}

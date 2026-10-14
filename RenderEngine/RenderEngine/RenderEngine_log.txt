@@ -128,3 +128,180 @@
 [01:32:50] [INFO ] [Scene] Loaded 2 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\ReworkTest.json
 [01:32:50] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\ReworkTest.json
 ----- Session end -----
+
+----- Session start -----
+[08:48:37] [INFO ] [Scene] Loaded 2 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\ReworkTest.json
+[08:48:37] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\ReworkTest.json
+[08:52:26] [INFO ] [Scene] Loaded 11 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey_new.json
+[08:52:26] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey_new.json
+[08:52:33] [INFO ] [Interface] New scene
+[08:52:36] [INFO ] [Interface] Added Sphere
+[08:54:58] [INFO ] [Interface] Duplicated Sphere (Copy)
+[08:55:25] [INFO ] [CommandHistory] Undo: Transform Sphere (Copy)
+[08:55:25] [INFO ] [Interface] Undo: Transform Sphere (Copy)
+----- Session end -----
+
+----- Session start -----
+[09:31:53] [INFO ] [Interface] Deleted Starting Cube
+[09:31:57] [INFO ] [Interface] Added Cube
+[09:32:02] [INFO ] [Interface] Duplicated Cube (Copy)
+----- Session end -----
+
+----- Session start -----
+[09:57:14] [INFO ] [Interface] Added Sphere
+[09:58:04] [INFO ] [Interface] Deleted Starting Cube
+[09:58:07] [INFO ] [Interface] Added Sphere (2)
+[09:58:19] [INFO ] [Interface] Nothing to redo
+[09:58:21] [INFO ] [CommandHistory] Undo: Transform Sphere (2)
+[09:58:21] [INFO ] [Interface] Undo: Transform Sphere (2)
+[09:58:22] [INFO ] [CommandHistory] Undo: Transform Sphere (2)
+[09:58:22] [INFO ] [Interface] Undo: Transform Sphere (2)
+[09:58:23] [INFO ] [CommandHistory] Redo: Transform Sphere (2)
+[09:58:23] [INFO ] [Interface] Redo: Transform Sphere (2)
+[09:58:26] [INFO ] [CommandHistory] Undo: Transform Sphere (2)
+[09:58:26] [INFO ] [Interface] Undo: Transform Sphere (2)
+[09:59:38] [INFO ] [Interface] Duplicated Sphere (2) (Copy)
+[09:59:56] [INFO ] [Interface] Duplicated Sphere (2) (Copy) (Copy)
+[10:00:10] [INFO ] [Interface] Duplicated Sphere (2) (Copy) (Copy) (Copy)
+[10:03:30] [INFO ] [Interface] Nothing to redo
+[10:03:30] [INFO ] [Interface] Nothing to redo
+[10:03:31] [INFO ] [Interface] Nothing to redo
+[10:03:31] [INFO ] [CommandHistory] Undo: Transform Head
+[10:03:31] [INFO ] [Interface] Undo: Transform Head
+[10:03:31] [INFO ] [CommandHistory] Undo: Transform Head
+[10:03:31] [INFO ] [Interface] Undo: Transform Head
+[10:03:32] [INFO ] [CommandHistory] Undo: Transform Head
+[10:03:32] [INFO ] [Interface] Undo: Transform Head
+[10:03:32] [INFO ] [CommandHistory] Undo: Transform Head
+[10:03:32] [INFO ] [Interface] Undo: Transform Head
+[10:03:32] [INFO ] [CommandHistory] Undo: Transform Head
+[10:03:32] [INFO ] [Interface] Undo: Transform Head
+[10:03:33] [INFO ] [CommandHistory] Undo: Transform Head
+[10:03:33] [INFO ] [Interface] Undo: Transform Head
+[10:03:34] [INFO ] [CommandHistory] Undo: Rename Head
+[10:03:34] [INFO ] [Interface] Undo: Rename Head
+[10:03:35] [INFO ] [CommandHistory] Redo: Rename Head
+[10:03:35] [INFO ] [Interface] Redo: Rename Head
+[10:05:06] [INFO ] [Interface] Added Cube
+[10:05:38] [INFO ] [Interface] Nothing to redo
+[10:05:38] [INFO ] [CommandHistory] Undo: Transform Cube
+[10:05:38] [INFO ] [Interface] Undo: Transform Cube
+[10:06:49] [INFO ] [Scene] Saved 6 object(s) to C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+[10:06:49] [INFO ] [Interface] Saved C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+[10:07:10] [INFO ] [Interface] Added Cube
+[10:08:02] [INFO ] [Interface] Duplicated Cube (Copy)
+[10:08:05] [INFO ] [Interface] Deleted Cube (Copy)
+[10:08:18] [INFO ] [Interface] Duplicated Cube (Copy)
+[10:09:37] [INFO ] [Interface] Nothing to redo
+[10:09:38] [INFO ] [Interface] Nothing to redo
+[10:09:44] [INFO ] [CommandHistory] Undo: Transform Head
+[10:09:44] [INFO ] [Interface] Undo: Transform Head
+[10:10:04] [INFO ] [Interface] Nothing to redo
+[10:10:05] [INFO ] [CommandHistory] Undo: Transform Head
+[10:10:05] [INFO ] [Interface] Undo: Transform Head
+[10:11:31] [INFO ] [Interface] Deleted Eye
+[10:11:32] [INFO ] [Interface] Duplicated Eye (Copy)
+[10:11:41] [INFO ] [CommandHistory] Undo: Transform Eye (Copy)
+[10:11:41] [INFO ] [Interface] Undo: Transform Eye (Copy)
+[10:11:41] [INFO ] [CommandHistory] Undo: Duplicate Eye (Copy)
+[10:11:41] [INFO ] [Interface] Undo: Duplicate Eye (Copy)
+[10:11:43] [INFO ] [Interface] Duplicated Eye (Copy)
+[10:11:43] [INFO ] [Interface] Duplicated Pupil (Copy)
+[10:11:51] [INFO ] [CommandHistory] Undo: Transform Eye (Copy)
+[10:11:51] [INFO ] [Interface] Undo: Transform Eye (Copy)
+[10:11:52] [INFO ] [CommandHistory] Undo: Reparent Pupil (Copy)
+[10:11:52] [INFO ] [Interface] Undo: Reparent Pupil (Copy)
+[10:11:52] [INFO ] [CommandHistory] Undo: Duplicate Pupil (Copy)
+[10:11:52] [INFO ] [Interface] Undo: Duplicate Pupil (Copy)
+[10:11:52] [INFO ] [CommandHistory] Undo: Duplicate Eye (Copy)
+[10:11:52] [INFO ] [Interface] Undo: Duplicate Eye (Copy)
+[10:11:53] [INFO ] [CommandHistory] Undo: Delete Eye
+[10:11:53] [INFO ] [Interface] Undo: Delete Eye
+[10:14:09] [INFO ] [CommandHistory] Undo: Transform Pupil
+[10:14:09] [INFO ] [Interface] Undo: Transform Pupil
+[10:14:16] [INFO ] [CommandHistory] Undo: Transform Pupil
+[10:14:16] [INFO ] [Interface] Undo: Transform Pupil
+[10:14:33] [INFO ] [CommandHistory] Undo: Transform Pupil
+[10:14:33] [INFO ] [Interface] Undo: Transform Pupil
+[10:14:33] [INFO ] [CommandHistory] Undo: Transform Pupil
+[10:14:33] [INFO ] [Interface] Undo: Transform Pupil
+[10:14:36] [INFO ] [Scene] Saved 8 object(s) to C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+[10:14:36] [INFO ] [Interface] Saved C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+[10:14:43] [INFO ] [Scene] Saved 8 object(s) to C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+[10:14:43] [INFO ] [Interface] Saved C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+[10:17:29] [INFO ] [CommandHistory] Undo: Transform Head
+[10:17:29] [INFO ] [Interface] Undo: Transform Head
+[10:17:29] [INFO ] [CommandHistory] Undo: Transform Head
+[10:17:29] [INFO ] [Interface] Undo: Transform Head
+[10:17:29] [INFO ] [CommandHistory] Undo: Transform Head
+[10:17:29] [INFO ] [Interface] Undo: Transform Head
+[10:17:32] [INFO ] [CommandHistory] Undo: Transform Head
+[10:17:32] [INFO ] [Interface] Undo: Transform Head
+[10:17:33] [INFO ] [CommandHistory] Redo: Transform Head
+[10:17:33] [INFO ] [Interface] Redo: Transform Head
+[10:17:34] [INFO ] [Scene] Saved 8 object(s) to C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+[10:17:34] [INFO ] [Interface] Saved C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+
+----- Session start -----
+[13:09:18] [INFO ] [Discord] Rich Presence disabled: no Discord Application ID set (RichPresence::kClientId / settings.json).
+
+----- Session start -----
+[13:22:58] [INFO ] [Discord] Rich Presence disabled: no Discord Application ID set (RichPresence::kClientId / settings.json).
+
+----- Session start -----
+[13:24:44] [INFO ] [Discord] Rich Presence disabled: no Discord Application ID set (RichPresence::kClientId / settings.json).
+
+----- Session start -----
+[13:25:50] [INFO ] [Discord] Rich Presence disabled: no Discord Application ID set (RichPresence::kClientId / settings.json).
+[13:26:25] [INFO ] [Interface] Inserted Baseplate
+[13:26:26] [INFO ] [Interface] Inserted SpawnPoint
+[13:26:28] [INFO ] [Interface] Inserted FallingBlock
+[13:26:45] [INFO ] [Game] Play mode started (0 script(s))
+[13:26:45] [INFO ] [Interface] Playing - WASD / Space to move, F5 to stop
+[13:27:17] [INFO ] [Game] Play mode stopped, scene restored
+[13:27:17] [INFO ] [Interface] Stopped - scene restored to its state before Play
+
+----- Session start -----
+[13:30:04] [INFO ] [Discord] Rich Presence disabled: no Discord Application ID set (RichPresence::kClientId / settings.json).
+[13:30:24] [INFO ] [Interface] Inserted KillBrick
+
+----- Session start -----
+[13:33:15] [INFO ] [Discord] Rich Presence disabled: no Discord Application ID set (RichPresence::kClientId / settings.json).
+[13:33:15] [INFO ] [Scene] Loaded 9 object(s) from assets/scenes/demo_obby.json
+[13:33:15] [INFO ] [Interface] Loaded assets/scenes/demo_obby.json
+[13:33:34] [INFO ] [Game] Play mode started (5 script(s))
+[13:33:34] [INFO ] [Interface] Playing - WASD / Space to move, F5 to stop
+[13:33:58] [INFO ] [Game] Play mode stopped, scene restored
+[13:33:58] [INFO ] [Interface] Stopped - scene restored to its state before Play
+[13:33:59] [INFO ] [Game] Play mode started (5 script(s))
+[13:33:59] [INFO ] [Interface] Playing - WASD / Space to move, F5 to stop
+
+----- Session start -----
+[13:36:03] [INFO ] [Discord] Rich Presence disabled: no Discord Application ID set (RichPresence::kClientId / settings.json).
+[13:36:03] [INFO ] [Scene] Loaded 9 object(s) from assets/scenes/demo_obby.json
+[13:36:03] [INFO ] [Interface] Loaded assets/scenes/demo_obby.json
+[13:36:10] [INFO ] [Game] Play mode started (5 script(s))
+[13:36:59] [INFO ] [Game] Play mode stopped, scene restored
+[13:36:59] [INFO ] [Interface] Stopped - scene restored to its state before Play
+[13:37:01] [INFO ] [Game] Play mode started (5 script(s))
+
+----- Session start -----
+[13:39:39] [INFO ] [Discord] Rich Presence disabled: no Discord Application ID set (RichPresence::kClientId / settings.json).
+[13:39:39] [WARN ] [Scene] Duplicate object name 'Sphere' in assets/scenes/mickey.json -- renamed to 'Sphere_1'.
+[13:39:39] [WARN ] [Scene] Duplicate object name 'Sphere' in assets/scenes/mickey.json -- renamed to 'Sphere_2'.
+[13:39:39] [WARN ] [Scene] Duplicate object name 'Sphere' in assets/scenes/mickey.json -- renamed to 'Sphere_3'.
+[13:39:39] [WARN ] [Scene] Duplicate object name 'Sphere' in assets/scenes/mickey.json -- renamed to 'Sphere_4'.
+[13:39:39] [WARN ] [Scene] Duplicate object name 'Sphere' in assets/scenes/mickey.json -- renamed to 'Sphere_5'.
+[13:39:39] [WARN ] [Scene] Duplicate object name 'Sphere' in assets/scenes/mickey.json -- renamed to 'Sphere_6'.
+[13:39:39] [WARN ] [Scene] Duplicate object name 'Sphere' in assets/scenes/mickey.json -- renamed to 'Sphere_7'.
+[13:39:39] [WARN ] [Scene] Duplicate object name 'Sphere' in assets/scenes/mickey.json -- renamed to 'Sphere_8'.
+[13:39:39] [WARN ] [Scene] Duplicate object name 'Sphere' in assets/scenes/mickey.json -- renamed to 'Sphere_9'.
+[13:39:39] [WARN ] [Scene] Duplicate object name 'Sphere' in assets/scenes/mickey.json -- renamed to 'Sphere_10'.
+[13:39:39] [INFO ] [Scene] Loaded 11 object(s) from assets/scenes/mickey.json
+[13:39:39] [INFO ] [Interface] Loaded assets/scenes/mickey.json
+[13:39:59] [INFO ] [Scene] Saved 11 object(s) to assets/scenes/mickey.json
+[13:39:59] [INFO ] [Interface] Saved assets/scenes/mickey.json
+
+----- Session start -----
+[19:39:47] [INFO ] [Discord] Rich Presence disabled: no Discord Application ID set (RichPresence::kClientId / settings.json).
+----- Session end -----

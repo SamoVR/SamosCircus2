@@ -282,6 +282,7 @@ void Engine::setupDefaultKeybinds() {
     bind("Rotate Gizmo",       GLFW_KEY_R, false, false, false, [this]() { UI->setGizmoOperation(ImGuizmo::OPERATION::ROTATE); });
     bind("Scale Gizmo",        GLFW_KEY_F, false, false, false, [this]() { UI->setGizmoOperation(ImGuizmo::OPERATION::SCALE); });
     bind("Toggle Gizmo Space", GLFW_KEY_X, false, false, false, [this]() { UI->toggleGizmoSpace(); });
+    bind("Play / Stop",        GLFW_KEY_F5, false, false, false, [this]() { UI->togglePlay(); });
 }
 
 // ----------------------------------------------------------------------------
@@ -358,6 +359,11 @@ bool Engine::init() {
     UI = std::make_unique<Interface>(window, scene, camera.get(), keybindManager.get(), inputManager.get(), settings);
     UI->applySavedKeybinds(); // user rebinds from settings.json override the defaults
 
+    runtime = std::make_unique<GameRuntime>(scene, *camera, *inputManager);
+    UI->setRuntime(runtime.get());
+
+    if (settings.discordRichPresence) discord.init(settings.discordClientId);
+
     initLines();
     initGrid();
     initFullScreenQuad();
@@ -366,13 +372,16 @@ bool Engine::init() {
     return true;
 }
 
-int Engine::run() {
+int Engine::run(const std::string& startupScene) {
     init();
+    if (!startupScene.empty()) UI->openScene(startupScene);
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents(); // first, so this frame already sees the latest input and close request
 
         // Close button / Alt+F4 / File > Exit: ask before discarding unsaved work.
+        // A running game is stopped first, so the scene is back in its edited state.
+        if (glfwWindowShouldClose(window) && UI->isPlaying()) UI->togglePlay();
         if (glfwWindowShouldClose(window) && !UI->requestClose()) {
             glfwSetWindowShouldClose(window, GLFW_FALSE);
         }
@@ -422,7 +431,8 @@ void Engine::processInput() {
     }
 
     // Clicking a gizmo handle must not also pick (and deselect) what is behind it.
-    if (inputManager->isMouseButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT) && !overUI && !UI->isGizmoActive()) {
+    // No picking while the game runs: the scene is not editable then.
+    if (inputManager->isMouseButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT) && !overUI && !UI->isGizmoActive() && !UI->isPlaying()) {
         const glm::vec2 mousePos = inputManager->getMousePosition();
         performObjectPicking(mousePos.x, mousePos.y);
     }
@@ -437,12 +447,21 @@ void Engine::update(float deltaTime) {
 
     // Shortcuts must not fire while typing in a text field, rebinding a key,
     // or with a dialog open (typing "R" in the name box switched the gizmo).
-    if (!UI->wantsTextInput() && !UI->isCapturingKey() && !UI->isModalUiOpen()) {
+    const bool typing = UI->wantsTextInput() || UI->isCapturingKey() || UI->isModalUiOpen();
+    if (UI->isPlaying()) {
+        // In play mode WASD etc. belong to the game, so editor shortcuts are
+        // off; only Play/Stop (F5) and Esc (stop) work.
+        if (!typing && (inputManager->isKeyJustPressed(GLFW_KEY_F5) || inputManager->isKeyJustPressed(GLFW_KEY_ESCAPE))) {
+            UI->togglePlay();
+        }
+    } else if (!typing) {
         keybindManager->update(inputManager.get());
     }
 
-    UI->tickAnimation(deltaTime);
+    if (UI->isPlaying()) runtime->update(deltaTime, !typing && !ImGui::GetIO().WantCaptureKeyboard);
+    else UI->tickAnimation(deltaTime);
     camera->update(deltaTime);
+    updatePresence(deltaTime);
 
     if (targetVisualizer) targetVisualizer->position = camera->target;
 }
@@ -459,6 +478,7 @@ void Engine::render(float deltaTime) {
     shader->setMat4("projection", camera->getProjectionMatrix());
 
     for (Object* obj : scene.getInternalObjects()) {
+        if (UI->isPlaying()) break; // the orbit-target marker is an editor aid
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -471,6 +491,7 @@ void Engine::render(float deltaTime) {
     for (Object* obj : scene.getObjects()) {
         obj->draw(*shader, *camera);
     }
+    if (runtime && runtime->player()) runtime->player()->draw(*shader, *camera);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     // Measurement lines last, in a separate pass: they switch shader programs,
@@ -489,6 +510,9 @@ void Engine::cleanup() {
     // Order matters: everything that owns GL objects goes while the context is alive.
     if (window) glfwMakeContextCurrent(window);
 
+    if (runtime) runtime->stop(); // restores the scene and frees the player's GL buffers
+    runtime.reset();
+    discord.shutdown();
     UI.reset();                 // ImGui backends + the UI's textures
     targetVisualizer = nullptr; // about to be destroyed with the scene
     scene.clearAll();           // every Object's VAO/VBO (user and internal)
@@ -519,4 +543,27 @@ void Engine::cleanup() {
         glfwTerminate();
         glfwStarted = false;
     }
+}
+
+// ----------------------------------------------------------------------------
+//  Discord Rich Presence
+// ----------------------------------------------------------------------------
+
+void Engine::updatePresence(float deltaTime) {
+    presenceTimer -= deltaTime;
+    if (presenceTimer <= 0.0f) {
+        presenceTimer = 1.0f; // building the strings every frame is pointless
+
+        std::string sceneName = "Untitled scene";
+        const std::string& path = UI->scenePath();
+        if (!path.empty()) {
+            const size_t slash = path.find_last_of("/\\");
+            sceneName = slash == std::string::npos ? path : path.substr(slash + 1);
+        }
+        const std::string details = (UI->isPlaying() ? "Playtesting " : "Building ") + sceneName;
+        const std::string state = UI->isPlaying() ? "In play mode"
+                                                  : std::to_string(scene.objectCount()) + " objects in scene";
+        discord.setActivity(details, state);
+    }
+    discord.update(deltaTime);
 }

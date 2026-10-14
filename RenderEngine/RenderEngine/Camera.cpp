@@ -3,11 +3,12 @@
 #include <cmath>
 
 Camera::Camera(float aspectRatio)
-    : target(0.0f), position(0.0f, 0.0f, 5.0f),
-    distance(5.0f), yaw(0.0f), pitch(0.0f),
-    targetDistance(5.0f), targetYaw(0.0f), targetPitch(0.0f), targetPanPoint(0.0f),
+    : target(0.0f), position(0.0f),
+    distance(kStartDistance), yaw(kStartYaw), pitch(kStartPitch),
+    targetDistance(kStartDistance), targetYaw(kStartYaw), targetPitch(kStartPitch), targetPanPoint(0.0f),
     zoomSpeed(1.0f), rotateSpeed(0.3f), panSpeed(0.005f),
-    fov(glm::radians(45.0f)), aspect(aspectRatio), nearPlane(0.1f), farPlane(100.0f) {
+    fov(glm::radians(45.0f)), aspect(aspectRatio), nearPlane(0.1f), farPlane(1000.0f) {
+    position = getPosition();
 }
 
 void Camera::handleMouseInput(float deltaX, float deltaY, bool rotating, bool panning) {
@@ -23,14 +24,15 @@ void Camera::handleMouseInput(float deltaX, float deltaY, bool rotating, bool pa
         // responsive rather than lagging behind its own smoothing.
         glm::vec3 right = glm::normalize(glm::cross(position - target, glm::vec3(0.0f, 1.0f, 0.0f)));
         glm::vec3 up = glm::normalize(glm::cross(right, position - target));
-        targetPanPoint -= right * deltaX * panSpeed;
-        targetPanPoint += up * deltaY * panSpeed;
+        const float scaled = panSpeed * std::max(1.0f, distance / 5.0f); // same feel at any zoom
+        targetPanPoint -= right * deltaX * scaled;
+        targetPanPoint += up * deltaY * scaled;
     }
 }
 
 void Camera::handleScrollInput(float yOffset) {
-    targetDistance -= yOffset * zoomSpeed;
-    targetDistance = std::max(1.0f, targetDistance);
+    targetDistance -= yOffset * zoomSpeed * std::max(1.0f, targetDistance * 0.15f); // proportional: usable both near and far
+    targetDistance = glm::clamp(targetDistance, 1.0f, 400.0f);
 }
 
 void Camera::update(float deltaTime) {
@@ -82,9 +84,9 @@ void Camera::focusOn(const glm::vec3& point) {
 }
 
 void Camera::reset() {
-    targetDistance = 5.0f;
-    targetYaw = 0.0f;
-    targetPitch = 0.0f;
+    targetDistance = kStartDistance;
+    targetYaw = kStartYaw;
+    targetPitch = kStartPitch;
     targetPanPoint = glm::vec3(0.0f);
 }
 
@@ -94,4 +96,15 @@ glm::vec2 Camera::worldToScreen(const glm::vec3& worldPos) const {
 
     glm::vec3 ndc = glm::vec3(clipSpace) / clipSpace.w;
     return glm::vec2(ndc.x * 0.5f + 0.5f, 1.0f - (ndc.y * 0.5f + 0.5f)); // normalised [0,1], y flipped
+}
+
+Camera::Orbit Camera::getOrbit() const {
+    return { targetDistance, targetYaw, targetPitch, targetPanPoint };
+}
+
+void Camera::setOrbit(const Orbit& orbit) {
+    targetDistance = orbit.distance;
+    targetYaw = orbit.yaw;
+    targetPitch = glm::clamp(orbit.pitch, -89.0f, 89.0f);
+    targetPanPoint = orbit.pivot;
 }

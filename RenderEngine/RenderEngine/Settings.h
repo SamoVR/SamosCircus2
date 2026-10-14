@@ -3,6 +3,7 @@
 // Settings.h -- user settings persisted to settings.json next to the .exe.
 // Previously nothing survived a restart (rebound keys, toggles, last scene).
 //
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <fstream>
@@ -30,6 +31,10 @@ struct AppSettings {
     float snapTranslate = 0.5f, snapRotate = 15.0f, snapScale = 0.1f;
     // UI: multiplier applied on top of the monitor's DPI scale
     float uiScale = 1.0f;
+    int layoutVersion = 0; // see Interface::update
+    // Discord Rich Presence
+    bool discordRichPresence = true;
+    std::int64_t discordClientId = 0; // 0 = use RichPresence::kClientId
     // Files
     std::string lastScenePath;
     std::vector<SavedKeybind> keybinds;
@@ -44,6 +49,7 @@ struct AppSettings {
         j["gizmoLocalSpace"] = gizmoLocalSpace; j["snapEnabled"] = snapEnabled;
         j["snapTranslate"] = snapTranslate;     j["snapRotate"] = snapRotate; j["snapScale"] = snapScale;
         j["uiScale"] = uiScale;                 j["lastScenePath"] = lastScenePath;
+        j["discordRichPresence"] = discordRichPresence; j["discordClientId"] = discordClientId; j["layoutVersion"] = layoutVersion;
         j["keybinds"] = nlohmann::json::array();
         for (const auto& k : keybinds) {
             j["keybinds"].push_back({ {"name", k.name}, {"key", k.key}, {"ctrl", k.ctrl}, {"shift", k.shift}, {"alt", k.alt} });
@@ -63,6 +69,7 @@ struct AppSettings {
         get("gizmoLocalSpace", gizmoLocalSpace); get("snapEnabled", snapEnabled);
         get("snapTranslate", snapTranslate); get("snapRotate", snapRotate); get("snapScale", snapScale);
         get("uiScale", uiScale);     get("lastScenePath", lastScenePath);
+        get("discordRichPresence", discordRichPresence); get("discordClientId", discordClientId); get("layoutVersion", layoutVersion);
         uiScale = uiScale < 0.5f ? 0.5f : (uiScale > 3.0f ? 3.0f : uiScale);
 
         keybinds.clear();

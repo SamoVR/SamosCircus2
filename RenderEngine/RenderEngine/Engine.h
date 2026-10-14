@@ -12,6 +12,8 @@
 #include "KeybindManager.h"
 #include "Settings.h"
 #include "Logger.h"
+#include "GameRuntime.h"
+#include "RichPresence.h"
 
 #include "stb_image.h"
 #include <imgui.h>
@@ -43,7 +45,8 @@ public:
 
     // Runs until the window closes. Returns 0 on a clean exit; throws
     // std::runtime_error (caught in main) if start-up fails.
-    int run();
+    // startupScene: optional scene file to open (command-line argument).
+    int run(const std::string& startupScene = "");
 
 private:
     // ---- world
@@ -53,6 +56,10 @@ private:
     std::unique_ptr<InputManager> inputManager;
     std::unique_ptr<KeybindManager> keybindManager;
     Object* targetVisualizer = nullptr; // owned by `scene` (internal object)
+    std::unique_ptr<GameRuntime> runtime;  // play mode: physics, scripts, player
+    RichPresence discord;
+    float presenceTimer = 0.0f;
+    void updatePresence(float deltaTime);
 
     // ---- rendering
     std::unique_ptr<Shader> shader;

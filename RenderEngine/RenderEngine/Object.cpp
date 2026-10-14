@@ -1,7 +1,9 @@
 #include "Object.h"
 #include "Logger.h"
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
+#include "Geometry.h"
 
 Object::Object(std::string name, const std::vector<Vertex>& vertices, Texture* texture)
     : name(std::move(name)),
@@ -41,6 +43,7 @@ Object::Object(const Object& other)
     showMeasureX(other.showMeasureX),
     showMeasureY(other.showMeasureY),
     showMeasureZ(other.showMeasureZ),
+    game(other.game),
     vertexCount(other.vertices.size())
 {
     if (other.ownedTexture_) {
@@ -68,6 +71,7 @@ Object::Object(Object&& other) noexcept
     showMeasureX(other.showMeasureX),
     showMeasureY(other.showMeasureY),
     showMeasureZ(other.showMeasureZ),
+    game(other.game),
     VAO(other.VAO),
     VBO(other.VBO),
     vertexCount(other.vertexCount),
@@ -98,6 +102,7 @@ Object& Object::operator=(Object&& other) noexcept {
         showMeasureX = other.showMeasureX;
         showMeasureY = other.showMeasureY;
         showMeasureZ = other.showMeasureZ;
+        game = other.game;
         VAO = other.VAO;
         VBO = other.VBO;
         vertexCount = other.vertexCount;
@@ -161,6 +166,7 @@ glm::mat4 Object::getModelMatrix() const {
 
 void Object::draw(Shader& shader, Camera& camera) const {
     (void)camera; // kept for API compatibility
+    if (!game.visible) return;
 
     // glUniform* calls apply to whichever program is bound. The engine interleaves other
     // shaders (measurement lines) between object draws, so bind ours explicitly.
@@ -257,38 +263,66 @@ bool Object::isChildOf(Object* potentialParent) const {
     return false;
 }
 
+namespace {
+    // 5 decimals is far below anything visible and keeps the file short
+    // ("-0.0611194372177124" -> "-0.06112").
+    double round5(float v) {
+        const double r = std::round(static_cast<double>(v) * 1e5) / 1e5;
+        return r == 0.0 ? 0.0 : r; // no "-0.0"
+    }
+    nlohmann::json vec3Json(const glm::vec3& v) { return { round5(v.x), round5(v.y), round5(v.z) }; }
+    glm::vec3 jsonVec3(const nlohmann::json& j) { return { j.at(0).get<float>(), j.at(1).get<float>(), j.at(2).get<float>() }; }
+}
+
+// Scene format v2: only non-default values are written, and a built-in
+// primitive is stored as its name ("mesh": "sphere") instead of thousands of
+// vertices. Other meshes go in "v" as one flat array (8 numbers per vertex:
+// position, uv, normal). Files in the old format still load.
 nlohmann::json Object::toJSON() const {
     nlohmann::json j;
     j["name"] = name;
-    j["position"] = { position.x, position.y, position.z };
-    j["rotation"] = { rotation.x, rotation.y, rotation.z };
-    j["scale"] = { scale.x, scale.y, scale.z };
-    j["color"] = { color.x, color.y, color.z };
+    j["position"] = vec3Json(position);
+    if (rotation != glm::vec3(0.0f)) j["rotation"] = vec3Json(rotation);
+    if (scale != glm::vec3(1.0f)) j["scale"] = vec3Json(scale);
+    if (color != glm::vec3(1.0f)) j["color"] = vec3Json(color);
     if (parent) j["parent"] = parent->name;
 
-    nlohmann::json verticesJson = nlohmann::json::array();
-    for (const auto& vertex : vertices) {
-        nlohmann::json vertexJson;
-        vertexJson["position"] = { vertex.position.x, vertex.position.y, vertex.position.z };
-        vertexJson["texCoord"] = { vertex.texCoord.x, vertex.texCoord.y };
-        vertexJson["normal"] = { vertex.normal.x, vertex.normal.y, vertex.normal.z };
-        verticesJson.push_back(vertexJson);
+    const std::string primitive = identifyPrimitive(vertices);
+    if (!primitive.empty()) {
+        j["mesh"] = primitive;
+    } else if (!vertices.empty()) {
+        nlohmann::json flat = nlohmann::json::array();
+        for (const auto& v : vertices) {
+            for (float f : { v.position.x, v.position.y, v.position.z, v.texCoord.x, v.texCoord.y, v.normal.x, v.normal.y, v.normal.z }) {
+                flat.push_back(round5(f));
+            }
+        }
+        j["mesh"] = "custom";
+        j["v"] = std::move(flat);
     }
-    j["vertices"] = verticesJson;
 
     if (texture) {
         j["texture"] = texture->getFilePath();
-        j["textureOwned"] = (ownedTexture_ != nullptr);
+        j["textureOwned"] = ownedTexture_ != nullptr;
     }
+
+    const GameProps defaults;
+    nlohmann::json g = nlohmann::json::object();
+    if (game.anchored != defaults.anchored) g["anchored"] = game.anchored;
+    if (game.canCollide != defaults.canCollide) g["canCollide"] = game.canCollide;
+    if (game.visible != defaults.visible) g["visible"] = game.visible;
+    if (game.bounciness != defaults.bounciness) g["bounciness"] = round5(game.bounciness);
+    if (!game.script.empty()) g["script"] = game.script;
+    if (!g.empty()) j["game"] = std::move(g);
     return j;
 }
 
 void Object::fromJSON(const nlohmann::json& j) {
     if (j.contains("name")) name = j["name"];
-    if (j.contains("position")) position = glm::vec3(j["position"][0], j["position"][1], j["position"][2]);
-    if (j.contains("rotation")) rotation = glm::vec3(j["rotation"][0], j["rotation"][1], j["rotation"][2]);
-    if (j.contains("scale")) scale = glm::vec3(j["scale"][0], j["scale"][1], j["scale"][2]);
-    if (j.contains("color")) color = glm::vec3(j["color"][0], j["color"][1], j["color"][2]);
+    if (j.contains("position")) position = jsonVec3(j["position"]);
+    if (j.contains("rotation")) rotation = jsonVec3(j["rotation"]);
+    if (j.contains("scale")) scale = jsonVec3(j["scale"]);
+    if (j.contains("color")) color = jsonVec3(j["color"]);
 
     if (j.contains("texture")) {
         const std::string texturePath = j["texture"];
@@ -306,8 +340,42 @@ void Object::fromJSON(const nlohmann::json& j) {
         // knows which shared Texture* to use (see Scene::loadFromFile).
     }
 
-    if (j.contains("vertices")) {
-        setVertices(fromJSONToVertices(j["vertices"]));
+    // Scenes saved before the game properties existed get the defaults (static, collidable parts).
+    if (j.contains("game") && j["game"].is_object()) {
+        const auto& g = j["game"];
+        game.anchored = g.value("anchored", true);
+        game.canCollide = g.value("canCollide", true);
+        game.visible = g.value("visible", true);
+        game.bounciness = g.value("bounciness", 0.0f);
+        game.script = g.value("script", std::string());
+    }
+
+    const std::string mesh = j.value("mesh", std::string());
+    if (mesh == "custom" && j.contains("v")) {
+        const auto& flat = j["v"];
+        std::vector<Vertex> verts(flat.size() / 8);
+        for (size_t i = 0; i < verts.size(); ++i) {
+            const size_t k = i * 8;
+            verts[i].position = { flat[k].get<float>(), flat[k + 1].get<float>(), flat[k + 2].get<float>() };
+            verts[i].texCoord = { flat[k + 3].get<float>(), flat[k + 4].get<float>() };
+            verts[i].normal = { flat[k + 5].get<float>(), flat[k + 6].get<float>(), flat[k + 7].get<float>() };
+        }
+        setVertices(verts);
+    } else if (!mesh.empty()) {
+        const std::vector<Vertex> verts = primitiveVertices(mesh);
+        if (verts.empty()) LOG_WARN("Object", "'" + name + "': unknown mesh '" + mesh + "'");
+        setVertices(verts);
+    } else if (j.contains("vertices")) { // scene format v1
+        std::vector<Vertex> verts = fromJSONToVertices(j["vertices"]);
+        if (verts.empty()) { // old builds sometimes saved primitives with no vertices (invisible objects)
+            LOG_WARN("Object", "'" + name + "': empty mesh in scene file, using a cube");
+            verts = createCubeVertices();
+        }
+        // v1 files store primitives vertex by vertex, some from before normals
+        // existed (unlit). Swap in the current primitive so they get lighting.
+        const std::string primitive = identifyPrimitive(verts);
+        if (!primitive.empty()) verts = primitiveVertices(primitive);
+        setVertices(verts);
     }
 }
 

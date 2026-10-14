@@ -14,6 +14,7 @@
 #include "Settings.h"
 #include "TransformUtil.h"
 #include "Logger.h"
+#include "GameRuntime.h"
 
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -68,6 +69,13 @@ public:
     void setGizmoOperation(ImGuizmo::OPERATION operation);
     void toggleGizmoSpace();
     void focusSelection();
+    bool openScene(const std::string& path) { return doLoad(path); } // command line: RenderEngine.exe scene.json
+
+    // ---- play mode (GameRuntime is owned by Engine)
+    void setRuntime(GameRuntime* r) { runtime = r; }
+    void togglePlay();
+    bool isPlaying() const { return runtime && runtime->isRunning(); }
+    const std::string& scenePath() const { return currentScenePath; }
 
     // ---- queries / hooks for Engine
     bool isGizmoActive() const;        // pointer is over / dragging the gizmo
@@ -194,4 +202,22 @@ private:
     void timelineUI();
     void updateFileBrowsers();
     void showShapeSelectionPopup();
+
+    // ---- game engine panels
+    GameRuntime* runtime = nullptr;
+    Object* scriptTarget = nullptr;                      // object open in the Script Editor
+    std::string scriptCheckResult;
+    bool showScriptEditor = false;
+    bool showOutput = true;
+    size_t lastLogSize = 0;
+    void insertTemplate(const std::string& kind);
+    void gamePropertiesUI(Object* object);
+    void scriptEditorUI();
+    void outputUI();
+    void playOverlay();
+    bool resetLayoutRequested = false;
+    // The free 3D area between the docked panels (overlays are placed in it).
+    // Same field names as ImGuiViewport so either can be used.
+    struct ViewArea { ImVec2 WorkPos, WorkSize; } viewArea;
+    void buildDefaultLayout(ImGuiID dockspaceId);
 };

@@ -10,6 +10,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <Windows.h>
+#include <shellapi.h>
 #endif
 
 #include "Engine.h"
@@ -31,10 +32,10 @@ namespace {
 #endif
     }
 
-    int runApplication() {
+    int runApplication(const std::string& startupScene) {
         try {
             Engine engine;
-            return engine.run();
+            return engine.run(startupScene);
         }
         catch (const std::exception& e) {
             reportFatalError(e.what());
@@ -46,12 +47,25 @@ namespace {
     }
 }
 
-int main() {
-    return runApplication();
+int main(int argc, char** argv) {
+    return runApplication(argc > 1 ? argv[1] : "");
 }
 
 #ifdef _WIN32
 int APIENTRY wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
-    return runApplication();
+    // First argument (UTF-8), e.g. a .json scene dropped on the exe.
+    std::string startupScene;
+    int argc = 0;
+    if (LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc)) {
+        if (argc > 1) {
+            const int size = WideCharToMultiByte(CP_UTF8, 0, argv[1], -1, nullptr, 0, nullptr, nullptr);
+            if (size > 1) {
+                startupScene.resize(static_cast<size_t>(size) - 1);
+                WideCharToMultiByte(CP_UTF8, 0, argv[1], -1, startupScene.data(), size, nullptr, nullptr);
+            }
+        }
+        LocalFree(argv);
+    }
+    return runApplication(startupScene);
 }
 #endif

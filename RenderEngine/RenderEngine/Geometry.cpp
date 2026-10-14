@@ -162,3 +162,31 @@ std::vector<Vertex> createFullScreenQuadVertices() {
         {{-1.0f,  1.0f,  0.0f}, {0.0f, 1.0f}}
     };
 }
+
+namespace {
+    bool sameShape(const std::vector<Vertex>& a, const std::vector<Vertex>& b) {
+        if (a.size() != b.size()) return false;
+        for (size_t i = 0; i < a.size(); ++i) {
+            if (glm::any(glm::greaterThan(glm::abs(a[i].position - b[i].position), glm::vec3(1e-4f))) ||
+                glm::any(glm::greaterThan(glm::abs(a[i].texCoord - b[i].texCoord), glm::vec2(1e-4f)))) return false;
+        }
+        return true;
+    }
+}
+
+const char* identifyPrimitive(const std::vector<Vertex>& vertices) {
+    static const char* names[] = { "cube", "sphere", "triangle" };
+    static std::vector<Vertex> cache[3];
+    for (int i = 0; i < 3; ++i) {
+        if (cache[i].empty()) cache[i] = primitiveVertices(names[i]);
+        if (sameShape(vertices, cache[i])) return names[i];
+    }
+    return "";
+}
+
+std::vector<Vertex> primitiveVertices(const std::string& name) {
+    if (name == "cube") return createCubeVertices();
+    if (name == "sphere") return createSphereVertices();
+    if (name == "triangle") return createTriangle3DVertices();
+    return {};
+}

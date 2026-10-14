@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -148,18 +148,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AnimationSequencer.cpp" />
+    <ClCompile Include="RichPresence.cpp" />
+    <ClCompile Include="GameRuntime.cpp" />
+    <ClCompile Include="InterfaceGame.cpp" />
+    <ClCompile Include="RiftScript.cpp" />
+    <ClCompile Include="imgui\misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="imgui\FontAwesome-main\font_awesome.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\ImGuiFileDialog-master\ImGuiFileDialog.cpp" />
-    <ClCompile Include="imgui\ImGuizmo-master\GraphEditor.cpp" />
     <ClCompile Include="imgui\ImGuizmo-master\ImCurveEdit.cpp" />
-    <ClCompile Include="imgui\ImGuizmo-master\ImGradient.cpp" />
     <ClCompile Include="imgui\ImGuizmo-master\ImGuizmo.cpp" />
     <ClCompile Include="imgui\ImGuizmo-master\ImSequencer.cpp" />
-    <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
@@ -182,7 +184,6 @@
     <ClCompile Include="libraries\discord-rpc\types.cpp" />
     <ClCompile Include="libraries\discord-rpc\user_manager.cpp" />
     <ClCompile Include="libraries\discord-rpc\voice_manager.cpp" />
-    <ClCompile Include="libraries\stb\stb_vorbis.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -191,6 +192,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimationSequencer.h" />
+    <ClInclude Include="RichPresence.h" />
+    <ClInclude Include="GameRuntime.h" />
+    <ClInclude Include="RiftScript.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Command.h" />
@@ -204,9 +208,7 @@
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\ImGuiFileDialog-master\ImGuiFileDialog.h" />
     <ClInclude Include="imgui\ImGuiFileDialog-master\ImGuiFileDialogConfig.h" />
-    <ClInclude Include="imgui\ImGuizmo-master\GraphEditor.h" />
     <ClInclude Include="imgui\ImGuizmo-master\ImCurveEdit.h" />
-    <ClInclude Include="imgui\ImGuizmo-master\ImGradient.h" />
     <ClInclude Include="imgui\ImGuizmo-master\ImGuizmo.h" />
     <ClInclude Include="imgui\ImGuizmo-master\ImSequencer.h" />
     <ClInclude Include="imgui\ImGuizmo-master\ImZoomSlider.h" />
@@ -239,26 +241,8 @@
     <ClInclude Include="libraries\discord-rpc\types.h" />
     <ClInclude Include="libraries\discord-rpc\user_manager.h" />
     <ClInclude Include="libraries\discord-rpc\voice_manager.h" />
-    <ClInclude Include="libraries\stb\stb_connected_components.h" />
-    <ClInclude Include="libraries\stb\stb_c_lexer.h" />
-    <ClInclude Include="libraries\stb\stb_divide.h" />
-    <ClInclude Include="libraries\stb\stb_ds.h" />
-    <ClInclude Include="libraries\stb\stb_dxt.h" />
-    <ClInclude Include="libraries\stb\stb_easy_font.h" />
-    <ClInclude Include="libraries\stb\stb_herringbone_wang_tile.h" />
-    <ClInclude Include="libraries\stb\stb_hexwave.h" />
     <ClInclude Include="libraries\stb\stb_image.h" />
     <ClInclude Include="libraries\stb\stb_image_resize2.h" />
-    <ClInclude Include="libraries\stb\stb_image_write.h" />
-    <ClInclude Include="libraries\stb\stb_include.h" />
-    <ClInclude Include="libraries\stb\stb_leakcheck.h" />
-    <ClInclude Include="libraries\stb\stb_perlin.h" />
-    <ClInclude Include="libraries\stb\stb_rect_pack.h" />
-    <ClInclude Include="libraries\stb\stb_sprintf.h" />
-    <ClInclude Include="libraries\stb\stb_textedit.h" />
-    <ClInclude Include="libraries\stb\stb_tilemap_editor.h" />
-    <ClInclude Include="libraries\stb\stb_truetype.h" />
-    <ClInclude Include="libraries\stb\stb_voxel_render.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="resource.h" />

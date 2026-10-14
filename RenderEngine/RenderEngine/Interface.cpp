@@ -25,18 +25,26 @@ Interface::Interface(GLFWwindow* window, Scene& scene, Camera* camera, KeybindMa
     // The context is OpenGL 3.3 core (see Engine::init), so ask for GLSL 330 core.
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
-    io.Fonts->AddFontDefault();
-    headingFont = io.Fonts->AddFontFromFileTTF("assets/fonts/ProggyVector-Regular.ttf", 18.0f);
-    if (!headingFont) {
-        LOG_WARN("Interface", "Failed to load assets/fonts/ProggyVector-Regular.ttf; using the default font.");
-    }
-
+    // Font Awesome is merged into BOTH fonts, so icons work in any widget
+    // (it used to be merged only into the heading font: icons in normal
+    // buttons rendered as '?').
     static const ImWchar icons_ranges[] = { 0xf000, 0xf3ff, 0 };
     ImFontConfig icons_config;
     icons_config.MergeMode = true;
     icons_config.PixelSnapH = true;
-    icons_config.GlyphMinAdvanceX = 16.0f;
-    iconFont = io.Fonts->AddFontFromFileTTF("assets/fonts/fa-solid-900.ttf", 16.0f, &icons_config, icons_ranges);
+    auto mergeIcons = [&](float size) {
+        icons_config.GlyphMinAdvanceX = size;
+        return io.Fonts->AddFontFromFileTTF("assets/fonts/fa-solid-900.ttf", size, &icons_config, icons_ranges);
+    };
+
+    io.Fonts->AddFontDefault();
+    iconFont = mergeIcons(13.0f);
+    headingFont = io.Fonts->AddFontFromFileTTF("assets/fonts/ProggyVector-Regular.ttf", 18.0f);
+    if (!headingFont) {
+        LOG_WARN("Interface", "Failed to load assets/fonts/ProggyVector-Regular.ttf; using the default font.");
+    } else {
+        mergeIcons(16.0f);
+    }
     if (!iconFont) {
         LOG_WARN("Interface", "Failed to load assets/fonts/fa-solid-900.ttf; toolbar icons will not display.");
     }
@@ -167,24 +175,46 @@ void Interface::update(float deltaTime) {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("MainDockspace", nullptr, windowFlags);
     ImGui::PopStyleVar(3);
-    ImGui::DockSpace(ImGui::GetID("MyDockspace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+    const ImGuiID dockspaceId = ImGui::GetID("MyDockspace");
+    const ImGuiDockNode* rootNode = ImGui::DockBuilderGetNode(dockspaceId);
+    // Rebuilt on first run, when imgui.ini has no layout, or when the panel set
+    // changed since the saved layout (it would leave new panels floating).
+    constexpr int kLayoutVersion = 2;
+    if (resetLayoutRequested || !rootNode || rootNode->IsLeafNode() || settings.layoutVersion != kLayoutVersion) {
+        settings.layoutVersion = kLayoutVersion;
+        settingsDirty = true;
+        buildDefaultLayout(dockspaceId);
+        resetLayoutRequested = false;
+    }
+    ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+    if (const ImGuiDockNode* central = ImGui::DockBuilderGetCentralNode(dockspaceId)) viewArea = { central->Pos, central->Size };
+    else viewArea = { viewport->WorkPos, viewport->WorkSize };
     ImGui::End();
 
     mainMenuBarUI();
     settingsUI();
     sceneControlsUI();
+
+    // Play mode: the scene is being simulated and will be restored on Stop,
+    // so editing it would be lost -- the editing panels are read-only.
+    const bool playMode = isPlaying();
+    if (playMode) ImGui::BeginDisabled();
     objectListUI();
     propertiesUI();
     timelineUI();
+    if (playMode) ImGui::EndDisabled();
+    scriptEditorUI();
+    outputUI();
 
     updateFileBrowsers();
     unsavedPopup();
     aboutPopups();
 
     renderText();
-    renderGizmo();
+    if (!playMode) renderGizmo();
     statsOverlay();
     statusOverlay();
+    playOverlay();
 
     // Persist settings once the mouse is released (not on every slider tick).
     if (settingsDirty && !ImGui::IsMouseDown(0)) {
@@ -218,6 +248,7 @@ bool Interface::hasUnsavedChanges() const {
 }
 
 void Interface::refreshDirtyState(float deltaTime) {
+    if (isPlaying()) return; // the simulation moves things; that is not an unsaved edit
     dirtyTimer += deltaTime;
     if (dirtyTimer < 0.75f) return;
     dirtyTimer = 0.0f;
@@ -466,6 +497,7 @@ void Interface::pruneSelection() {
         primaryObject = selectedObjects.empty() ? nullptr : *selectedObjects.begin();
     }
     if (textureTargetObject && !alive.count(textureTargetObject)) textureTargetObject = nullptr;
+    if (scriptTarget && !alive.count(scriptTarget)) scriptTarget = nullptr;
     for (auto it = editBefore.begin(); it != editBefore.end();) {
         if (!alive.count(it->first)) it = editBefore.erase(it); else ++it;
     }
@@ -789,12 +821,41 @@ void Interface::mainMenuBarUI() {
         ImGui::EndMenu();
     }
 
+    const bool playMode = isPlaying();
+    if (ImGui::BeginMenu("Insert", !playMode)) {
+        if (ImGui::MenuItem("Part (Cube)"))  insertTemplate("Part");
+        if (ImGui::MenuItem("Sphere"))       insertTemplate("Sphere");
+        if (ImGui::MenuItem("Wedge (Triangle)")) insertTemplate("Wedge");
+        ImGui::Separator();
+        if (ImGui::MenuItem("Baseplate"))    insertTemplate("Baseplate");
+        if (ImGui::MenuItem("Spawn Point"))  insertTemplate("SpawnPoint");
+        ImGui::Separator();
+        ImGui::TextDisabled("Scripted templates");
+        if (ImGui::MenuItem("Kill Brick"))   insertTemplate("KillBrick");
+        if (ImGui::MenuItem("Spinner"))      insertTemplate("Spinner");
+        if (ImGui::MenuItem("Coin"))         insertTemplate("Coin");
+        if (ImGui::MenuItem("Jump Pad"))     insertTemplate("JumpPad");
+        if (ImGui::MenuItem("Falling Block")) insertTemplate("FallingBlock");
+        if (ImGui::MenuItem("Finish Line"))  insertTemplate("Finish");
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Game")) {
+        if (ImGui::MenuItem(playMode ? "Stop" : "Play", shortcutFor(keybindManager, "Play / Stop").c_str())) togglePlay();
+        if (ImGui::MenuItem("Pause", nullptr, runtime && runtime->isPaused(), playMode)) runtime->togglePause();
+        ImGui::Separator();
+        ImGui::MenuItem("Output", nullptr, &showOutput);
+        ImGui::MenuItem("Script Editor", nullptr, &showScriptEditor);
+        ImGui::EndMenu();
+    }
+
     if (ImGui::BeginMenu("View")) {
         if (ImGui::MenuItem("Show Grid", nullptr, &settings.showGrid)) settingsDirty = true;
         if (ImGui::MenuItem("Wireframe", nullptr, &settings.wireframe)) settingsDirty = true;
         if (ImGui::MenuItem("Stats Overlay", nullptr, &settings.showStats)) settingsDirty = true;
         if (ImGui::MenuItem("Smooth Camera", nullptr, &settings.cameraSmoothing)) settingsDirty = true;
         if (ImGui::MenuItem("Reset Camera")) camera->reset();
+        if (ImGui::MenuItem("Reset Layout")) resetLayoutRequested = true;
         ImGui::Separator();
         if (ImGui::MenuItem("Gizmo: Local Space", shortcutFor(keybindManager, "Toggle Gizmo Space").c_str(), &settings.gizmoLocalSpace)) settingsDirty = true;
         if (ImGui::MenuItem("Gizmo: Snapping", nullptr, &settings.snapEnabled)) settingsDirty = true;
@@ -844,7 +905,28 @@ void Interface::aboutPopups() {
 }
 
 void Interface::sceneControlsUI() {
-    ImGui::Begin("Scene Controls");
+    ImGui::Begin("Toolbar###Scene Controls");
+    const bool toolbarLocked = isPlaying(); // captured: Play/Stop below changes isPlaying() mid-frame
+
+    // Play / Stop -- the green/red button of the engine.
+    {
+        const bool playMode = isPlaying();
+        const ImVec4 tint = playMode ? ImVec4(0.80f, 0.22f, 0.22f, 1.0f) : ImVec4(0.18f, 0.62f, 0.30f, 1.0f);
+        ImGui::PushStyleColor(ImGuiCol_Button, tint);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(tint.x + 0.1f, tint.y + 0.1f, tint.z + 0.1f, 1.0f));
+        if (ImGui::Button(playMode ? ICON_FA_STOP "  Stop" : ICON_FA_PLAY "  Play")) togglePlay();
+        ImGui::PopStyleColor(2);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s (%s)", playMode ? "Stop the game and restore the scene" : "Test the game: WASD + Space",
+                                                      shortcutFor(keybindManager, "Play / Stop").c_str());
+        if (playMode) {
+            ImGui::SameLine();
+            if (ImGui::Button(runtime->isPaused() ? ICON_FA_PLAY "  Resume" : ICON_FA_PAUSE "  Pause")) runtime->togglePause();
+            ImGui::SameLine();
+            ImGui::TextDisabled("Playing  %.1f s", runtime->elapsed());
+        }
+        if (toolbarLocked) ImGui::BeginDisabled();
+        ImGui::SameLine();
+    }
 
     if (ImGui::Button("Add Object")) ImGui::OpenPopup("Select Object Shape");
     showShapeSelectionPopup();
@@ -861,9 +943,10 @@ void Interface::sceneControlsUI() {
     if (ImGui::Button("Redo")) redo();
     if (!history.canRedo()) ImGui::EndDisabled();
 
-    ImGui::Separator();
+    // One row: the toolbar is docked as a thin strip (see buildDefaultLayout).
+    ImGui::SameLine(0.0f, 24.0f);
 
-    const float buttonSize = 40.0f;
+    const float buttonSize = ImGui::GetFrameHeight();
     const ImVec4 activeColor(0.25f, 0.60f, 1.00f, 1.00f);
     const ImVec4 hoveredColor(0.35f, 0.68f, 1.00f, 1.00f);
     const ImVec4 normalColor = ImGui::GetStyleColorVec4(ImGuiCol_Button);
@@ -871,9 +954,7 @@ void Interface::sceneControlsUI() {
     auto gizmoButton = [&](const char* icon, const char* tooltip, ImGuizmo::OPERATION op) {
         ImGui::PushStyleColor(ImGuiCol_Button, gizmoOperation == op ? activeColor : normalColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoveredColor);
-        ImGui::PushFont(iconFont);
         if (ImGui::Button(icon, ImVec2(buttonSize, buttonSize))) setGizmoOperation(op);
-        ImGui::PopFont();
         ImGui::PopStyleColor(2);
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", tooltip);
         ImGui::SameLine();
@@ -891,6 +972,7 @@ void Interface::sceneControlsUI() {
     if (ImGui::Checkbox("Snap", &settings.snapEnabled)) settingsDirty = true;
     if (ImGui::IsItemHovered()) ImGui::SetTooltip("Snap gizmo movement (hold Ctrl to invert). Step sizes are in Settings.");
 
+    if (toolbarLocked) ImGui::EndDisabled();
     ImGui::End();
 }
 
@@ -905,7 +987,7 @@ void Interface::showShapeSelectionPopup() {
 }
 
 void Interface::objectListUI() {
-    ImGui::Begin("Object List");
+    ImGui::Begin("Explorer###Object List");
 
     pushHeading("Objects");
     ImGui::SameLine();
@@ -995,7 +1077,9 @@ void Interface::propertiesUI() {
 
     if (selectedObjects.empty()) {
         ImGui::TextDisabled("Nothing selected.");
-        ImGui::TextDisabled("Click an object in the viewport or in the Object List.");
+        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+        ImGui::TextWrapped("Click an object in the viewport or in the Explorer.");
+        ImGui::PopStyleColor();
         ImGui::End();
         return;
     }
@@ -1101,6 +1185,9 @@ void Interface::displayObjectProperties(Object* object) {
         if (ImGui::Button("Duplicate")) duplicateObject();
         ImGui::SameLine();
         if (ImGui::Button("Delete")) panelDeleteRequest = object;
+
+        ImGui::Separator();
+        gamePropertiesUI(object);
 
         ImGui::Separator();
         pushHeading("Measurement Lines");
@@ -1275,7 +1362,7 @@ void Interface::renderText() {
 
 void Interface::statsOverlay() {
     if (!settings.showStats) return;
-    const ImGuiViewport* vp = ImGui::GetMainViewport();
+    const ViewArea* vp = &viewArea;
     ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x + vp->WorkSize.x - 12.0f, vp->WorkPos.y + 12.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
     ImGui::SetNextWindowBgAlpha(0.55f);
     const ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings |
@@ -1290,7 +1377,7 @@ void Interface::statsOverlay() {
 
 void Interface::statusOverlay() {
     if (statusTimer <= 0.0f || statusText.empty()) return;
-    const ImGuiViewport* vp = ImGui::GetMainViewport();
+    const ViewArea* vp = &viewArea;
     ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x + 12.0f, vp->WorkPos.y + vp->WorkSize.y - 12.0f), ImGuiCond_Always, ImVec2(0.0f, 1.0f));
     ImGui::SetNextWindowBgAlpha(0.70f * std::min(1.0f, statusTimer)); // fades during the last second
     const ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings |

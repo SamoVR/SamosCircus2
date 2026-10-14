@@ -128,7 +128,14 @@ bool Scene::saveToFile(const std::string& filename) const {
         LOG_ERROR("Scene", "Failed to open file for saving: " + filename);
         return false;
     }
-    outFile << j.dump(4);
+    // One object per line: small, and still readable / diff-friendly.
+    std::string text = "{\n  \"version\": 2,\n  \"objects\": [\n";
+    const auto& objects = j["objects"];
+    for (size_t i = 0; i < objects.size(); ++i) {
+        text += "    " + objects[i].dump() + (i + 1 < objects.size() ? ",\n" : "\n");
+    }
+    text += "  ]\n}\n";
+    outFile << text;
     outFile.close();
     if (outFile.fail()) {
         LOG_ERROR("Scene", "Error while writing scene file: " + filename);

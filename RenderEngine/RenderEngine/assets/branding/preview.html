@@ -1,0 +1,209 @@
+<!doctype html><html><head><meta charset="utf-8"><title>RIFT logo koncepty</title><style>body{background:#0e0f1a;color:#cbd5e1;font-family:Segoe UI,Arial;padding:16px}.c{display:inline-block;text-align:center;margin:8px;vertical-align:top}.c svg{width:200px;height:200px}.s svg{width:32px;height:32px;margin:4px}.w svg{width:560px;height:184px}</style></head><body>
+<div class=c>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- 1 · Dimensional Tear: trhlina v tmavom priestore, cez ktoru je vidiet herny svet (neonovy horizont) -->
+  <defs>
+    <linearGradient id="t-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0B0B1E"/><stop offset="1" stop-color="#1B1038"/></linearGradient>
+    <linearGradient id="t-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2B86C5"/><stop offset=".55" stop-color="#9D4EDD"/><stop offset="1" stop-color="#FF3CAC"/></linearGradient>
+    <linearGradient id="t-sun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE66D"/><stop offset="1" stop-color="#FF6B9D"/></linearGradient>
+    <filter id="t-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+    <path id="t-shape" d="M128 18 L114 52 L100 60 L94 98 L78 118 L86 150 L98 176 L104 206 L128 238 L144 208 L158 194 L162 160 L178 134 L168 104 L160 84 L154 50 Z"/>
+    <clipPath id="t-tear"><use href="#t-shape"/></clipPath>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#t-bg)"/>
+  <g fill="#fff" opacity=".7"><circle cx="44" cy="52" r="1.6"/><circle cx="206" cy="40" r="1.2"/><circle cx="214" cy="188" r="1.8"/><circle cx="58" cy="200" r="1.2"/><circle cx="196" cy="118" r="1"/><circle cx="36" cy="132" r="1"/></g>
+  <use href="#t-shape" fill="#22D3EE" filter="url(#t-glow)" opacity=".9"/>
+  <g clip-path="url(#t-tear)">
+    <rect x="70" y="10" width="120" height="240" fill="url(#t-sky)"/>
+    <circle cx="130" cy="150" r="34" fill="url(#t-sun)"/>
+    <g fill="#9D4EDD"><rect x="90" y="138" width="80" height="3"/><rect x="90" y="147" width="80" height="4"/><rect x="90" y="157" width="80" height="5"/></g>
+    <rect x="70" y="166" width="120" height="90" fill="#140A2E"/>
+    <g stroke="#FF3CAC" stroke-width="1.6" fill="none">
+      <line x1="80" y1="172" x2="180" y2="172"/><line x1="80" y1="182" x2="180" y2="182"/><line x1="80" y1="198" x2="180" y2="198"/><line x1="80" y1="222" x2="180" y2="222"/>
+      <line x1="130" y1="166" x2="130" y2="250"/><line x1="130" y1="166" x2="90" y2="250"/><line x1="130" y1="166" x2="170" y2="250"/><line x1="130" y1="166" x2="50" y2="250"/><line x1="130" y1="166" x2="210" y2="250"/>
+    </g>
+  </g>
+  <use href="#t-shape" fill="none" stroke="#E0FBFF" stroke-width="2.5" stroke-linejoin="round"/>
+  <polygon points="176,64 186,58 182,72" fill="#67E8F9"/><polygon points="62,168 54,180 68,178" fill="#C084FC"/>
+</svg>
+<p>logo1_dimensional_tear</p></div>
+<div class=c>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- 2 · Voxel R: R postavene z hernych kociek (stavanie ako v Roblox Studiu), jedna kocka vyskocila cez trhlinu -->
+  <defs>
+    <linearGradient id="v-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E1B4B"/><stop offset="1" stop-color="#0F0A24"/></linearGradient>
+    <g id="v-c"><polygon points="0,-12 20,-2 0,8 -20,-2" fill="#C4B5FD"/><polygon points="-20,-2 0,8 0,30 -20,20" fill="#7C3AED"/><polygon points="0,8 20,-2 20,20 0,30" fill="#4C1D95"/></g>
+    <g id="v-g"><polygon points="0,-12 20,-2 0,8 -20,-2" fill="#CFFAFE"/><polygon points="-20,-2 0,8 0,30 -20,20" fill="#22D3EE"/><polygon points="0,8 20,-2 20,20 0,30" fill="#0E7490"/></g>
+    <filter id="v-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7"/></filter>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#v-bg)"/>
+  <!-- mriezka 3x5 (R), kreslene zhora nadol a zlava doprava, aby sa kocky spravne prekryvali -->
+  <g transform="translate(70,58)">
+    <use href="#v-c" x="0" y="0"/><use href="#v-c" x="40" y="0"/>
+    <use href="#v-c" x="0" y="30"/><use href="#v-c" x="80" y="30"/>
+    <use href="#v-c" x="0" y="60"/><use href="#v-c" x="40" y="60"/>
+    <use href="#v-c" x="0" y="90"/>
+    <ellipse cx="80" cy="100" rx="22" ry="7" fill="#22D3EE" filter="url(#v-glow)"/>
+    <ellipse cx="80" cy="100" rx="14" ry="3" fill="#E0FBFF"/>
+    <use href="#v-c" x="0" y="120"/><use href="#v-c" x="80" y="120"/>
+    <use href="#v-g" x="104" y="74" transform="rotate(14 104 84)"/>
+  </g>
+</svg>
+<p>logo2_voxel_r</p></div>
+<div class=c>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- 3 · Crystal Shard: fazetovany krystal (low-poly 3D) rozlomeny trhlinou, zvnutra presvitajuce svetlo -->
+  <defs>
+    <radialGradient id="s-bg" cx=".5" cy=".45" r=".7"><stop offset="0" stop-color="#241A4D"/><stop offset="1" stop-color="#0A0817"/></radialGradient>
+    <filter id="s-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="8"/></filter>
+    <g id="s-gem">
+      <polygon points="128,22 128,128 62,96" fill="#A78BFA"/>
+      <polygon points="128,22 194,96 128,128" fill="#7C3AED"/>
+      <polygon points="62,96 128,128 128,234" fill="#5B21B6"/>
+      <polygon points="128,128 194,96 128,234" fill="#3B0E7A"/>
+      <polygon points="128,22 104,104 128,128" fill="#DDD6FE" opacity=".55"/>
+      <polygon points="128,128 166,112 150,186" fill="#6D28D9" opacity=".6"/>
+    </g>
+    <clipPath id="s-l"><polygon points="0,0 150,0 118,100 140,130 106,256 0,256"/></clipPath>
+    <clipPath id="s-r"><polygon points="150,0 256,0 256,256 106,256 140,130 118,100"/></clipPath>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#s-bg)"/>
+  <polyline points="150,4 118,100 140,130 106,252" fill="none" stroke="#F0ABFC" stroke-width="16" filter="url(#s-glow)" opacity=".8"/>
+  <g clip-path="url(#s-l)"><use href="#s-gem" transform="translate(-9,4) rotate(-3 128 128)"/></g>
+  <g clip-path="url(#s-r)"><use href="#s-gem" transform="translate(9,-4) rotate(3 128 128)"/></g>
+  <polyline points="150,4 118,100 140,130 106,252" fill="none" stroke="#FFF" stroke-width="2.5" stroke-linejoin="round"/>
+  <g fill="#F5D0FE"><polygon points="182,50 190,44 188,56"/><polygon points="66,190 58,200 70,198"/><circle cx="200" cy="168" r="2"/></g>
+</svg>
+<p>logo3_crystal_shard</p></div>
+<div class=c>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- 4 · Glitch R: R rozrezane na pruhy posunute ako pri skoku medzi dimenziami (RGB split) -->
+  <defs>
+    <linearGradient id="g-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#111827"/><stop offset="1" stop-color="#0B0B14"/></linearGradient>
+    <path id="g-r" fill-rule="evenodd" d="M64 40 H152 C192 40 212 66 212 100 C212 126 198 144 176 152 L216 216 H168 L134 158 H110 V216 H64 Z M110 80 V120 H148 C162 120 168 111 168 100 C168 89 162 80 148 80 Z"/>
+    <clipPath id="g-a"><rect x="0" y="0" width="256" height="96"/></clipPath>
+    <clipPath id="g-b"><rect x="0" y="96" width="256" height="22"/></clipPath>
+    <clipPath id="g-c"><rect x="0" y="118" width="256" height="50"/></clipPath>
+    <clipPath id="g-d"><rect x="0" y="168" width="256" height="88"/></clipPath>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#g-bg)"/>
+  <use href="#g-r" fill="#FF2E88" transform="translate(-7,2)" opacity=".9"/>
+  <use href="#g-r" fill="#00E5FF" transform="translate(7,-2)" opacity=".9"/>
+  <g fill="#F8FAFC">
+    <g clip-path="url(#g-a)"><use href="#g-r"/></g>
+    <g clip-path="url(#g-b)"><use href="#g-r" transform="translate(20,0)"/></g>
+    <g clip-path="url(#g-c)"><use href="#g-r" transform="translate(-9,0)"/></g>
+    <g clip-path="url(#g-d)"><use href="#g-r"/></g>
+  </g>
+  <rect x="160" y="104" width="62" height="5" fill="#00E5FF"/><rect x="34" y="150" width="40" height="4" fill="#FF2E88"/><rect x="190" y="186" width="24" height="3" fill="#F8FAFC" opacity=".6"/>
+</svg>
+<p>logo4_glitch_r</p></div>
+<br><div class="c w">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 210" width="640" height="210">
+  <!-- 5 · Wordmark: vlastne geometricke pismena (nie font), naklonene; "I" je ziariaca trhlina -->
+  <defs>
+    <linearGradient id="w-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/></linearGradient>
+    <linearGradient id="w-t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#67E8F9"/></linearGradient>
+    <filter id="w-glow" x="-200%" y="-30%" width="500%" height="160%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <g transform="translate(40,0) skewX(-12)" fill="url(#w-g)">
+    <path fill-rule="evenodd" d="M40 30 H122 C160 30 178 54 178 84 C178 108 166 124 146 131 L182 170 H138 L108 136 H82 V170 H40 Z M82 66 V102 H118 C130 102 136 94 136 84 C136 74 130 66 118 66 Z"/>
+    <path d="M290 30 H390 V66 H332 V86 H382 V120 H332 V170 H290 Z"/>
+    <path d="M410 30 H530 V66 H491 V170 H449 V66 H410 Z"/>
+  </g>
+  <polygon points="250,22 266,22 254,80 274,80 238,182 246,106 226,106" fill="url(#w-t)" filter="url(#w-glow)"/>
+  <text x="96" y="204" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" letter-spacing="34">ENGINE</text>
+</svg>
+</div><div class="c s"><p>32 px</p>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- 1 · Dimensional Tear: trhlina v tmavom priestore, cez ktoru je vidiet herny svet (neonovy horizont) -->
+  <defs>
+    <linearGradient id="st-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0B0B1E"/><stop offset="1" stop-color="#1B1038"/></linearGradient>
+    <linearGradient id="st-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2B86C5"/><stop offset=".55" stop-color="#9D4EDD"/><stop offset="1" stop-color="#FF3CAC"/></linearGradient>
+    <linearGradient id="st-sun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE66D"/><stop offset="1" stop-color="#FF6B9D"/></linearGradient>
+    <filter id="st-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+    <path id="st-shape" d="M128 18 L114 52 L100 60 L94 98 L78 118 L86 150 L98 176 L104 206 L128 238 L144 208 L158 194 L162 160 L178 134 L168 104 L160 84 L154 50 Z"/>
+    <clipPath id="st-tear"><use href="#st-shape"/></clipPath>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#st-bg)"/>
+  <g fill="#fff" opacity=".7"><circle cx="44" cy="52" r="1.6"/><circle cx="206" cy="40" r="1.2"/><circle cx="214" cy="188" r="1.8"/><circle cx="58" cy="200" r="1.2"/><circle cx="196" cy="118" r="1"/><circle cx="36" cy="132" r="1"/></g>
+  <use href="#st-shape" fill="#22D3EE" filter="url(#st-glow)" opacity=".9"/>
+  <g clip-path="url(#st-tear)">
+    <rect x="70" y="10" width="120" height="240" fill="url(#st-sky)"/>
+    <circle cx="130" cy="150" r="34" fill="url(#st-sun)"/>
+    <g fill="#9D4EDD"><rect x="90" y="138" width="80" height="3"/><rect x="90" y="147" width="80" height="4"/><rect x="90" y="157" width="80" height="5"/></g>
+    <rect x="70" y="166" width="120" height="90" fill="#140A2E"/>
+    <g stroke="#FF3CAC" stroke-width="1.6" fill="none">
+      <line x1="80" y1="172" x2="180" y2="172"/><line x1="80" y1="182" x2="180" y2="182"/><line x1="80" y1="198" x2="180" y2="198"/><line x1="80" y1="222" x2="180" y2="222"/>
+      <line x1="130" y1="166" x2="130" y2="250"/><line x1="130" y1="166" x2="90" y2="250"/><line x1="130" y1="166" x2="170" y2="250"/><line x1="130" y1="166" x2="50" y2="250"/><line x1="130" y1="166" x2="210" y2="250"/>
+    </g>
+  </g>
+  <use href="#st-shape" fill="none" stroke="#E0FBFF" stroke-width="2.5" stroke-linejoin="round"/>
+  <polygon points="176,64 186,58 182,72" fill="#67E8F9"/><polygon points="62,168 54,180 68,178" fill="#C084FC"/>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- 2 · Voxel R: R postavene z hernych kociek (stavanie ako v Roblox Studiu), jedna kocka vyskocila cez trhlinu -->
+  <defs>
+    <linearGradient id="sv-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E1B4B"/><stop offset="1" stop-color="#0F0A24"/></linearGradient>
+    <g id="sv-c"><polygon points="0,-12 20,-2 0,8 -20,-2" fill="#C4B5FD"/><polygon points="-20,-2 0,8 0,30 -20,20" fill="#7C3AED"/><polygon points="0,8 20,-2 20,20 0,30" fill="#4C1D95"/></g>
+    <g id="sv-g"><polygon points="0,-12 20,-2 0,8 -20,-2" fill="#CFFAFE"/><polygon points="-20,-2 0,8 0,30 -20,20" fill="#22D3EE"/><polygon points="0,8 20,-2 20,20 0,30" fill="#0E7490"/></g>
+    <filter id="sv-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7"/></filter>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#sv-bg)"/>
+  <!-- mriezka 3x5 (R), kreslene zhora nadol a zlava doprava, aby sa kocky spravne prekryvali -->
+  <g transform="translate(70,58)">
+    <use href="#sv-c" x="0" y="0"/><use href="#sv-c" x="40" y="0"/>
+    <use href="#sv-c" x="0" y="30"/><use href="#sv-c" x="80" y="30"/>
+    <use href="#sv-c" x="0" y="60"/><use href="#sv-c" x="40" y="60"/>
+    <use href="#sv-c" x="0" y="90"/>
+    <ellipse cx="80" cy="100" rx="22" ry="7" fill="#22D3EE" filter="url(#sv-glow)"/>
+    <ellipse cx="80" cy="100" rx="14" ry="3" fill="#E0FBFF"/>
+    <use href="#sv-c" x="0" y="120"/><use href="#sv-c" x="80" y="120"/>
+    <use href="#sv-g" x="104" y="74" transform="rotate(14 104 84)"/>
+  </g>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- 3 · Crystal Shard: fazetovany krystal (low-poly 3D) rozlomeny trhlinou, zvnutra presvitajuce svetlo -->
+  <defs>
+    <radialGradient id="ss-bg" cx=".5" cy=".45" r=".7"><stop offset="0" stop-color="#241A4D"/><stop offset="1" stop-color="#0A0817"/></radialGradient>
+    <filter id="ss-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="8"/></filter>
+    <g id="ss-gem">
+      <polygon points="128,22 128,128 62,96" fill="#A78BFA"/>
+      <polygon points="128,22 194,96 128,128" fill="#7C3AED"/>
+      <polygon points="62,96 128,128 128,234" fill="#5B21B6"/>
+      <polygon points="128,128 194,96 128,234" fill="#3B0E7A"/>
+      <polygon points="128,22 104,104 128,128" fill="#DDD6FE" opacity=".55"/>
+      <polygon points="128,128 166,112 150,186" fill="#6D28D9" opacity=".6"/>
+    </g>
+    <clipPath id="ss-l"><polygon points="0,0 150,0 118,100 140,130 106,256 0,256"/></clipPath>
+    <clipPath id="ss-r"><polygon points="150,0 256,0 256,256 106,256 140,130 118,100"/></clipPath>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#ss-bg)"/>
+  <polyline points="150,4 118,100 140,130 106,252" fill="none" stroke="#F0ABFC" stroke-width="16" filter="url(#ss-glow)" opacity=".8"/>
+  <g clip-path="url(#ss-l)"><use href="#ss-gem" transform="translate(-9,4) rotate(-3 128 128)"/></g>
+  <g clip-path="url(#ss-r)"><use href="#ss-gem" transform="translate(9,-4) rotate(3 128 128)"/></g>
+  <polyline points="150,4 118,100 140,130 106,252" fill="none" stroke="#FFF" stroke-width="2.5" stroke-linejoin="round"/>
+  <g fill="#F5D0FE"><polygon points="182,50 190,44 188,56"/><polygon points="66,190 58,200 70,198"/><circle cx="200" cy="168" r="2"/></g>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- 4 · Glitch R: R rozrezane na pruhy posunute ako pri skoku medzi dimenziami (RGB split) -->
+  <defs>
+    <linearGradient id="sg-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#111827"/><stop offset="1" stop-color="#0B0B14"/></linearGradient>
+    <path id="sg-r" fill-rule="evenodd" d="M64 40 H152 C192 40 212 66 212 100 C212 126 198 144 176 152 L216 216 H168 L134 158 H110 V216 H64 Z M110 80 V120 H148 C162 120 168 111 168 100 C168 89 162 80 148 80 Z"/>
+    <clipPath id="sg-a"><rect x="0" y="0" width="256" height="96"/></clipPath>
+    <clipPath id="sg-b"><rect x="0" y="96" width="256" height="22"/></clipPath>
+    <clipPath id="sg-c"><rect x="0" y="118" width="256" height="50"/></clipPath>
+    <clipPath id="sg-d"><rect x="0" y="168" width="256" height="88"/></clipPath>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#sg-bg)"/>
+  <use href="#sg-r" fill="#FF2E88" transform="translate(-7,2)" opacity=".9"/>
+  <use href="#sg-r" fill="#00E5FF" transform="translate(7,-2)" opacity=".9"/>
+  <g fill="#F8FAFC">
+    <g clip-path="url(#sg-a)"><use href="#sg-r"/></g>
+    <g clip-path="url(#sg-b)"><use href="#sg-r" transform="translate(20,0)"/></g>
+    <g clip-path="url(#sg-c)"><use href="#sg-r" transform="translate(-9,0)"/></g>
+    <g clip-path="url(#sg-d)"><use href="#sg-r"/></g>
+  </g>
+  <rect x="160" y="104" width="62" height="5" fill="#00E5FF"/><rect x="34" y="150" width="40" height="4" fill="#FF2E88"/><rect x="190" y="186" width="24" height="3" fill="#F8FAFC" opacity=".6"/>
+</svg>
+</div></body></html>
