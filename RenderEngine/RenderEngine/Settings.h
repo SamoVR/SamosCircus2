@@ -9,6 +9,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include "Logger.h"
+#include "RichPresence.h"
 
 struct SavedKeybind {
     std::string name;
@@ -34,7 +35,7 @@ struct AppSettings {
     int layoutVersion = 0; // see Interface::update
     // Discord Rich Presence
     bool discordRichPresence = true;
-    std::int64_t discordClientId = 0; // 0 = use RichPresence::kClientId
+    std::int64_t discordClientId = 1363649635603972227; // 0 = use RichPresence::kClientId
     // Files
     std::string lastScenePath;
     std::vector<SavedKeybind> keybinds;

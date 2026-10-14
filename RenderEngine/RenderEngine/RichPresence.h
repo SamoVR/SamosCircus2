@@ -22,7 +22,7 @@ namespace discord { class Core; }
 
 class RichPresence {
 public:
-    static constexpr std::int64_t kClientId = 0; // <-- Application ID from the Discord developer portal
+    static constexpr std::int64_t kClientId = 1363649635603972227; // <-- Application ID from the Discord developer portal
 
     RichPresence() = default;
     ~RichPresence();

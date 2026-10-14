@@ -347,3 +347,100 @@
 ----- Session start -----
 [20:28:47] [INFO ] [Discord] Rich Presence disabled: no Discord Application ID set (RichPresence::kClientId / settings.json).
 ----- Session end -----
+
+----- Session start -----
+[20:33:27] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+[20:33:49] [WARN ] [Scene] Duplicate object name 'Eye' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json -- renamed to 'Eye_1'.
+[20:33:49] [WARN ] [Scene] Duplicate object name 'Pupil' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json -- renamed to 'Pupil_1'.
+[20:33:49] [INFO ] [Scene] Loaded 8 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+[20:33:49] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+[20:33:57] [INFO ] [Game] Play mode started (0 script(s))
+[20:34:03] [INFO ] [Game] Play mode stopped, scene restored
+[20:34:03] [INFO ] [Interface] Stopped - scene restored to its state before Play
+
+----- Session start -----
+[20:34:39] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+
+----- Session start -----
+[20:36:38] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+----- Session end -----
+
+----- Session start -----
+[20:37:13] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+----- Session end -----
+
+----- Session start -----
+[20:42:33] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+----- Session end -----
+
+----- Session start -----
+[20:47:10] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+[20:47:22] [WARN ] [Scene] Duplicate object name 'Eye' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json -- renamed to 'Eye_1'.
+[20:47:22] [WARN ] [Scene] Duplicate object name 'Pupil' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json -- renamed to 'Pupil_1'.
+[20:47:22] [INFO ] [Scene] Loaded 8 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+[20:47:22] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+[20:50:05] [INFO ] [Interface] Duplicated Pupil (Copy)
+[20:50:07] [INFO ] [Interface] Nothing to redo
+[20:50:08] [INFO ] [CommandHistory] Undo: Transform Pupil (Copy)
+[20:50:08] [INFO ] [Interface] Undo: Transform Pupil (Copy)
+[20:50:08] [INFO ] [CommandHistory] Undo: Duplicate Pupil (Copy)
+[20:50:08] [INFO ] [Interface] Undo: Duplicate Pupil (Copy)
+[20:50:09] [INFO ] [CommandHistory] Undo: Transform Pupil
+[20:50:09] [INFO ] [Interface] Undo: Transform Pupil
+[20:50:11] [INFO ] [Interface] Deleted Pupil_01
+[20:50:12] [INFO ] [Interface] Duplicated Pupil (Copy)
+[20:50:22] [INFO ] [Interface] Duplicated Pupil (Copy) (Copy)
+[20:50:26] [INFO ] [Interface] Deleted Pupil (Copy) (Copy)
+[20:50:30] [INFO ] [Scene] Saved 8 object(s) to C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+[20:50:30] [INFO ] [Interface] Saved C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\GeometryCharacter.json
+----- Session end -----
+
+----- Session start -----
+[20:52:34] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+[20:52:56] [INFO ] [Interface] Added Sphere
+[20:52:59] [INFO ] [Interface] Deleted Starting Cube
+----- Session end -----
+
+----- Session start -----
+[21:21:56] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+
+----- Session start -----
+[21:26:49] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+----- Session end -----
+
+----- Session start -----
+[21:31:43] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+[21:31:53] [INFO ] [Scene] Loaded 9 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\demo_obby.json
+[21:31:53] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\demo_obby.json
+
+----- Session start -----
+[21:46:29] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+[21:46:53] [INFO ] [Scene] Loaded 9 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\demo_obby.json
+[21:46:53] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\demo_obby.json
+[21:47:18] [INFO ] [Interface] Deleted Coin
+[21:47:22] [INFO ] [Interface] Nothing to redo
+[21:47:22] [INFO ] [CommandHistory] Undo: Delete Coin
+[21:47:22] [INFO ] [Interface] Undo: Delete Coin
+----- Session end -----
+
+----- Session start -----
+[21:49:19] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+[21:49:48] [INFO ] [Scene] Loaded 9 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\demo_obby.json
+[21:49:48] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\demo_obby.json
+----- Session end -----
+
+----- Session start -----
+[21:50:33] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+----- Session end -----
+
+----- Session start -----
+[21:51:34] [INFO ] [Discord] Connected to Discord, Rich Presence active.
+[21:51:38] [INFO ] [Scene] Loaded 9 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\demo_obby.json
+[21:51:38] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\demo_obby.json
+[21:51:41] [INFO ] [Game] Play mode started (5 script(s))
+[21:52:26] [INFO ] [Game] Play mode stopped, scene restored
+[21:52:26] [INFO ] [Interface] Stopped - scene restored to its state before Play
+[21:55:12] [INFO ] [Game] Play mode started (5 script(s))
+[21:55:58] [INFO ] [Game] Play mode stopped, scene restored
+[21:55:58] [INFO ] [Interface] Stopped - scene restored to its state before Play
+----- Session end -----

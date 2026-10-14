@@ -1,11 +1,11 @@
 {
   "cameraSmoothing": true,
   "cameraSmoothingSpeed": 12.199999809265137,
-  "discordClientId": 0,
+  "discordClientId": 1363649635603972227,
   "discordRichPresence": true,
   "gizmoLocalSpace": false,
   "keybinds": [],
-  "lastScenePath": "assets/scenes/mickey.json",
+  "lastScenePath": "C:\\Users\\Samuel\\source\\repos\\SamoVR\\SamosCircus2\\RenderEngine\\RenderEngine\\assets\\scenes\\demo_obby.json",
   "layoutVersion": 2,
   "showGrid": true,
   "showStats": true,
