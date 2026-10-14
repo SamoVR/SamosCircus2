@@ -343,7 +343,7 @@ bool Engine::init() {
 
     // Starting content. The cube owns its texture; with the scene being the
     // sole owner of objects, nothing here can leak.
-    auto cubeTexture = std::make_unique<Texture>("assets/images/icon.png");
+    auto cubeTexture = std::make_unique<Texture>("assets/textures/texture_08.png");
     scene.addObject(std::make_unique<Object>("Starting Cube", createCubeVertices(), std::move(cubeTexture)));
 
     auto marker = std::make_unique<Object>("target_marker", createCubeVertices(), static_cast<Texture*>(nullptr));
