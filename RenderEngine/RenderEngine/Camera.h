@@ -5,15 +5,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include <iostream>
+
 class Camera {
 public:
     Camera(float aspectRatio);
 
-    // Eases the rendered camera toward the input-driven target state. Must be
-    // called once per frame with the real delta time (Engine's main loop).
-    // It used to be an empty stub that nothing called.
     void update(float deltaTime);
-
     void handleMouseInput(float deltaX, float deltaY, bool rotating, bool panning);
     void handleScrollInput(float yOffset);
 
@@ -22,40 +20,14 @@ public:
     glm::vec3 target;
     glm::vec3 position;
 
-    void setAspectRatio(float aspectRatio);
-
-    // Moves the orbit pivot to `point` (eased when smoothing is on).
-    void focusOn(const glm::vec3& point);
-    // Back to the startup view.
-    void reset();
-
-    // Input-driven orbit state (what update() eases toward). Play mode saves
-    // the editor view with it and restores it on Stop.
-    struct Orbit { float distance, yaw, pitch; glm::vec3 pivot; };
-    Orbit getOrbit() const;
-    void setOrbit(const Orbit& orbit);
+    void setAspectRatio(float aspectRatio);  // New method to set aspect ratio
     glm::vec2 worldToScreen(const glm::vec3& worldPos) const;
 
-    // Smooth (eased) orbit/pan/zoom vs. instant response. Toggle in the UI.
-    bool smoothingEnabled = true;
-    // Higher = snappier. 12 reaches ~90% of the way in about 0.2 s.
-    float smoothingSpeed = 12.0f;
 
 private:
-    // Startup view: a bit above the ground, so a new scene shows its floor.
-    static constexpr float kStartDistance = 12.0f, kStartYaw = 30.0f, kStartPitch = 20.0f;
-
-    // Rendered state.
     float distance;
     float yaw;
     float pitch;
-
-    // Input-driven target state that update() eases toward.
-    float targetDistance;
-    float targetYaw;
-    float targetPitch;
-    glm::vec3 targetPanPoint;
-
     float zoomSpeed;
     float rotateSpeed;
     float panSpeed;

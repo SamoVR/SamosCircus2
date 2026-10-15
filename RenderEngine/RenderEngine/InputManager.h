@@ -28,6 +28,5 @@ private:
 
     glm::vec2 lastMousePos = glm::vec2(0.0f);
     glm::vec2 currentMousePos = glm::vec2(0.0f);
-    bool hasMousePos_ = false; // false until the first update() has sampled the cursor
 
 };

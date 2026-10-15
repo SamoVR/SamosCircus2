@@ -25,21 +25,13 @@ void KeybindManager::registerKeybind(const std::string& name, const KeyCombo& co
     namedKeybinds.push_back({ name, combo, action });
 }
 
-std::string KeybindManager::findConflict(const KeyCombo& combo, const std::string& excludingName) const {
-    for (const auto& keybind : namedKeybinds) {
-        if (keybind.name == excludingName) continue;
-        if (keybind.combo == combo) return keybind.name;
-    }
-    return "";
-}
 
-std::string KeybindManager::rebindKey(const std::string& name, const KeyCombo& newCombo) {
-    const std::string conflict = findConflict(newCombo, name);
+void KeybindManager::rebindKey(const std::string& name, const KeyCombo& newCombo) {
     for (auto& keybind : namedKeybinds) {
         if (keybind.name == name) {
             keybind.combo = newCombo;
+            //std::cout << "Rebound " << name << " to key " << newCombo.key << std::endl;
             break;
         }
     }
-    return conflict;
 }

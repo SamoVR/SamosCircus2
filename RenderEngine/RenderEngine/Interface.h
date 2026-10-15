@@ -9,12 +9,6 @@
 #include "KeybindManager.h"
 #include "InputManager.h"
 #include "AnimationSequencer.h"
-#include "CommandHistory.h"
-#include "Commands.h"
-#include "Settings.h"
-#include "TransformUtil.h"
-#include "Logger.h"
-#include "GameRuntime.h"
 
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -28,67 +22,32 @@
 #include "FontAwesome-main/font_awesome.h"
 
 #include <unordered_set>
-#include <unordered_map>
 #include <vector>
-#include <memory>
-#include <string>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <iostream>
+#include <sstream>
+#include <string>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 class Interface {
 public:
-    Interface(GLFWwindow* window, Scene& scene, Camera* camera, KeybindManager* keybindManager,
-              InputManager* inputManager, AppSettings& settings);
+    Interface(GLFWwindow* window, Scene& scene, Camera* camera, KeybindManager* keybindManager, InputManager* inputManager);
     ~Interface();
 
-    Interface(const Interface&) = delete;
-    Interface& operator=(const Interface&) = delete;
-
-    // Per frame. tickAnimation runs from Engine::update (independent of any
-    // window being visible); update builds and renders the UI.
-    void tickAnimation(float deltaTime);
     void update(float deltaTime);
-
-    // ---- selection
-    const std::unordered_set<Object*>& getSelectedObjects() const { return selectedObjects; }
+    const std::unordered_set<Object*>& getSelectedObjects() const {
+        return selectedObjects;
+    }
     void clearSelection();
-    // appendSelection: Ctrl/Shift-click semantics -- toggles the object.
     void selectObject(Object* object, bool appendSelection);
-    void selectAll();
+    void propagateTransform(Object* parent, const glm::mat4& delta);
 
-    // ---- actions (menus and keybinds)
-    void newScene();
-    void openLoadDialog();
-    void openSaveDialog();   // "Save As"
-    void saveScene();        // "Save": Save As if the scene has no file yet
     void duplicateObject();
-    void deleteSelected();
-    void undo();
-    void redo();
+    void openSaveDialog();
+    void openLoadDialog();
     void setGizmoOperation(ImGuizmo::OPERATION operation);
-    void toggleGizmoSpace();
-    void focusSelection();
-    bool openScene(const std::string& path) { return doLoad(path); } // command line: RenderEngine.exe scene.json
-
-    // ---- play mode (GameRuntime is owned by Engine)
-    void setRuntime(GameRuntime* r) { runtime = r; }
-    void togglePlay();
-    bool isPlaying() const { return runtime && runtime->isRunning(); }
-    const std::string& scenePath() const { return currentScenePath; }
-
-    // ---- queries / hooks for Engine
-    bool isGizmoActive() const;        // pointer is over / dragging the gizmo
-    bool wantsTextInput() const;       // typing in a text field: keybinds must not fire
-    bool isModalUiOpen() const;        // any popup or file dialog is open
-    bool isCapturingKey() const { return !waitingForRebind.empty(); } // keybind rebind popup is open
-    bool hasUnsavedChanges() const;
-    // The Engine calls this when the window close button / Esc was used.
-    // Returns true if the window may close right now; otherwise a
-    // "unsaved changes" prompt is shown and the close is postponed.
-    bool requestClose();
-    void applySavedKeybinds();         // settings.json -> KeybindManager
-    void showStatus(const std::string& message, bool isError = false);
 
     struct DebugText {
         glm::vec3 worldPosition;
@@ -96,128 +55,47 @@ public:
         ImVec4 color;
         ImVec2 screenOffset;
     };
+
     std::vector<DebugText> debugTexts;
+
 
 private:
     GLFWwindow* window;
+    ImFont* headingFont;
+    ImFont* iconFont;
     Scene& scene;
     Camera* camera;
     KeybindManager* keybindManager;
     InputManager* inputManager;
-    AppSettings& settings;
-
-    ImFont* headingFont = nullptr;
-    ImFont* iconFont = nullptr;
-
-    std::unique_ptr<Texture> defaultTexture;             // shared by every primitive created from the UI
-    std::unique_ptr<AnimationSequencer> animationSequencer;
-    CommandHistory history;
+    Texture* defaultTexture;
+    Object* textureTargetObject = nullptr;
+    AnimationSequencer* animationSequencer = nullptr;
 
     std::unordered_set<Object*> selectedObjects;
-    Object* primaryObject = nullptr;                     // the one the gizmo is attached to
-    void pruneSelection();                               // drops pointers no longer in the scene
+    Object* lastSelectedObject = nullptr;
 
-    // ---- gizmo
-    ImGuizmo::OPERATION gizmoOperation = ImGuizmo::TRANSLATE;
-    bool gizmoWasUsing = false;
-    std::vector<std::pair<Object*, ObjectState>> gizmoStartStates;
     void renderGizmo();
 
-    // ---- property-edit undo tracking (state captured when a widget is
-    // activated, committed as one undo step when it is released)
-    std::unordered_map<Object*, ObjectState> editBefore;
-    void beginEdit(Object* object);
-    void endEdit(Object* object, const char* what);
-    void trackEdit(Object* object, const char* what); // call right after the widget
+    ImGuizmo::OPERATION gizmoOperation = ImGuizmo::TRANSLATE;
+    ImGuizmo::MODE gizmoMode = ImGuizmo::WORLD;
 
-    // ---- scene / file state
-    Object* textureTargetObject = nullptr;
-    Object* panelDeleteRequest = nullptr;               // set by the Properties panel, executed after it is drawn
-    std::string currentScenePath;
-    std::string savedSnapshot;
-    bool dirtyCached = false;
-    float dirtyTimer = 0.0f;
-    std::string shownTitle;
-    void markClean();
-    void refreshDirtyState(float deltaTime);
-    void updateWindowTitle();
-    bool doSave(const std::string& path);
-    bool doLoad(const std::string& path);
-    void resetSceneState();                              // clears selection / animation / history
+    bool showShapePopup = false;
 
-    enum class PendingAction { None, NewScene, OpenScene, Exit };
-    PendingAction pendingAction = PendingAction::None;
-    bool openUnsavedPopup = false;
-    bool exitConfirmed = false;
-    void guardUnsaved(PendingAction action);
-    void runPending(PendingAction action);
+    void displayObjectProperties(Object* object, int index);
+    void renderObjectNode(Object* object);
 
-    // ---- helpers
-    std::string makeUniqueName(const std::string& base) const;
-    void addPrimitive(const std::string& baseName, const std::vector<Vertex>& vertices);
-    void deleteObjects(const std::vector<Object*>& objects);
-    void reparent(Object* object, Object* newParent);
-    ObjectState localStateFor(const Object& object, const Object* newParent) const;
-    void pushHeading(const char* text);
-
-    // ---- animation playback
-    bool playing = false;
-    bool loopPlayback = true;
-    float playbackFps = 30.0f;
-    float frameAccumulator = 0.0f;
-    bool timelineExpanded = true;
-    int timelineSelected = -1;
-    int timelineFirstFrame = 0;                          // was a per-frame local, which made scrolling impossible
-
-    // ---- status / overlays
-    std::string statusText;
-    bool statusIsError = false;
-    float statusTimer = 0.0f;
-    float smoothedFps = 60.0f;
-    bool showAbout = false;
-    bool showShortcuts = false;
-    void statusOverlay();
-    void statsOverlay();
-    void aboutPopups();
-    void unsavedPopup();
-
-    // ---- settings / keybinds
-    std::string waitingForRebind;
-    std::string rebindWarning;
-    std::vector<NamedKeybind> defaultKeybinds;
-    bool settingsDirty = false;
-    void saveKeybindsToSettings();
-    void applyUiScale();
-    void applyTheme();
-
-    // ---- panels
     void renderText();
+
+    void debugUI();
     void mainMenuBarUI();
     void sceneControlsUI();
     void objectListUI();
-    void renderObjectNode(Object* object);
-    void propertiesUI();
-    void displayObjectProperties(Object* object);
     void settingsUI();
-    void timelineUI();
+    void propertiesUI();
+    void timelineUI(float deltaTime);
+   
     void updateFileBrowsers();
     void showShapeSelectionPopup();
+    std::string selectedTexturePath = "assets/textures/texture_08.png";
 
-    // ---- game engine panels
-    GameRuntime* runtime = nullptr;
-    Object* scriptTarget = nullptr;                      // object open in the Script Editor
-    std::string scriptCheckResult;
-    bool showScriptEditor = false;
-    bool showOutput = true;
-    size_t lastLogSize = 0;
-    void insertTemplate(const std::string& kind);
-    void gamePropertiesUI(Object* object);
-    void scriptEditorUI();
-    void outputUI();
-    void playOverlay();
-    bool resetLayoutRequested = false;
-    // The free 3D area between the docked panels (overlays are placed in it).
-    // Same field names as ImGuiViewport so either can be used.
-    struct ViewArea { ImVec2 WorkPos, WorkSize; } viewArea;
-    void buildDefaultLayout(ImGuiID dockspaceId);
 };

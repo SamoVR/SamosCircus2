@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "objects": [
-    {"mesh":"cube","name":"Cube","position":[0.0,0.0,0.0],"texture":"assets/images/Mona_Lisa.png","textureOwned":true},
-    {"mesh":"cube","name":"Cube (Copy)","position":[-0.00669,0.30465,-1.80597],"texture":"assets/images/icon.png","textureOwned":true}
-  ]
-}
