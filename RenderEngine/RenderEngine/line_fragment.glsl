@@ -1,9 +1,11 @@
 #version 330 core
 out vec4 FragColor;
 
-//uniform vec4 lineColor;
+// Colour of the line being drawn (the measurement lines use red/green/blue per
+// axis). This uniform was commented out and the shader hardcoded white, so the
+// colour passed to Engine::drawLine was silently ignored.
+uniform vec3 lineColor;
 
 void main() {
-    //FragColor = lineColor;
-    FragColor = vec4(1.0, 1.0, 1.0, 1.0); // white
+    FragColor = vec4(lineColor, 1.0);
 }

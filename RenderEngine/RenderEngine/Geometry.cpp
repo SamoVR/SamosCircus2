@@ -3,12 +3,29 @@
 #include <cmath>
 
 namespace glm {
-    const float pi = 3.14159265358979323846f;  // Define pi manually
-    const float two_pi = 6.28318530717958647692f; // Define two_pi manually
+    const float pi = 3.14159265358979323846f;
+    const float two_pi = 6.28318530717958647692f;
+}
+
+namespace {
+    // Flat-shaded face normal from triangle winding (counter-clockwise when
+    // viewed from outside, the winding already used by every primitive here).
+    // Computing it from positions keeps normals correct-by-construction: no
+    // ~48 hand-typed normals that could drift from the positions on edit.
+    void computeFlatNormals(std::vector<Vertex>& vertices) {
+        for (size_t i = 0; i + 2 < vertices.size(); i += 3) {
+            const glm::vec3 edge1 = vertices[i + 1].position - vertices[i].position;
+            const glm::vec3 edge2 = vertices[i + 2].position - vertices[i].position;
+            const glm::vec3 n = glm::normalize(glm::cross(edge1, edge2));
+            vertices[i].normal = n;
+            vertices[i + 1].normal = n;
+            vertices[i + 2].normal = n;
+        }
+    }
 }
 
 std::vector<Vertex> createCubeVertices() {
-    return {
+    std::vector<Vertex> cube = {
         // Front face
         {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f}},
         {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f}},
@@ -57,10 +74,12 @@ std::vector<Vertex> createCubeVertices() {
         {{ 0.5f, -0.5f,  0.5f}, {1.0f, 1.0f}},
         {{-0.5f, -0.5f,  0.5f}, {0.0f, 1.0f}},
     };
+    computeFlatNormals(cube);
+    return cube;
 }
 
 std::vector<Vertex> createTriangle3DVertices() {
-    return {
+    std::vector<Vertex> pyramid = {
         // Base
         {{-0.5f, 0.0f, -0.5f}, {0.0f, 0.0f}},
         {{ 0.5f, 0.0f, -0.5f}, {1.0f, 0.0f}},
@@ -81,38 +100,44 @@ std::vector<Vertex> createTriangle3DVertices() {
         {{ 0.0f, 0.8f,  0.0f}, {0.5f, 1.0f}},
         {{-0.5f, 0.0f, -0.5f}, {1.0f, 0.0f}},
     };
+    computeFlatNormals(pyramid);
+    return pyramid;
 }
 
 std::vector<Vertex> createSphereVertices(float radius, int stacks, int slices) {
     std::vector<Vertex> vertices;
 
-    // Generate vertices for the sphere
     for (int i = 0; i <= stacks; ++i) {
         float V = float(i) / float(stacks);
-        float phi = glm::pi * V;  // Use glm::pi manually
+        float phi = glm::pi * V;
 
         for (int j = 0; j <= slices; ++j) {
             float U = float(j) / float(slices);
-            float theta = glm::two_pi * U;  // Use glm::two_pi manually
+            float theta = glm::two_pi * U;
 
-            float x = radius * sin(phi) * cos(theta);
-            float y = radius * cos(phi);
-            float z = radius * sin(phi) * sin(theta);
+            glm::vec3 position = {
+                radius * sin(phi) * cos(theta),
+                radius * cos(phi),
+                radius * sin(phi) * sin(theta)
+            };
 
-            glm::vec2 uv = { U, V };
-            vertices.push_back({ {x, y, z}, uv });
+            Vertex v;
+            v.position = position;
+            v.texCoord = { U, V };
+            // For a sphere centred on the origin the outward normal is just
+            // the normalised position: exact, and smooth-shaded (per-face
+            // normals would make the sphere look faceted).
+            v.normal = glm::normalize(position);
+            vertices.push_back(v);
         }
     }
 
     std::vector<Vertex> sphere;
-
-    // Generate indices for the sphere faces
     for (int i = 0; i < stacks; ++i) {
         for (int j = 0; j < slices; ++j) {
             int first = i * (slices + 1) + j;
             int second = first + slices + 1;
 
-            // Create two triangles per quad
             sphere.push_back(vertices[first]);
             sphere.push_back(vertices[second]);
             sphere.push_back(vertices[first + 1]);
@@ -122,13 +147,12 @@ std::vector<Vertex> createSphereVertices(float radius, int stacks, int slices) {
             sphere.push_back(vertices[first + 1]);
         }
     }
-
     return sphere;
 }
 
 std::vector<Vertex> createFullScreenQuadVertices() {
+    // Screen-space quad: deliberately no normals (zero == unlit).
     return {
-        // Positions           // Texture Coordinates
         {{-1.0f, -1.0f,  0.0f}, {0.0f, 0.0f}},
         {{ 1.0f, -1.0f,  0.0f}, {1.0f, 0.0f}},
         {{ 1.0f,  1.0f,  0.0f}, {1.0f, 1.0f}},
@@ -137,32 +161,4 @@ std::vector<Vertex> createFullScreenQuadVertices() {
         {{ 1.0f,  1.0f,  0.0f}, {1.0f, 1.0f}},
         {{-1.0f,  1.0f,  0.0f}, {0.0f, 1.0f}}
     };
-}
-
-namespace {
-    bool sameShape(const std::vector<Vertex>& a, const std::vector<Vertex>& b) {
-        if (a.size() != b.size()) return false;
-        for (size_t i = 0; i < a.size(); ++i) {
-            if (glm::any(glm::greaterThan(glm::abs(a[i].position - b[i].position), glm::vec3(1e-4f))) ||
-                glm::any(glm::greaterThan(glm::abs(a[i].texCoord - b[i].texCoord), glm::vec2(1e-4f)))) return false;
-        }
-        return true;
-    }
-}
-
-const char* identifyPrimitive(const std::vector<Vertex>& vertices) {
-    static const char* names[] = { "cube", "sphere", "triangle" };
-    static std::vector<Vertex> cache[3];
-    for (int i = 0; i < 3; ++i) {
-        if (cache[i].empty()) cache[i] = primitiveVertices(names[i]);
-        if (sameShape(vertices, cache[i])) return names[i];
-    }
-    return "";
-}
-
-std::vector<Vertex> primitiveVertices(const std::string& name) {
-    if (name == "cube") return createCubeVertices();
-    if (name == "sphere") return createSphereVertices();
-    if (name == "triangle") return createTriangle3DVertices();
-    return {};
 }

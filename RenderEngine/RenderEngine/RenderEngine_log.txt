@@ -1,0 +1,130 @@
+
+----- Session start -----
+[01:21:31] [INFO ] [Interface] Added Sphere
+[01:21:40] [INFO ] [CommandHistory] Undo: Transform Sphere
+[01:21:40] [INFO ] [Interface] Undo: Transform Sphere
+[01:21:40] [INFO ] [CommandHistory] Undo: Transform Sphere
+[01:21:40] [INFO ] [Interface] Undo: Transform Sphere
+[01:21:41] [INFO ] [CommandHistory] Undo: Add Sphere
+[01:21:41] [INFO ] [Interface] Undo: Add Sphere
+[01:21:42] [INFO ] [CommandHistory] Undo: Transform Starting Test
+[01:21:42] [INFO ] [Interface] Undo: Transform Starting Test
+[01:21:42] [INFO ] [CommandHistory] Undo: Transform Starting Test
+[01:21:42] [INFO ] [Interface] Undo: Transform Starting Test
+[01:21:42] [INFO ] [CommandHistory] Undo: Transform Starting Test
+[01:21:42] [INFO ] [Interface] Undo: Transform Starting Test
+[01:21:42] [INFO ] [CommandHistory] Undo: Scale Starting Test
+[01:21:42] [INFO ] [Interface] Undo: Scale Starting Test
+[01:21:43] [INFO ] [CommandHistory] Undo: Transform Starting Test
+[01:21:43] [INFO ] [Interface] Undo: Transform Starting Test
+[01:21:43] [INFO ] [CommandHistory] Undo: Reset Starting Test
+[01:21:43] [INFO ] [Interface] Undo: Reset Starting Test
+[01:21:43] [INFO ] [CommandHistory] Undo: Rotate Starting Test
+[01:21:43] [INFO ] [Interface] Undo: Rotate Starting Test
+[01:21:43] [INFO ] [CommandHistory] Undo: Rotate Starting Test
+[01:21:43] [INFO ] [Interface] Undo: Rotate Starting Test
+[01:21:43] [INFO ] [CommandHistory] Undo: Rotate Starting Test
+[01:21:43] [INFO ] [Interface] Undo: Rotate Starting Test
+[01:21:43] [INFO ] [CommandHistory] Undo: Transform Starting Test
+[01:21:43] [INFO ] [Interface] Undo: Transform Starting Test
+[01:21:44] [INFO ] [CommandHistory] Undo: Transform Starting Test
+[01:21:44] [INFO ] [Interface] Undo: Transform Starting Test
+[01:21:44] [INFO ] [CommandHistory] Undo: Scale Starting Test
+[01:21:44] [INFO ] [Interface] Undo: Scale Starting Test
+[01:21:44] [INFO ] [CommandHistory] Undo: Rotate Starting Test
+[01:21:44] [INFO ] [Interface] Undo: Rotate Starting Test
+[01:21:44] [INFO ] [CommandHistory] Undo: Rotate Starting Test
+[01:21:44] [INFO ] [Interface] Undo: Rotate Starting Test
+[01:21:44] [INFO ] [CommandHistory] Undo: Rotate Starting Test
+[01:21:44] [INFO ] [Interface] Undo: Rotate Starting Test
+[01:21:44] [INFO ] [CommandHistory] Undo: Transform Starting Test
+[01:21:44] [INFO ] [Interface] Undo: Transform Starting Test
+[01:21:44] [INFO ] [CommandHistory] Undo: Transform Starting Test
+[01:21:44] [INFO ] [Interface] Undo: Transform Starting Test
+[01:21:44] [INFO ] [CommandHistory] Undo: Transform Starting Test
+[01:21:44] [INFO ] [Interface] Undo: Transform Starting Test
+[01:21:45] [INFO ] [CommandHistory] Undo: Transform Starting Test
+[01:21:45] [INFO ] [Interface] Undo: Transform Starting Test
+[01:21:45] [INFO ] [CommandHistory] Undo: Rename Starting Test
+[01:21:45] [INFO ] [Interface] Undo: Rename Starting Test
+[01:21:45] [INFO ] [CommandHistory] Undo: Transform Starting Cube
+[01:21:45] [INFO ] [Interface] Undo: Transform Starting Cube
+[01:21:45] [INFO ] [CommandHistory] Undo: Transform Starting Cube
+[01:21:45] [INFO ] [Interface] Undo: Transform Starting Cube
+[01:21:45] [INFO ] [CommandHistory] Undo: Transform Starting Cube
+[01:21:45] [INFO ] [Interface] Undo: Transform Starting Cube
+[01:21:47] [INFO ] [CommandHistory] Redo: Transform Starting Cube
+[01:21:47] [INFO ] [Interface] Redo: Transform Starting Cube
+[01:21:47] [INFO ] [CommandHistory] Undo: Transform Starting Cube
+[01:21:47] [INFO ] [Interface] Undo: Transform Starting Cube
+[01:21:55] [INFO ] [CommandHistory] Redo: Transform Starting Cube
+[01:21:55] [INFO ] [Interface] Redo: Transform Starting Cube
+[01:21:58] [INFO ] [CommandHistory] Redo: Transform Starting Cube
+[01:21:58] [INFO ] [Interface] Redo: Transform Starting Cube
+[01:21:59] [INFO ] [CommandHistory] Undo: Transform Starting Cube
+[01:21:59] [INFO ] [Interface] Undo: Transform Starting Cube
+[01:22:00] [INFO ] [CommandHistory] Undo: Transform Starting Cube
+[01:22:00] [INFO ] [Interface] Undo: Transform Starting Cube
+[01:22:05] [INFO ] [Interface] Added Cube
+[01:22:16] [INFO ] [Interface] Duplicated Cube (Copy)
+[01:22:21] [INFO ] [Interface] Duplicated Cube (Copy) (Copy)
+[01:22:41] [INFO ] [Interface] Deleted Cube (Copy)
+[01:22:44] [INFO ] [CommandHistory] Undo: Delete Cube (Copy)
+[01:22:44] [INFO ] [Interface] Undo: Delete Cube (Copy)
+[01:23:24] [INFO ] [Interface] Deleted Cube (Copy) (Copy)
+[01:23:32] [INFO ] [Interface] Deleted Cube (Copy)
+[01:23:33] [INFO ] [Interface] Deleted Starting Cube
+[01:23:35] [INFO ] [Interface] Deleted Cube
+[01:23:38] [INFO ] [Interface] Added Cube
+[01:23:45] [INFO ] [Interface] Added Cube to the timeline
+[01:25:06] [INFO ] [Interface] Added Cube to the timeline
+[01:25:15] [INFO ] [Interface] Added Cube to the timeline
+[01:27:55] [INFO ] [Interface] Deleted Cube
+[01:28:21] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_1'.
+[01:28:21] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_2'.
+[01:28:21] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_3'.
+[01:28:21] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_4'.
+[01:28:21] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_5'.
+[01:28:21] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_6'.
+[01:28:21] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_7'.
+[01:28:21] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_8'.
+[01:28:21] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_9'.
+[01:28:21] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_10'.
+[01:28:21] [INFO ] [Scene] Loaded 11 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json
+[01:28:22] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json
+[01:28:27] [INFO ] [Scene] Loaded 11 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey_new.json
+[01:28:28] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey_new.json
+----- Session end -----
+
+----- Session start -----
+[01:30:50] [INFO ] [Interface] Added Starting Cube to the timeline
+----- Session end -----
+
+----- Session start -----
+[01:31:24] [WARN ] [Scene] Duplicate object name 'Cube (Copy) (Copy)' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\house.json -- renamed to 'Cube (Copy) (Copy)_1'.
+[01:31:24] [WARN ] [Scene] Duplicate object name 'Cube (Copy) (Copy) (Copy)' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\house.json -- renamed to 'Cube (Copy) (Copy) (Copy)_1'.
+[01:31:24] [INFO ] [Scene] Loaded 7 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\house.json
+[01:31:24] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\house.json
+[01:31:34] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\test.json -- renamed to 'Sphere_1'.
+[01:31:34] [INFO ] [Scene] Loaded 4 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\test.json
+[01:31:34] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\test.json
+[01:31:38] [INFO ] [Interface] New scene
+[01:31:47] [INFO ] [Interface] Added Cube
+[01:32:00] [INFO ] [Interface] Duplicated Cube (Copy)
+[01:32:34] [INFO ] [Scene] Saved 2 object(s) to C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\ReworkTest.json
+[01:32:34] [INFO ] [Interface] Saved C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\ReworkTest.json
+[01:32:47] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_1'.
+[01:32:47] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_2'.
+[01:32:47] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_3'.
+[01:32:47] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_4'.
+[01:32:47] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_5'.
+[01:32:47] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_6'.
+[01:32:47] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_7'.
+[01:32:47] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_8'.
+[01:32:47] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_9'.
+[01:32:47] [WARN ] [Scene] Duplicate object name 'Sphere' in C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json -- renamed to 'Sphere_10'.
+[01:32:47] [INFO ] [Scene] Loaded 11 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json
+[01:32:47] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\mickey.json
+[01:32:50] [INFO ] [Scene] Loaded 2 object(s) from C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\ReworkTest.json
+[01:32:50] [INFO ] [Interface] Loaded C:\Users\Samuel\source\repos\SamoVR\SamosCircus2\RenderEngine\RenderEngine\assets\scenes\ReworkTest.json
+----- Session end -----
