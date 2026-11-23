@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="SpaceStationTime/SpaceStationTime.vcxproj" Id="05275396-d881-4da8-822b-98944e4a70d8" />
+</Solution>
